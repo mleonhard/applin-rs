@@ -87,6 +87,7 @@
 //!
 //! # TO DO
 #![forbid(unsafe_code)]
+pub mod app;
 pub mod error;
 pub mod random;
 pub mod rebuilder;

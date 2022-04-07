@@ -1,3 +1,4 @@
+use crate::app::{App, AppFn};
 use crate::error::server_error;
 use crate::rebuilder::Rebuilder;
 use crate::session_cookie::SessionCookie;
@@ -7,75 +8,13 @@ use core::fmt::{Debug, Formatter};
 use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
-use std::sync::{Arc, Mutex, MutexGuard, PoisonError, Weak};
+use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 
 pub fn session_not_found() -> Response {
     Response::text(400, "SESSION_NOT_FOUND")
 }
 
 // TODO: Clean shutdown.
-
-pub struct Inner {
-    weak_session: Weak<Session>,
-    keys_fn: Box<dyn Send + Sync + Fn(&Rebuilder) -> Result<HashSet<String>, Box<dyn Error>>>,
-    value_fn: Box<dyn Send + Sync + Fn(&str, &Rebuilder) -> Result<Value, Box<dyn Error>>>,
-    keys_rebuilder: Rebuilder,
-    value_rebuilders: HashMap<String, Rebuilder>,
-    sender: EventSender,
-}
-impl Inner {
-    // TODO: Pass &Arc<Session> and remove `weak_session`.
-    pub fn build_keys(&mut self) -> Result<Vec<(String, Value)>, Box<dyn Error>> {
-        let mut updates = Vec::new();
-        let mut keys = (*self.keys_fn)(&self.keys_rebuilder)?;
-        // Remove keys.
-        self.value_rebuilders.retain(|key, _rebuilder| {
-            if keys.contains(key) {
-                true
-            } else {
-                updates.push((key.to_string(), Value::Null));
-                false
-            }
-        });
-        // Add keys.
-        keys.retain(|key| !self.value_rebuilders.contains_key(key));
-        for key in keys {
-            let rebuilder = Rebuilder::Value(self.weak_session.clone(), key.clone());
-            self.value_rebuilders.insert(key.clone(), rebuilder.clone());
-            let value = (*self.value_fn)(&key, &rebuilder)?;
-            updates.push((key, value));
-        }
-        Ok(updates)
-    }
-
-    pub fn build_and_send_keys(&mut self) -> Result<(), Box<dyn Error>> {
-        let updates = self.build_keys()?;
-        let json_updates = Value::Array(
-            updates
-                .into_iter()
-                .map(|(key, value)| json!({ key: value }))
-                .collect(),
-        );
-        self.sender.send(Event::Message(json_updates.to_string()));
-        Ok(())
-    }
-
-    pub fn build_value(&mut self, key: &str) -> Result<Value, Box<dyn Error>> {
-        let rebuilder = self
-            .value_rebuilders
-            .get(key)
-            .ok_or_else(|| format!("no rebuilder found for key {:?}", key))?;
-        let value = (self.value_fn)(key, rebuilder)?;
-        Ok(json!({ key: value }))
-    }
-
-    pub fn build_and_send_value(&mut self, key: &str) -> Result<(), Box<dyn Error>> {
-        let diff = self.build_value(key)?;
-        self.sender
-            .send(Event::Message(serde_json::to_string(&diff).unwrap()));
-        Ok(())
-    }
-}
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum PendingUpdate {
@@ -84,50 +23,85 @@ pub enum PendingUpdate {
 }
 
 pub struct Session {
+    pub app_fn: Box<AppFn>,
+    pub app: Mutex<App>,
     pub cookie: SessionCookie,
-    pub inner: Mutex<Option<Inner>>,
     pub rpc_updates: Mutex<HashSet<PendingUpdate>>,
     pub scheduled_updates: Mutex<HashSet<PendingUpdate>>,
+    pub sender: Mutex<EventSender>,
 }
 impl Session {
-    pub fn new<PathsFn, PagesFn>(
-        cookie: SessionCookie,
-        keys_fn: PathsFn,
-        value_fn: PagesFn,
-    ) -> (Arc<Self>, Response)
+    pub fn new<F>(app_fn: F) -> (Arc<Self>, Response)
     where
-        PathsFn: 'static
-            + Send
-            + Sync
-            + Fn(&Rebuilder) -> Result<HashSet<String>, Box<dyn std::error::Error>>,
-        PagesFn: 'static
-            + Send
-            + Sync
-            + Fn(&str, &Rebuilder) -> Result<Value, Box<dyn std::error::Error>>,
+        F: 'static + Send + Sync + Fn(Rebuilder) -> Result<App, Box<dyn std::error::Error>>,
     {
+        let cookie = SessionCookie::new_random();
         let (sender, response) = Response::event_stream();
         let response = response.with_set_cookie(cookie.to_cookie());
         let session = Arc::new(Self {
+            app_fn: Box::new(app_fn),
+            app: Mutex::new(App::new()),
             cookie,
-            inner: Mutex::new(None),
             rpc_updates: Mutex::new(HashSet::new()),
             scheduled_updates: Mutex::new(HashSet::new()),
+            sender: Mutex::new(sender),
         });
-        let inner = Inner {
-            weak_session: Arc::downgrade(&session),
-            keys_fn: Box::new(keys_fn),
-            value_fn: Box::new(value_fn),
-            keys_rebuilder: Rebuilder::Keys(Arc::downgrade(&session)),
-            value_rebuilders: HashMap::new(),
-            sender,
-        };
-        *(session.inner.lock().unwrap()) = Some(inner);
-        session.schedule_rebuild_keys(None);
         (session, response)
     }
 
-    pub fn lock_inner(&self) -> MutexGuard<Option<Inner>> {
-        self.inner.lock().unwrap_or_else(PoisonError::into_inner)
+    pub fn lock_app(&self) -> MutexGuard<App> {
+        self.app.lock().unwrap_or_else(PoisonError::into_inner)
+    }
+
+    pub fn lock_sender(&self) -> MutexGuard<EventSender> {
+        self.sender.lock().unwrap_or_else(PoisonError::into_inner)
+    }
+
+    pub fn build_keys(self: &Arc<Self>) -> Result<HashMap<String, Value>, Box<dyn Error>> {
+        let mut app_guard = self.lock_app();
+        let mut new_app = (*self.app_fn)(Rebuilder::Keys(Arc::downgrade(self)))?;
+        let mut diff = HashMap::new();
+        // Removed keys.
+        for key in app_guard.key_to_value_fn.keys() {
+            if !new_app.key_to_value_fn.contains_key(key) {
+                diff.insert(key.to_string(), Value::Null);
+            }
+        }
+        // Added keys.
+        for (key, value_fn) in new_app.key_to_value_fn.iter() {
+            if !app_guard.key_to_value_fn.contains_key(key) {
+                let rebuilder = Rebuilder::Value(Arc::downgrade(self), key.to_string());
+                let value = (*value_fn)(rebuilder)?;
+                diff.insert(key.to_string(), value);
+            }
+        }
+        std::mem::swap(&mut *app_guard, &mut new_app);
+        Ok(diff)
+    }
+
+    pub fn build_and_send_keys(self: &Arc<Self>) -> Result<(), Box<dyn Error>> {
+        let diff = self.build_keys()?;
+        let json_string = serde_json::to_string(&diff).unwrap();
+        self.lock_sender().send(Event::Message(json_string));
+        Ok(())
+    }
+
+    pub fn build_value(self: &Arc<Self>, key: &str) -> Result<Value, Box<dyn Error>> {
+        let app_guard = self.lock_app();
+        let value_fn = app_guard
+            .key_to_value_fn
+            .get(key)
+            .ok_or_else(|| format!("key {:?} not found", key))?;
+        let rebuilder = Rebuilder::Value(Arc::downgrade(self), key.to_string());
+        (*value_fn)(rebuilder)
+    }
+
+    pub fn build_and_send_value(self: &Arc<Self>, key: &str) -> Result<(), Box<dyn Error>> {
+        let value = self.build_value(key)?;
+        let json_obj = json!({ key: value });
+        let json_string = json_obj.to_string();
+        self.lock_sender().send(Event::Message(json_string));
+        Ok(())
     }
 
     pub fn schedule_rebuild_keys(self: &Arc<Self>, rpc_session: Option<&Arc<Session>>) {
@@ -137,14 +111,11 @@ impl Session {
                 return;
             }
         }
-        let arc_session = self.clone();
+        let self_clone = self.clone();
         safina_executor::schedule_blocking(move || {
-            arc_session
-                .lock_inner()
-                .as_mut()
-                .unwrap()
-                .build_and_send_keys()
-                .unwrap();
+            self_clone.build_and_send_keys().unwrap();
+            // TODO: Disconnect on error or panic.  Also below.
+            self_clone.lock_sender().disconnect();
         });
     }
 
@@ -163,51 +134,38 @@ impl Session {
                 return;
             }
         }
-        let arc_session = self.clone();
+        let self_clone = self.clone();
         safina_executor::schedule_blocking(move || {
-            arc_session
-                .lock_inner()
-                .as_mut()
-                .unwrap()
-                .build_and_send_value(&key)
-                .unwrap();
+            self_clone.build_and_send_value(&key).unwrap();
         });
     }
 
-    pub fn response(&self) -> Result<Response, Response> {
+    pub fn response(self: &Arc<Self>) -> Result<Response, Response> {
         let mut pending_updates = HashSet::new();
         std::mem::swap(&mut *self.rpc_updates.lock().unwrap(), &mut pending_updates);
         dbg!(&pending_updates);
-        let mut inner_guard = self.lock_inner();
-        let mut json_updates = Vec::new();
-        if pending_updates.remove(&PendingUpdate::Keys) {
-            let keys_and_values = inner_guard
-                .as_mut()
-                .unwrap()
-                .build_keys()
-                .map_err(|e| server_error(format!("error building keys: {}", e)))?;
-            for (key, value) in keys_and_values {
-                json_updates.push(json!({ &key: value }));
-                pending_updates.remove(&PendingUpdate::Value(key));
-            }
-        }
+        let mut diff = if pending_updates.remove(&PendingUpdate::Keys) {
+            self.build_keys()
+                .map_err(|e| server_error(format!("error building keys: {}", e)))?
+        } else {
+            HashMap::new()
+        };
         for pending_update in pending_updates {
-            match pending_update {
+            let key = match pending_update {
                 PendingUpdate::Keys => unreachable!(),
-                PendingUpdate::Value(key) => {
-                    let value = inner_guard
-                        .as_mut()
-                        .unwrap()
-                        .build_value(&key)
-                        .map_err(|e| {
-                            server_error(format!("error building key {:?}: {}", key, e))
-                        })?;
-                    json_updates.push(json!({ key: value }));
-                }
+                PendingUpdate::Value(key) => key,
+            };
+            if diff.contains_key(&key) {
+                // Skip deleted keys.
+                continue;
             }
+            let value = self
+                .build_value(&key)
+                .map_err(|e| server_error(format!("error building key {:?}: {}", key, e)))?;
+            diff.insert(key, value);
         }
-        dbg!(&json_updates);
-        Ok(Response::json(200, Value::Array(json_updates)).unwrap())
+        dbg!(&diff);
+        Ok(Response::json(200, diff).unwrap())
     }
 }
 impl PartialEq for Session {
@@ -229,14 +187,7 @@ impl Debug for Session {
             .cloned()
             .collect();
         scheduled_updates.sort();
-        let mut keys: Vec<String> = self
-            .lock_inner()
-            .as_ref()
-            .unwrap()
-            .value_rebuilders
-            .keys()
-            .cloned()
-            .collect();
+        let mut keys: Vec<String> = self.lock_app().key_to_value_fn.keys().cloned().collect();
         keys.sort();
         write!(
             f,

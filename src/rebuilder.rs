@@ -25,11 +25,11 @@ impl Rebuilder {
         }
     }
 
-    pub fn session(&self) -> Option<Arc<Session>> {
+    pub fn session(&self) -> Result<Arc<Session>, &'static str> {
         let weak_session = match self {
             Rebuilder::Keys(weak_session) | Rebuilder::Value(weak_session, ..) => weak_session,
         };
-        weak_session.upgrade()
+        weak_session.upgrade().ok_or("Session not found")
     }
 
     pub fn session_exists(&self) -> bool {
