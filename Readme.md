@@ -1,9 +1,9 @@
 Maggie
 ======
-[![crates.io version](https://img.shields.io/crates/v/beatrice.svg)](https://crates.io/crates/beatrice)
-[![license: Apache 2.0](https://raw.githubusercontent.com/mleonhard/beatrice-rs/main/license-apache-2.0.svg)](http://www.apache.org/licenses/LICENSE-2.0)
-[![unsafe forbidden](https://raw.githubusercontent.com/mleonhard/beatrice-rs/main/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/)
-[![pipeline status](https://github.com/mleonhard/beatrice-rs/workflows/CI/badge.svg)](https://github.com/mleonhard/beatrice-rs/actions)
+[![crates.io version](https://img.shields.io/crates/v/maggie.svg)](https://crates.io/crates/maggie)
+[![license: Apache 2.0](https://raw.githubusercontent.com/mleonhard/maggie-rs/main/license-apache-2.0.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![unsafe forbidden](https://raw.githubusercontent.com/mleonhard/maggie-rs/main/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/)
+[![pipeline status](https://github.com/mleonhard/maggie-rs/workflows/CI/badge.svg)](https://github.com/mleonhard/maggie-rs/actions)
 
 An app server library in Rust.
 
@@ -15,7 +15,7 @@ Use a Maggie client to access the app:
 - `forbid(unsafe_code)`
 - Define your app's UI and RPCs in threaded Rust.
 - Uses [`beatrice`](https://github.com/mleonhard/beatrice-rs)
-  http server for good performance under load.
+  http server for good performance under load. - TODO: Make a benchmark.
 - No macros or complicated type params
 - Good test coverage (??%) - TODO: Update.
 
