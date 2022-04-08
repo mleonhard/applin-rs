@@ -1,5 +1,6 @@
 use crate::error::client_error;
 use crate::random::random_u64;
+use crate::session_id::SessionId;
 use beatrice::internal::escape_and_elide;
 use beatrice::{AsciiString, Cookie, Request, Response};
 use core::fmt::{Debug, Formatter};
@@ -16,17 +17,23 @@ pub struct SessionCookie {
     secret: u64,
 }
 impl SessionCookie {
+    pub fn from_req_option(req: &Request) -> Result<Option<SessionCookie>, Response> {
+        if let Some(string) = req.cookies.get(SESSION_COOKIE_NAME) {
+            let cookie = Self::try_from(string.as_str()).map_err(|e| {
+                client_error(format!(
+                    "error parsing {:?} cookie: {}",
+                    SESSION_COOKIE_NAME, e
+                ))
+            })?;
+            Ok(Some(cookie))
+        } else {
+            Ok(None)
+        }
+    }
+
     pub fn from_req(req: &Request) -> Result<SessionCookie, Response> {
-        let string = req
-            .cookies
-            .get(SESSION_COOKIE_NAME)
-            .ok_or_else(|| client_error(format!("missing cookie {:?}", SESSION_COOKIE_NAME)))?;
-        Self::try_from(string.as_str()).map_err(|e| {
-            client_error(format!(
-                "error parsing {:?} cookie: {}",
-                SESSION_COOKIE_NAME, e
-            ))
-        })
+        Self::from_req_option(req)?
+            .ok_or_else(|| client_error(format!("missing cookie {:?}", SESSION_COOKIE_NAME)))
     }
 
     pub fn new_random() -> Self {
@@ -36,8 +43,8 @@ impl SessionCookie {
         }
     }
 
-    pub fn id(&self) -> u64 {
-        self.id
+    pub fn id(&self) -> SessionId {
+        SessionId::new(self.id)
     }
 
     pub fn to_cookie(&self) -> Cookie {

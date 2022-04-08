@@ -27,6 +27,10 @@ impl Button {
             .extend(actions.into_iter().map(|action| action.to_string()));
         self
     }
+
+    pub fn build(self) -> Value {
+        serde_json::to_value(self).unwrap()
+    }
 }
 impl From<Button> for Value {
     fn from(button: Button) -> Self {
@@ -67,6 +71,10 @@ impl DetailCell {
     pub fn with_photo(mut self, path: impl ToString) -> Self {
         self.photo = Some(path.to_string());
         self
+    }
+
+    pub fn build(self) -> Value {
+        serde_json::to_value(self).unwrap()
     }
 }
 impl From<DetailCell> for Value {
@@ -146,9 +154,13 @@ impl TitleBar {
             .extend(actions.into_iter().map(|action| action.to_string()));
         self
     }
+
+    pub fn build(self) -> Value {
+        serde_json::to_value(self).unwrap()
+    }
 }
 impl From<TitleBar> for Value {
-    fn from(titel_bar: TitleBar) -> Self {
-        serde_json::to_value(titel_bar).unwrap()
+    fn from(title_bar: TitleBar) -> Self {
+        serde_json::to_value(title_bar).unwrap()
     }
 }

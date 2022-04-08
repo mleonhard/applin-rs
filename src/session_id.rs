@@ -1,14 +1,18 @@
+use crate::random::random_u64;
 use beatrice::internal::escape_and_elide;
 use core::fmt::{Debug, Formatter};
-use nanorand::{ChaCha, Rng};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
 #[derive(Clone, Copy, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct SessionId(pub u64);
+pub struct SessionId(u64);
 impl SessionId {
-    pub fn new(rng: &mut ChaCha<20>) -> Self {
-        Self(rng.generate_range(0_u64..u64::MAX))
+    pub fn new(value: u64) -> Self {
+        Self(value)
+    }
+
+    pub fn new_random() -> Self {
+        Self(random_u64())
     }
 
     pub fn inner(&self) -> u64 {

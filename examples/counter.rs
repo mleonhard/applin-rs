@@ -15,167 +15,138 @@
 use crate::safina_executor::Executor;
 use beatrice::reexport::{safina_executor, safina_timer};
 use beatrice::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
-use core::sync::atomic::{AtomicU64, Ordering};
-use maggie::app::App;
-use maggie::rebuilder::Rebuilder;
-use maggie::rebuilder_set::RebuilderSet;
-use maggie::session::{session_not_found, Session};
-use maggie::session_cookie::SessionCookie;
+use maggie::context::Context;
+use maggie::key_set::KeySet;
+use maggie::random::random_u64;
+use maggie::roster::Roster;
+use maggie::session_set::SessionSet;
 use maggie::widgets::{text, Button, DetailCell, TitleBar};
-use serde_json::json;
-use std::collections::HashMap;
+use serde_json::Value;
 use std::error::Error;
-use std::sync::{Arc, RwLock};
+use std::fmt::{Debug, Formatter};
+use std::sync::Arc;
 
-struct Counter {
-    value: AtomicU64,
-    rebuilders: RebuilderSet,
+struct UserId(pub u64);
+impl UserId {
+    pub fn new_random() -> Self {
+        Self(random_u64())
+    }
 }
-impl Counter {
-    pub fn new(executor: &Arc<Executor>) -> Self {
-        Self {
-            value: AtomicU64::new(0),
-            rebuilders: RebuilderSet::new(executor),
-        }
+impl Debug for UserId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(f, "UserId({})", self.0)
     }
-
-    pub fn get(&self, rebuilder: Rebuilder) -> u64 {
-        self.rebuilders.insert(rebuilder);
-        self.value.load(Ordering::Acquire)
-    }
-
-    pub fn increment(&self, rpc_session: Option<&Arc<Session>>) {
-        self.value.fetch_add(1, Ordering::AcqRel);
-        self.rebuilders.rebuild_all(rpc_session);
-    }
-
-    // pub fn add(&self, n: u64, rpc_session: Option<&Arc<Session>>) {
-    //     self.value.fetch_add(n, Ordering::AcqRel);
-    //     self.rebuilders.rebuild_all(rpc_session);
-    // }
 }
-
-// struct UserId(pub u64);
-// impl UserId {
-//     pub fn new_random() -> Self {
-//         Self(random_u64())
-//     }
-// }
-// impl Debug for UserId {
-//     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
-//         write!(f, "UserId({})", self.0)
-//     }
-// }
 
 struct UserState {
-    pub session: Arc<Session>,
-    pub count: AtomicU64,
+    pub user_id: UserId,
+    pub count: Roster<u64, Self>,
 }
 impl UserState {
-    pub fn new(session: Arc<Session>) -> Self {
+    pub fn new(user_id: UserId) -> Self {
         Self {
-            session,
-            count: AtomicU64::new(0),
+            user_id,
+            count: Roster::new(0),
         }
     }
 }
 
 struct State {
-    global_counter: Counter,
-    user_states: RwLock<HashMap<SessionCookie, Arc<UserState>>>,
+    global_counter: Roster<u64, UserState>,
+    sessions: SessionSet<UserState>,
 }
 impl State {
     pub fn new(executor: &Arc<Executor>) -> Self {
         Self {
-            global_counter: Counter::new(executor),
-            user_states: RwLock::new(HashMap::new()),
+            global_counter: Roster::new(0).with_cleanup_task(executor),
+            sessions: SessionSet::new(),
         }
     }
 }
 
-fn app(state: &Arc<State>, _rebuilder: Rebuilder) -> Result<App, Box<dyn Error>> {
-    let mut app = App::new();
+fn key_set(
+    state: &Arc<State>,
+    ctx: &Context<UserState>,
+) -> Result<KeySet<UserState>, Box<dyn Error>> {
+    let mut app = KeySet::new();
     app.add_static(
         "/",
-        json!([
-            TitleBar::new("Counter Example"),
-            DetailCell::new("Global Counter").with_action("/global_counter"),
-            DetailCell::new("User Counter").with_action("/user_counter"),
+        Value::Array(vec![
+            TitleBar::new("Counter Example").build(),
+            DetailCell::new("Global Counter")
+                .with_action("/global_counter")
+                .build(),
+            DetailCell::new("User Counter")
+                .with_action("/user_counter")
+                .build(),
         ]),
     );
     let state_clone = state.clone();
-    app.add_fn("/global_counter", move |rebuilder| {
-        Ok(json!([
-            TitleBar::new("Global Counter").with_back(),
+    app.add_fn("/global_counter", move |ctx| {
+        //dbg!("/global_counter");
+        Ok(Value::Array(vec![
+            TitleBar::new("Global Counter").with_back().build(),
+            text(format!("Value: {}", *state_clone.global_counter.read(&ctx))),
+            Button::new("Increment")
+                .with_action("rpc:/global_increment")
+                .build(),
+            if *state_clone.global_counter.read(&ctx) > 5 {
+                DetailCell::new("Global Counter High")
+                    .with_action("/high_global_counter")
+                    .build()
+            } else {
+                Value::Null
+            },
+        ]))
+    });
+    app.add_fn("/user_counter", move |ctx| {
+        //dbg!("/user_counter");
+        Ok(Value::Array(vec![
+            TitleBar::new("My Counter").with_back().build(),
             text(format!(
                 "Value: {}",
-                state_clone.global_counter.get(rebuilder)
+                *ctx.session()?.value().count.read(&ctx)
             )),
-            Button::new("Increment").with_action("rpc:/global_increment"),
+            Button::new("Increment")
+                .with_action("rpc:/user_increment")
+                .build(),
         ]))
     });
-    let state_clone = state.clone();
-    app.add_fn("/user_counter", move |rebuilder| {
-        let count = state_clone
-            .user_states
-            .read()
-            .unwrap()
-            .get(&rebuilder.session()?.cookie)
-            .ok_or_else(|| "session not found")?
-            .count
-            .load(Ordering::Acquire);
-        Ok(json!([
-            TitleBar::new("My Counter").with_back(),
-            text(format!("Value: {}", count)),
-            Button::new("Increment").with_action("rpc:/user_increment"),
-        ]))
-    });
+    if *state.global_counter.read(ctx) > 5 {
+        app.add_static(
+            "/high_global_counter",
+            Value::Array(vec![
+                TitleBar::new("High Global Counter").with_back().build(),
+                text("The global counter is higher than 5."),
+            ]),
+        );
+    }
+    //dbg!(&app);
     Ok(app)
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn maggie(state: &Arc<State>, _req: &Request) -> Result<Response, Response> {
-    // TODO: Look for existing session.
-    let cookie = SessionCookie::new_random();
+fn maggie(state: &Arc<State>, req: &Request) -> Result<Response, Response> {
     let state_clone = state.clone();
-    let (session, response) = Session::new(move |rebuilder| app(&state_clone, rebuilder));
-    let user_state = Arc::new(UserState::new(session.clone()));
-    state
-        .user_states
-        .write()
-        .unwrap()
-        .insert(cookie, user_state);
-    session.schedule_rebuild_keys(None);
+    let (_session, response) = state.sessions.resume_or_new(
+        req,
+        move |ctx| key_set(&state_clone, ctx),
+        || UserState::new(UserId::new_random()),
+    )?;
+    //dbg!(&response);
     Ok(response)
 }
 
 fn global_increment(state: &Arc<State>, req: &Request) -> Result<Response, Response> {
-    let cookie = SessionCookie::from_req(req)?;
-    let user_state = state
-        .user_states
-        .read()
-        .unwrap()
-        .get(&cookie)
-        .cloned()
-        .ok_or_else(session_not_found)?;
-    state.global_counter.increment(Some(&user_state.session));
-    user_state.session.response()
+    let session = state.sessions.get(req)?;
+    (*state.global_counter.write(Some(session.id()))) += 1;
+    session.rpc_response()
 }
 
 fn user_increment(state: &Arc<State>, req: &Request) -> Result<Response, Response> {
-    let cookie = SessionCookie::from_req(req)?;
-    let user_state = state
-        .user_states
-        .read()
-        .unwrap()
-        .get(&cookie)
-        .cloned()
-        .ok_or_else(session_not_found)?;
-    user_state.count.fetch_add(1, Ordering::AcqRel);
-    user_state
-        .session
-        .schedule_rebuild_value("/user_counter", Some(&user_state.session));
-    user_state.session.response()
+    let session = state.sessions.get(req)?;
+    (*session.value().count.write(Some(session.id()))) += 1;
+    session.rpc_response()
 }
 
 #[allow(clippy::unnecessary_wraps)]
