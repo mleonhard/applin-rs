@@ -11,3 +11,5 @@ Cargo.lock
 
 # JetBrains CLion & IntelliJ
 /.idea/
+
+Readme.md.*

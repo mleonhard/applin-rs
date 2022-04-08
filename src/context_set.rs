@@ -1,5 +1,4 @@
 use crate::context::Context;
-use crate::session_id::SessionId;
 use beatrice::reexport::safina_executor::Executor;
 use beatrice::reexport::safina_timer;
 use core::sync::atomic::{AtomicBool, Ordering};
@@ -79,11 +78,11 @@ impl<T: 'static + Send + Sync> ContextSet<T> {
         self.write().remove(ctx)
     }
 
-    pub fn rebuild_all(&self, session_id: Option<SessionId>) {
+    pub fn rebuild_all(&self, ctx: &Context<T>) {
         //dbg!(&session_id);
         self.clean_if_cleanup_task_not_started();
-        for ctx in self.read().iter() {
-            ctx.rebuild(session_id);
+        for target_ctx in self.read().iter() {
+            target_ctx.rebuild(ctx);
         }
     }
 }

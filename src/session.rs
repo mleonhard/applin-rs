@@ -3,7 +3,7 @@ use crate::error::server_error;
 use crate::key_set::KeySet;
 use crate::session_cookie::SessionCookie;
 use crate::session_id::SessionId;
-use beatrice::reexport::safina_executor;
+use beatrice::reexport::safina_executor::Executor;
 use beatrice::{Event, EventSender, Response};
 use core::fmt::{Debug, Formatter};
 use serde_json::{json, Value};
@@ -20,15 +20,16 @@ pub enum PendingUpdate {
     Key(String),
 }
 
-pub struct ValueGuard<'x, T>(MutexGuard<'x, T>);
-impl<'x, T> Deref for ValueGuard<'x, T> {
+#[allow(clippy::module_name_repetitions)]
+pub struct SessionStateGuard<'x, T>(MutexGuard<'x, T>);
+impl<'x, T> Deref for SessionStateGuard<'x, T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
         &*self.0
     }
 }
-impl<'x, T> DerefMut for ValueGuard<'x, T> {
+impl<'x, T> DerefMut for SessionStateGuard<'x, T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut *self.0
     }
@@ -42,16 +43,17 @@ pub struct InnerSession<T> {
 }
 
 pub struct Session<T> {
+    pub executor: Arc<Executor>,
     pub cookie: SessionCookie,
     #[allow(clippy::type_complexity)]
     pub key_set_fn:
         Box<dyn 'static + Send + Sync + Fn(&Context<T>) -> Result<KeySet<T>, Box<dyn Error>>>,
     pub scheduled_updates: Mutex<HashSet<PendingUpdate>>,
-    pub value: Mutex<T>,
+    pub state: Mutex<T>,
     pub inner: Mutex<InnerSession<T>>,
 }
 impl<T: 'static + Send + Sync> Session<T> {
-    pub fn new<F>(key_set_fn: F, value: T) -> (Arc<Self>, Response)
+    pub fn new<F>(executor: &Arc<Executor>, key_set_fn: F, state: T) -> (Arc<Self>, Response)
     where
         F: 'static + Send + Sync + Fn(&Context<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
     {
@@ -59,22 +61,27 @@ impl<T: 'static + Send + Sync> Session<T> {
         let (sender, response) = Response::event_stream();
         let response = response.with_set_cookie(cookie.to_cookie());
         let session = Arc::new(Self {
+            executor: executor.clone(),
             key_set_fn: Box::new(key_set_fn),
             cookie,
             scheduled_updates: Mutex::new(HashSet::new()),
-            value: Mutex::new(value),
+            state: Mutex::new(state),
             inner: Mutex::new(InnerSession {
                 key_set: KeySet::new(),
                 rpc_updates: HashSet::new(),
                 sender,
             }),
         });
-        session.schedule_rebuild_key_set(None);
+        session.schedule_rebuild_key_set(&Context::Empty);
         (session, response)
     }
 
     pub fn id(&self) -> SessionId {
         self.cookie.id()
+    }
+
+    pub fn rpc_context(&self) -> Context<T> {
+        Context::Rpc(self.id())
     }
 
     pub fn lock_inner(&self) -> MutexGuard<InnerSession<T>> {
@@ -88,8 +95,8 @@ impl<T: 'static + Send + Sync> Session<T> {
     }
 
     #[must_use]
-    pub fn value(&self) -> ValueGuard<'_, T> {
-        ValueGuard(self.value.lock().unwrap_or_else(PoisonError::into_inner))
+    pub fn state(&self) -> SessionStateGuard<'_, T> {
+        SessionStateGuard(self.state.lock().unwrap_or_else(PoisonError::into_inner))
     }
 
     #[must_use]
@@ -100,7 +107,7 @@ impl<T: 'static + Send + Sync> Session<T> {
         let (sender, response) = Response::event_stream();
         inner_guard.sender = sender;
         drop(inner_guard);
-        self.schedule_rebuild_key_set(None);
+        self.schedule_rebuild_key_set(&Context::Empty);
         response.with_set_cookie(self.cookie.to_cookie())
     }
 
@@ -164,13 +171,14 @@ impl<T: 'static + Send + Sync> Session<T> {
     }
 
     #[allow(clippy::missing_panics_doc)]
-    pub fn schedule_rebuild_key_set(self: &Arc<Self>, session_id: Option<SessionId>) {
-        if session_id == Some(self.cookie.id()) {
+    pub fn schedule_rebuild_key_set(self: &Arc<Self>, ctx: &Context<T>) {
+        // TODO: Schedule only one worker at a time per session.
+        if &Context::Rpc(self.id()) == ctx {
             self.lock_inner().rpc_updates.insert(PendingUpdate::KeySet);
             return;
         }
         let self_clone = self.clone();
-        safina_executor::schedule_blocking(move || {
+        self.executor.schedule_blocking(move || {
             self_clone.build_key_set_and_send().unwrap();
             // TODO: Disconnect on error or panic.  Also below.
             // self_clone.lock_inner().sender.disconnect();
@@ -178,20 +186,17 @@ impl<T: 'static + Send + Sync> Session<T> {
     }
 
     #[allow(clippy::missing_panics_doc)]
-    pub fn schedule_rebuild_value(
-        self: &Arc<Self>,
-        key: impl AsRef<str>,
-        session_id: Option<SessionId>,
-    ) {
+    pub fn schedule_rebuild_value(self: &Arc<Self>, key: impl AsRef<str>, ctx: &Context<T>) {
+        // TODO: Schedule only one worker at a time per session.
         let key = key.as_ref().to_string();
-        if session_id == Some(self.cookie.id()) {
+        if &Context::Rpc(self.id()) == ctx {
             self.lock_inner()
                 .rpc_updates
                 .insert(PendingUpdate::Key(key));
             return;
         }
         let self_clone = self.clone();
-        safina_executor::schedule_blocking(move || {
+        self.executor.schedule_blocking(move || {
             self_clone.build_value_and_send(&key).unwrap();
         });
     }

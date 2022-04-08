@@ -3,6 +3,7 @@ use crate::key_set::KeySet;
 use crate::session::Session;
 use crate::session_cookie::SessionCookie;
 use crate::session_id::SessionId;
+use beatrice::reexport::safina_executor::Executor;
 use beatrice::{Request, Response};
 use std::collections::HashMap;
 use std::sync::{Arc, PoisonError, RwLock, RwLockReadGuard, RwLockWriteGuard};
@@ -13,12 +14,16 @@ pub fn session_not_found() -> Response {
 }
 
 pub struct SessionSet<T> {
+    pub executor: Arc<Executor>,
+    // TODO: Remove disconnected clients from the set after a delay.
+    // TODO: Send keepalives.
     pub set: Arc<RwLock<HashMap<SessionId, Arc<Session<T>>>>>,
 }
 impl<T: 'static + Send + Sync> SessionSet<T> {
     #[must_use]
-    pub fn new() -> Self {
+    pub fn new(executor: &Arc<Executor>) -> Self {
         Self {
+            executor: executor.clone(),
             set: Arc::new(RwLock::new(HashMap::new())),
         }
     }
@@ -67,7 +72,7 @@ impl<T: 'static + Send + Sync> SessionSet<T> {
     where
         F: 'static + Send + Sync + Fn(&Context<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
     {
-        let (session, response) = Session::new(key_set_fn, value);
+        let (session, response) = Session::new(&self.executor, key_set_fn, value);
         self.write_lock()
             .insert(session.cookie.id(), session.clone());
         (session, response)
@@ -79,7 +84,7 @@ impl<T: 'static + Send + Sync> SessionSet<T> {
         &self,
         req: &Request,
         key_set_fn: F,
-        value_fn: impl FnOnce() -> T,
+        session_state_fn: impl FnOnce() -> T,
     ) -> Result<(Arc<Session<T>>, Response), Response>
     where
         F: 'static + Send + Sync + Fn(&Context<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
@@ -88,12 +93,8 @@ impl<T: 'static + Send + Sync> SessionSet<T> {
             let response = session.resume();
             Ok((session, response))
         } else {
-            Ok(self.new_session(key_set_fn, value_fn()))
+            let session_state = session_state_fn();
+            Ok(self.new_session(key_set_fn, session_state))
         }
-    }
-}
-impl<T: 'static + Send + Sync> Default for SessionSet<T> {
-    fn default() -> Self {
-        Self::new()
     }
 }

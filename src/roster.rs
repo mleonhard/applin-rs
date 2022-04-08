@@ -1,15 +1,15 @@
 use crate::context::Context;
 use crate::context_set::ContextSet;
-use crate::session_id::SessionId;
 use beatrice::reexport::safina_executor::Executor;
-use std::ops::{Deref, DerefMut};
+use core::fmt::{Debug, Formatter};
+use core::ops::{Deref, DerefMut};
 use std::sync::{Arc, PoisonError, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 #[allow(clippy::module_name_repetitions)]
 pub struct RosterWriteGuard<'x, V, T: 'static + Send + Sync>(
     Option<RwLockWriteGuard<'x, V>>,
     &'x ContextSet<T>,
-    Option<SessionId>,
+    &'x Context<T>,
 );
 impl<'x, V, T: 'static + Send + Sync> Deref for RosterWriteGuard<'x, V, T> {
     type Target = V;
@@ -42,6 +42,17 @@ impl<V, T: 'static + Send + Sync> Roster<V, T> {
         }
     }
 
+    #[must_use]
+    pub fn with_cleanup_task(self, executor: &Arc<Executor>) -> Self {
+        self.context_set.start_cleanup_task(executor);
+        self
+    }
+
+    /// Calling this a second time does nothing.
+    pub fn start_cleanup_task(&self, executor: &Arc<Executor>) {
+        self.context_set.start_cleanup_task(executor);
+    }
+
     pub fn subscribe(&self, ctx: &Context<T>) {
         self.context_set.insert(ctx);
     }
@@ -71,8 +82,8 @@ impl<V, T: 'static + Send + Sync> Roster<V, T> {
 
     /// Get a write lock on the value.
     /// When the returned guard drops, it rebuilds all subscribed contexts.
-    pub fn write(&self, session_id: Option<SessionId>) -> RosterWriteGuard<'_, V, T> {
-        RosterWriteGuard(Some(self.value_write_lock()), &self.context_set, session_id)
+    pub fn write<'x>(&'x self, ctx: &'x Context<T>) -> RosterWriteGuard<'x, V, T> {
+        RosterWriteGuard(Some(self.value_write_lock()), &self.context_set, ctx)
     }
 
     /// Write the value without updating clients.
@@ -80,15 +91,13 @@ impl<V, T: 'static + Send + Sync> Roster<V, T> {
         self.value_write_lock()
     }
 }
-impl<V, T: 'static + Send + Sync> Roster<V, T> {
-    #[must_use]
-    pub fn with_cleanup_task(self, executor: &Arc<Executor>) -> Self {
-        self.context_set.start_cleanup_task(executor);
-        self
-    }
-
-    /// Calling this a second time does nothing.
-    pub fn start_cleanup_task(&self, executor: &Arc<Executor>) {
-        self.context_set.start_cleanup_task(executor);
+impl<V, T: 'static + Send + Sync> Debug for Roster<V, T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), core::fmt::Error> {
+        write!(
+            f,
+            "Roster<{},{}>",
+            core::any::type_name::<V>(),
+            core::any::type_name::<T>(),
+        )
     }
 }
