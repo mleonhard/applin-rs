@@ -34,6 +34,7 @@ impl<'x, T> DerefMut for ValueGuard<'x, T> {
     }
 }
 
+#[allow(clippy::module_name_repetitions)]
 pub struct InnerSession<T> {
     pub key_set: KeySet<T>,
     pub rpc_updates: HashSet<PendingUpdate>,
@@ -42,6 +43,7 @@ pub struct InnerSession<T> {
 
 pub struct Session<T> {
     pub cookie: SessionCookie,
+    #[allow(clippy::type_complexity)]
     pub key_set_fn:
         Box<dyn 'static + Send + Sync + Fn(&Context<T>) -> Result<KeySet<T>, Box<dyn Error>>>,
     pub scheduled_updates: Mutex<HashSet<PendingUpdate>>,
@@ -85,10 +87,12 @@ impl<T: 'static + Send + Sync> Session<T> {
             .unwrap_or_else(PoisonError::into_inner)
     }
 
+    #[must_use]
     pub fn value(&self) -> ValueGuard<'_, T> {
         ValueGuard(self.value.lock().unwrap_or_else(PoisonError::into_inner))
     }
 
+    #[must_use]
     pub fn resume(self: &Arc<Self>) -> Response {
         self.lock_scheduled_updates().clear();
         let mut inner_guard = self.lock_inner();
@@ -100,6 +104,8 @@ impl<T: 'static + Send + Sync> Session<T> {
         response.with_set_cookie(self.cookie.to_cookie())
     }
 
+    /// # Errors
+    /// Returns an error when we fail to build the new key set or fail to build the value for a key.
     pub fn build_key_set(self: &Arc<Self>) -> Result<HashMap<String, Value>, Box<dyn Error>> {
         let mut inner_guard = self.lock_inner();
         let mut new_key_set = (*self.key_set_fn)(&Context::Keys(Arc::downgrade(self)))?;
@@ -111,7 +117,7 @@ impl<T: 'static + Send + Sync> Session<T> {
             }
         }
         // Added keys.
-        for (key, value_fn) in new_key_set.key_to_value_fn.iter() {
+        for (key, value_fn) in &new_key_set.key_to_value_fn {
             if !inner_guard.key_set.key_to_value_fn.contains_key(key) {
                 let ctx = Context::Value(Arc::downgrade(self), key.to_string());
                 let value = (*value_fn)(&ctx)?;
@@ -122,6 +128,9 @@ impl<T: 'static + Send + Sync> Session<T> {
         Ok(diff)
     }
 
+    /// # Errors
+    /// Returns an error when we fail to build the new key set or fail to build the value for a key.
+    #[allow(clippy::missing_panics_doc)]
     pub fn build_key_set_and_send(self: &Arc<Self>) -> Result<(), Box<dyn Error>> {
         let diff = self.build_key_set()?;
         let json_string = serde_json::to_string(&diff).unwrap();
@@ -130,6 +139,8 @@ impl<T: 'static + Send + Sync> Session<T> {
         Ok(())
     }
 
+    /// # Errors
+    /// Returns an error when we build the value for the key.
     pub fn build_value(self: &Arc<Self>, key: &str) -> Result<Value, Box<dyn Error>> {
         let inner_guard = self.lock_inner();
         let value_fn = inner_guard
@@ -141,6 +152,8 @@ impl<T: 'static + Send + Sync> Session<T> {
         (*value_fn)(&ctx)
     }
 
+    /// # Errors
+    /// Returns an error when we build the value for the key.
     pub fn build_value_and_send(self: &Arc<Self>, key: &str) -> Result<(), Box<dyn Error>> {
         let value = self.build_value(key)?;
         let json_obj = json!({ key: value });
@@ -150,6 +163,7 @@ impl<T: 'static + Send + Sync> Session<T> {
         Ok(())
     }
 
+    #[allow(clippy::missing_panics_doc)]
     pub fn schedule_rebuild_key_set(self: &Arc<Self>, session_id: Option<SessionId>) {
         if session_id == Some(self.cookie.id()) {
             self.lock_inner().rpc_updates.insert(PendingUpdate::KeySet);
@@ -163,6 +177,7 @@ impl<T: 'static + Send + Sync> Session<T> {
         });
     }
 
+    #[allow(clippy::missing_panics_doc)]
     pub fn schedule_rebuild_value(
         self: &Arc<Self>,
         key: impl AsRef<str>,
@@ -181,6 +196,9 @@ impl<T: 'static + Send + Sync> Session<T> {
         });
     }
 
+    /// # Errors
+    /// Returns an error when we fail to build the new key set or fail to build the value for a key.
+    #[allow(clippy::missing_panics_doc)]
     pub fn rpc_response(self: &Arc<Self>) -> Result<Response, Response> {
         let mut pending_updates = HashSet::new();
         std::mem::swap(&mut self.lock_inner().rpc_updates, &mut pending_updates);

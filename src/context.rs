@@ -14,17 +14,20 @@ impl<T: 'static + Send + Sync> Context<T> {
         match self {
             Context::Keys(weak_session) => {
                 if let Some(session) = weak_session.upgrade() {
-                    session.schedule_rebuild_key_set(session_id)
+                    session.schedule_rebuild_key_set(session_id);
                 }
             }
             Context::Value(weak_session, key) => {
                 if let Some(session) = weak_session.upgrade() {
-                    session.schedule_rebuild_value(key, session_id)
+                    session.schedule_rebuild_value(key, session_id);
                 }
             }
         }
     }
 
+    /// # Errors
+    /// Returns an error when the session is not found.
+    /// This happens when the connection is closed and the session was cleaned up.
     pub fn session(&self) -> Result<Arc<Session<T>>, &'static str> {
         let weak_session = match self {
             Context::Keys(weak_session) | Context::Value(weak_session, ..) => weak_session,
@@ -32,6 +35,7 @@ impl<T: 'static + Send + Sync> Context<T> {
         weak_session.upgrade().ok_or("session not found")
     }
 
+    #[must_use]
     pub fn session_exists(&self) -> bool {
         let weak_session = match self {
             Context::Keys(weak_session) | Context::Value(weak_session, ..) => weak_session,

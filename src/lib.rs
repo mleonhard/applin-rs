@@ -97,5 +97,4 @@ pub mod session;
 pub mod session_cookie;
 pub mod session_id;
 pub mod session_set;
-pub mod session_token;
 pub mod widgets;

@@ -5,6 +5,7 @@ use beatrice::reexport::safina_executor::Executor;
 use std::ops::{Deref, DerefMut};
 use std::sync::{Arc, PoisonError, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
+#[allow(clippy::module_name_repetitions)]
 pub struct RosterWriteGuard<'x, V, T: 'static + Send + Sync>(
     Option<RwLockWriteGuard<'x, V>>,
     &'x ContextSet<T>,
@@ -80,6 +81,7 @@ impl<V, T: 'static + Send + Sync> Roster<V, T> {
     }
 }
 impl<V, T: 'static + Send + Sync> Roster<V, T> {
+    #[must_use]
     pub fn with_cleanup_task(self, executor: &Arc<Executor>) -> Self {
         self.context_set.start_cleanup_task(executor);
         self

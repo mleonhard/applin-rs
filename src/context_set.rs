@@ -12,6 +12,7 @@ pub struct ContextSet<T> {
     pub set: Arc<RwLock<HashSet<Context<T>>>>,
 }
 impl<T: 'static + Send + Sync> ContextSet<T> {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             cleanup_task_started: AtomicBool::new(false),
@@ -19,6 +20,7 @@ impl<T: 'static + Send + Sync> ContextSet<T> {
         }
     }
 
+    #[must_use]
     pub fn with_cleanup_task(self, executor: &Arc<Executor>) -> Self {
         self.start_cleanup_task(executor);
         self
@@ -83,5 +85,10 @@ impl<T: 'static + Send + Sync> ContextSet<T> {
         for ctx in self.read().iter() {
             ctx.rebuild(session_id);
         }
+    }
+}
+impl<T: 'static + Send + Sync> Default for ContextSet<T> {
+    fn default() -> Self {
+        Self::new()
     }
 }

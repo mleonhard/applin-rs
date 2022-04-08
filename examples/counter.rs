@@ -39,10 +39,12 @@ impl Debug for UserId {
 }
 
 struct UserState {
+    #[allow(dead_code)]
     pub user_id: UserId,
     pub count: Roster<u64, Self>,
 }
 impl UserState {
+    #[must_use]
     pub fn new(user_id: UserId) -> Self {
         Self {
             user_id,
@@ -64,6 +66,7 @@ impl State {
     }
 }
 
+#[allow(clippy::unnecessary_wraps)]
 fn key_set(
     state: &Arc<State>,
     ctx: &Context<UserState>,
@@ -86,11 +89,11 @@ fn key_set(
         //dbg!("/global_counter");
         Ok(Value::Array(vec![
             TitleBar::new("Global Counter").with_back().build(),
-            text(format!("Value: {}", *state_clone.global_counter.read(&ctx))),
+            text(format!("Value: {}", *state_clone.global_counter.read(ctx))),
             Button::new("Increment")
                 .with_action("rpc:/global_increment")
                 .build(),
-            if *state_clone.global_counter.read(&ctx) > 5 {
+            if *state_clone.global_counter.read(ctx) > 5 {
                 DetailCell::new("Global Counter High")
                     .with_action("/high_global_counter")
                     .build()
@@ -105,7 +108,7 @@ fn key_set(
             TitleBar::new("My Counter").with_back().build(),
             text(format!(
                 "Value: {}",
-                *ctx.session()?.value().count.read(&ctx)
+                *ctx.session()?.value().count.read(ctx)
             )),
             Button::new("Increment")
                 .with_action("rpc:/user_increment")

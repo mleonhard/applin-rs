@@ -7,7 +7,7 @@ use core::fmt::{Debug, Formatter};
 use std::hash::{Hash, Hasher};
 use std::str::FromStr;
 
-const SESSION_COOKIE_NAME: &'static str = "session";
+const SESSION_COOKIE_NAME: &str = "session";
 
 // TODONT: Do not implement `Ord` or `PartialOrd`.  They would let
 //         data structure operations leak `secret` via timing.
@@ -17,6 +17,10 @@ pub struct SessionCookie {
     secret: u64,
 }
 impl SessionCookie {
+    /// Returns `None` when the request doesn't have the cookie.
+    ///
+    /// # Errors
+    /// Returns an error when the request has the cookie and we fail to parse it.
     pub fn from_req_option(req: &Request) -> Result<Option<SessionCookie>, Response> {
         if let Some(string) = req.cookies.get(SESSION_COOKIE_NAME) {
             let cookie = Self::try_from(string.as_str()).map_err(|e| {
@@ -31,11 +35,14 @@ impl SessionCookie {
         }
     }
 
+    /// # Errors
+    /// Returns an error when the request doesn't have the cookie or we fail to parse it.
     pub fn from_req(req: &Request) -> Result<SessionCookie, Response> {
         Self::from_req_option(req)?
             .ok_or_else(|| client_error(format!("missing cookie {:?}", SESSION_COOKIE_NAME)))
     }
 
+    #[must_use]
     pub fn new_random() -> Self {
         Self {
             id: random_u64(),
@@ -43,10 +50,13 @@ impl SessionCookie {
         }
     }
 
+    #[must_use]
     pub fn id(&self) -> SessionId {
         SessionId::new(self.id)
     }
 
+    #[must_use]
+    #[allow(clippy::missing_panics_doc)]
     pub fn to_cookie(&self) -> Cookie {
         Cookie::new(
             SESSION_COOKIE_NAME,
@@ -85,9 +95,10 @@ impl Debug for SessionCookie {
         write!(f, "SessionCookie(id={},secret=...)", self.id)
     }
 }
+#[allow(clippy::derive_hash_xor_eq)]
 impl Hash for SessionCookie {
     fn hash<H: Hasher>(&self, hasher: &mut H) {
-        self.id.hash(hasher)
+        self.id.hash(hasher);
         // TODONT: Do not hash `secret`.  This should prevent data structure operations
         // from leaking it via timing.
     }

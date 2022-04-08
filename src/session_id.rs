@@ -7,14 +7,17 @@ use std::str::FromStr;
 #[derive(Clone, Copy, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct SessionId(u64);
 impl SessionId {
+    #[must_use]
     pub fn new(value: u64) -> Self {
         Self(value)
     }
 
+    #[must_use]
     pub fn new_random() -> Self {
         Self(random_u64())
     }
 
+    #[must_use]
     pub fn inner(&self) -> u64 {
         self.0
     }
