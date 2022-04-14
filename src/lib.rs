@@ -46,6 +46,7 @@
 //!   - Users choose when to update.
 //!     Server must support multiple app versions or demand that users update.
 //!   - Develop on macOS only
+//!   - [Docs are not searchable](https://github.com/apple/swift-org-website/issues/24)
 //! - [Android Studio](https://developer.android.com/studio/)
 //!   - Very popular
 //!   - Android
@@ -74,13 +75,22 @@
 //!   - Widgets look and behave similar to native widgets
 //!   - Unmaintained - little progress on mobile features since 2019
 //!     - iOS support is incomplete:
-//!       no detail cell widget, no check box, broken dark mode support, no keyboard dismiss button
-//!     - Documentation has large holes: Navigator, focus management, non-trivial examples, local data management
-//!     - No integration test support
-//!     - Camera & photo module has show-stopping bug unaddressed for 3 years
-//!     - No high-quality location module
+//!       no detail cell widget or check box (Flutter Team replied to my email and refused to add these),
+//!       [broken dark mode support](https://github.com/flutter/flutter/issues/80860),
+//!       [no scroll-to-dismiss keyboard behavior](https://github.com/flutter/flutter/issues/57609) which is used by most iOS apps,
+//!       [no keyboard dismiss button](https://github.com/flutter/flutter/issues/45076) which is used by all the other iOS apps,
+//!     - Documentation has large holes:
+//!       [Navigator](https://github.com/flutter/flutter/issues/69315),
+//!       [focus management](https://github.com/flutter/flutter/issues/45076),
+//!       non-trivial examples, local data management
+//!     - [Integration test support is broken & deprecated](https://github.com/flutter/flutter/issues?q=is%3Aissue+author%3Amleonhard+integration+test+).
+//!     - Camera & photo module has a [show-stopping bug](https://github.com/flutter/flutter/issues/70751), ignored for 3 years
+//!     - [No high-quality location module](https://github.com/flutter/flutter/issues/31453)
 //!     - Debugger lacks async support
-//!     - UI inspection tools are buggy, not fixed in 3 years
+//!     - [UI inspection tools are buggy](https://github.com/flutter/flutter-intellij/issues/4426), not fixed in 3 years
+//!     - When your Dart code times out waiting for an HTTP request,
+//!       [the request continues in the background](https://github.com/dart-lang/http/issues/424),
+//!       wasting mobile device CPU & RAM, data transfer, battery, and server resources.
 //!
 //! # Changelog
 //! - v0.1.0 - First published version

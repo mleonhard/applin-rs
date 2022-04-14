@@ -108,7 +108,9 @@ impl<T: 'static + Send + Sync> Session<T> {
         inner_guard.sender = sender;
         drop(inner_guard);
         self.schedule_rebuild_key_set(&Context::Empty);
-        response.with_set_cookie(self.cookie.to_cookie())
+        response
+            .with_set_cookie(self.cookie.to_cookie())
+            .with_no_store()
     }
 
     /// # Errors
@@ -229,7 +231,7 @@ impl<T: 'static + Send + Sync> Session<T> {
             diff.insert(key, value);
         }
         //dbg!(&diff);
-        Ok(Response::json(200, diff).unwrap())
+        Ok(Response::json(200, diff).unwrap().with_no_store())
     }
 }
 impl<T> PartialEq for Session<T> {
