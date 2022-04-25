@@ -8,8 +8,8 @@ Maggie
 An app server library in Rust.
 
 Use a Maggie client to access the app:
-- `maggie-ios`
-- `maggie-android`
+- [`maggie-ios`](https://github.com/mleonhard/maggie-ios)
+- [`maggie-android`](https://github.com/mleonhard/maggie-android)
 
 # Features
 - `forbid(unsafe_code)`

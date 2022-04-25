@@ -13,3 +13,4 @@ Cargo.lock
 /.idea/
 
 Readme.md.*
+.DS_Store
