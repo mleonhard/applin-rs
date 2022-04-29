@@ -62,6 +62,7 @@ impl SessionCookie {
             SESSION_COOKIE_NAME,
             AsciiString::try_from(format!("{}-{}", self.id, self.secret)).unwrap(),
         )
+        .with_secure(false) // So we can test at http://127.0.0.1/.
     }
 }
 impl TryFrom<&str> for SessionCookie {

@@ -101,10 +101,12 @@ fn connect(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response
         move |_ctx| Ok(key_set(&state_clone)),
         || SessionState {},
     )?;
+    //dbg!(&response);
     Ok(response)
 }
 
 fn increment(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
+    //dbg!(req);
     let session = state.sessions.get(req)?;
     state.counter.write(&session.rpc_context()).add_assign(1);
     session.rpc_response()
