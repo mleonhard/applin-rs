@@ -4,36 +4,31 @@
 //! Start the server:
 //! ```
 //! $ cargo run --package maggie --example dynamic_page
-//! Access the app at http://127.0.0.1:8000/maggie
-//! INFO GET /connect => 200 streamed
+//! Access the app at http://127.0.0.1:8000/
+//! INFO GET / => 200 streamed
 //! ```
 //!
 //! Connect to it and see the updates arrive periodically:
 //! ```
-//! $ curl http://127.0.0.1:8000/connect
-//! data: {"/":[{"text":"Dynamic Page Example","typ":"title-bar"},"The page below appears and disappears every 5 seconds:",null]}
-//! data: {"/page_2":[{"start_actions":["pop"],"start_text":"Back","text":"Page 2","typ":"title-bar"},"This is page 2."]}
-//! data: {"/":[{"text":"Dynamic Page Example","typ":"title-bar"},"The page below appears and disappears every 5 seconds:",{"actions":["/page_2"],"text":"Page 2","typ":"detail-cell"}]}
-//! data: {"/page_2":null}
-//! data: {"/":[{"text":"Dynamic Page Example","typ":"title-bar"},"The page below appears and disappears every 5 seconds:",null]}
-//! data: {"/page_2":[{"start_actions":["pop"],"start_text":"Back","text":"Page 2","typ":"title-bar"},"This is page 2."]}
-//! data: {"/":[{"text":"Dynamic Page Example","typ":"title-bar"},"The page below appears and disappears every 5 seconds:",{"actions":["/page_2"],"text":"Page 2","typ":"detail-cell"}]}
-//! data: {"/page_2":null}
-//! data: {"/":[{"text":"Dynamic Page Example","typ":"title-bar"},"The page below appears and disappears every 5 seconds:",null]}
+//! $ curl http://127.0.0.1:8000/
+//! data: {"pages":{"/":{"title":"Dynamic Page Example","typ":"nav-page","widget":{"typ":"column","widgets":[{"text":"The page below appears and disappears every 5 seconds:","typ":"text"},{"typ":"empty"}]}}}}
+//! data: {"pages":{"/page_2":{"title":"Page 2","typ":"nav-page","widget":{"text":"This is page 2.","typ":"text"}}}}
+//! data: {"pages":{"/":{"title":"Dynamic Page Example","typ":"nav-page","widget":{"typ":"column","widgets":[{"text":"The page below appears and disappears every 5 seconds:","typ":"text"},{"actions":["/page_2"],"text":"Page 2","typ":"detail-cell"}]}}}}
+//! data: {"pages":{"/page_2":null}}
+//! data: {"pages":{"/":{"title":"Dynamic Page Example","typ":"nav-page","widget":{"typ":"column","widgets":[{"text":"The page below appears and disappears every 5 seconds:","typ":"text"},{"typ":"empty"}]}}}}
 //! ^C
 //! ```
 #![forbid(unsafe_code)]
 
-use crate::safina_executor::Executor;
 use beatrice::reexport::permit::Permit;
 use beatrice::reexport::{safina_executor, safina_timer};
 use beatrice::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
 use maggie::context::Context;
 use maggie::key_set::KeySet;
+use maggie::pages::NavPage;
 use maggie::roster::Roster;
 use maggie::session_set::SessionSet;
-use maggie::widgets::{text, DetailCell, TitleBar};
-use serde_json::Value;
+use maggie::widgets::{Column, DetailCell, Empty, Text};
 use std::error::Error;
 use std::ops::BitXorAssign;
 use std::sync::Arc;
@@ -46,7 +41,7 @@ struct ServerState {
     sessions: SessionSet<SessionState>,
 }
 impl ServerState {
-    pub fn new(executor: &Arc<Executor>) -> Self {
+    pub fn new(executor: &Arc<safina_executor::Executor>) -> Self {
         Self {
             show_page_2: Roster::new(false).with_cleanup_task(executor),
             sessions: SessionSet::new(executor),
@@ -61,24 +56,23 @@ fn key_set(
 ) -> Result<KeySet<SessionState>, Box<dyn Error>> {
     let mut keys = KeySet::new();
     let state_clone = state.clone();
-    keys.add_fn("/", move |ctx| {
-        Ok(Value::Array(vec![
-            TitleBar::new("Dynamic Page Example").build(),
-            text("The page below appears and disappears every 5 seconds:"),
-            if *state_clone.show_page_2.read(ctx) {
-                DetailCell::new("Page 2").with_action("/page_2").build()
-            } else {
-                Value::Null
-            },
-        ]))
+    keys.add_page_fn("/", move |ctx| {
+        Ok(NavPage::new(
+            "Dynamic Page Example",
+            Column::new((
+                Text::new("The page below appears and disappears every 5 seconds:"),
+                if *state_clone.show_page_2.read(ctx) {
+                    DetailCell::new("Page 2").with_action("/page_2").to_widget()
+                } else {
+                    Empty::new().to_widget()
+                },
+            )),
+        ))
     });
     if *state.show_page_2.read(ctx) {
-        keys.add_static(
+        keys.add_static_page(
             "/page_2",
-            Value::Array(vec![
-                TitleBar::new("Page 2").with_back().build(),
-                text("This is page 2."),
-            ]),
+            NavPage::new("Page 2", Text::new("This is page 2.")),
         );
     }
     Ok(keys)
@@ -99,13 +93,13 @@ fn connect(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response
 fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     match (req.method(), req.url().path()) {
         ("GET", "/health") => Ok(Response::text(200, "ok")),
-        ("GET", "/connect") => connect(state, req),
+        ("GET", "/") => connect(state, req),
         _ => Ok(Response::text(404, "Not found")),
     }
 }
 
 pub fn main() {
-    println!("Access the app at http://127.0.0.1:8000/maggie");
+    println!("Access the app at http://127.0.0.1:8000/");
     safina_timer::start_timer_thread();
     let executor = safina_executor::Executor::default();
     let state = Arc::new(ServerState::new(&executor));
@@ -121,13 +115,7 @@ pub fn main() {
                 .bitxor_assign(true);
         }
     });
-    let request_handler = move |req: Request| {
-        print_log_response(
-            req.method().to_string(),
-            req.url().clone(),
-            handle_req(&state, &req),
-        )
-    };
+    let request_handler = move |req: Request| print_log_response(&req, handle_req(&state, &req));
     executor
         .block_on(
             HttpServerBuilder::new()

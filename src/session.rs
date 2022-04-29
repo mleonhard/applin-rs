@@ -142,7 +142,8 @@ impl<T: 'static + Send + Sync> Session<T> {
     #[allow(clippy::missing_panics_doc)]
     pub fn build_key_set_and_send(self: &Arc<Self>) -> Result<(), Box<dyn Error>> {
         let diff = self.build_key_set()?;
-        let json_string = serde_json::to_string(&diff).unwrap();
+        let update = json!({ "pages": diff });
+        let json_string = serde_json::to_string(&update).unwrap();
         //dbg!(&json_string);
         self.lock_inner().sender.send(Event::Message(json_string));
         Ok(())
@@ -162,10 +163,10 @@ impl<T: 'static + Send + Sync> Session<T> {
     }
 
     /// # Errors
-    /// Returns an error when we build the value for the key.
+    /// Returns an error when we fail to build the value for the key.
     pub fn build_value_and_send(self: &Arc<Self>, key: &str) -> Result<(), Box<dyn Error>> {
         let value = self.build_value(key)?;
-        let json_obj = json!({ key: value });
+        let json_obj = json!({"pages": { key: value }});
         let json_string = json_obj.to_string();
         //dbg!(&json_string);
         self.lock_inner().sender.send(Event::Message(json_string));
@@ -231,7 +232,9 @@ impl<T: 'static + Send + Sync> Session<T> {
             diff.insert(key, value);
         }
         //dbg!(&diff);
-        Ok(Response::json(200, diff).unwrap().with_no_store())
+        Ok(Response::json(200, json!({ "pages": diff }))
+            .unwrap()
+            .with_no_store())
     }
 }
 impl<T> PartialEq for Session<T> {

@@ -30,6 +30,7 @@ impl<'x, V, T: 'static + Send + Sync> Drop for RosterWriteGuard<'x, V, T> {
     }
 }
 
+/// A single value of type `V` and a set of subscribers.
 pub struct Roster<V, T: 'static + Send + Sync> {
     pub context_set: ContextSet<T>,
     value: RwLock<V>,
