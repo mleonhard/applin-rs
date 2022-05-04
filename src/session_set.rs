@@ -1,8 +1,8 @@
 use crate::context::Context;
 use crate::key_set::KeySet;
-use crate::session::Session;
 use crate::session_cookie::SessionCookie;
 use crate::session_id::SessionId;
+use crate::session_struct::Session;
 use beatrice::reexport::safina_executor::Executor;
 use beatrice::{Request, Response};
 use std::collections::HashMap;

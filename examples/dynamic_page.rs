@@ -23,12 +23,10 @@
 use beatrice::reexport::permit::Permit;
 use beatrice::reexport::{safina_executor, safina_timer};
 use beatrice::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
-use maggie::context::Context;
-use maggie::key_set::KeySet;
-use maggie::pages::NavPage;
-use maggie::roster::Roster;
-use maggie::session_set::SessionSet;
-use maggie::widgets::{Column, DetailCell, Empty, Text};
+use maggie::builder::{empty, push, Column, DetailCell, NavPage, Text};
+use maggie::data::{Context, Roster};
+use maggie::page::KeySet;
+use maggie::session::SessionSet;
 use std::error::Error;
 use std::ops::BitXorAssign;
 use std::sync::Arc;
@@ -62,9 +60,11 @@ fn key_set(
             Column::new((
                 Text::new("The page below appears and disappears every 5 seconds:"),
                 if *state_clone.show_page_2.read(ctx) {
-                    DetailCell::new("Page 2").with_action("/page_2").to_widget()
+                    DetailCell::new("Page 2")
+                        .with_action(push("/page_2"))
+                        .into()
                 } else {
-                    Empty::new().to_widget()
+                    empty()
                 },
             )),
         ))

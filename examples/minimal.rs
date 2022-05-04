@@ -30,11 +30,10 @@
 
 use beatrice::reexport::{safina_executor, safina_timer};
 use beatrice::{socket_addr_127_0_0_1, HttpServerBuilder, Request};
-use maggie::context::Context;
-use maggie::key_set::KeySet;
-use maggie::pages::PlainPage;
-use maggie::session_set::SessionSet;
-use maggie::widgets::Text;
+use maggie::builder::{PlainPage, Text};
+use maggie::data::Context;
+use maggie::page::KeySet;
+use maggie::session::SessionSet;
 use std::sync::Arc;
 
 pub fn main() {

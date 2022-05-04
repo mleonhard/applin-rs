@@ -97,16 +97,73 @@
 //!
 //! # TO DO
 #![forbid(unsafe_code)]
-pub mod context;
-pub mod context_set;
-pub mod error;
-pub mod key_set;
-pub mod pages;
-pub mod random;
-pub mod roster;
-pub mod session;
-pub mod session_cookie;
-pub mod session_id;
-pub mod session_set;
-pub mod widget_list;
-pub mod widgets;
+
+mod action;
+mod action_builders;
+mod back_button;
+mod button;
+mod column;
+mod context;
+mod context_set;
+mod detail_cell;
+mod error;
+mod h_alignment;
+mod key_set;
+mod nav_page;
+mod page_enum;
+mod plain_page;
+mod random;
+mod roster;
+mod session_cookie;
+mod session_id;
+mod session_set;
+mod session_struct;
+mod text;
+mod v_alignment;
+mod widget_builders;
+mod widget_enum;
+mod widget_list;
+
+pub mod reexports {
+    pub use serde_json;
+}
+
+pub mod data {
+    pub use crate::context::*;
+    pub use crate::context_set::*;
+    pub use crate::error::*;
+    pub use crate::random::*;
+    pub use crate::roster::*;
+}
+
+pub mod session {
+    pub use crate::session_cookie::*;
+    pub use crate::session_id::*;
+    pub use crate::session_set::*;
+    pub use crate::session_struct::*;
+}
+
+pub mod page {
+    pub use crate::key_set::*;
+    pub use crate::page_enum::*;
+}
+
+pub mod builder {
+    pub use crate::action_builders::*;
+    pub use crate::back_button::*;
+    pub use crate::button::*;
+    pub use crate::column::*;
+    pub use crate::detail_cell::*;
+    pub use crate::nav_page::*;
+    pub use crate::plain_page::*;
+    pub use crate::text::*;
+    pub use crate::widget_builders::*;
+}
+
+pub mod widget {
+    pub use crate::action::*;
+    pub use crate::h_alignment::*;
+    pub use crate::v_alignment::*;
+    pub use crate::widget_enum::*;
+    pub use crate::widget_list::*;
+}

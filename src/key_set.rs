@@ -1,5 +1,5 @@
 use crate::context::Context;
-use crate::pages::Page;
+use crate::page_enum::Page;
 use core::fmt::{Debug, Formatter};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -22,90 +22,86 @@ impl<T> KeySet<T> {
 
     #[must_use]
     #[allow(clippy::needless_pass_by_value)]
-    pub fn with_page_fn<F, P: Into<Page>>(mut self, key: impl ToString, page_fn: F) -> Self
+    pub fn with_page_fn<F, P: Into<Page>>(mut self, key: impl Into<String>, page_fn: F) -> Self
     where
         F: 'static + Send + Sync + Fn(&Context<T>) -> Result<P, Box<dyn std::error::Error>>,
     {
         self.key_to_value_fn.insert(
-            key.to_string(),
-            Box::new(move |ctx| page_fn(ctx).map(|page| page.into().0)),
+            key.into(),
+            Box::new(move |ctx| page_fn(ctx).map(Into::into).map(Into::into)),
         );
         self
     }
 
     #[must_use]
     #[allow(clippy::needless_pass_by_value)]
-    pub fn with_value_fn<F, V: Into<Value>>(mut self, key: impl ToString, value_fn: F) -> Self
+    pub fn with_value_fn<F, V: Into<Value>>(mut self, key: impl Into<String>, value_fn: F) -> Self
     where
         F: 'static + Send + Sync + Fn(&Context<T>) -> Result<V, Box<dyn std::error::Error>>,
     {
         self.key_to_value_fn.insert(
-            key.to_string(),
-            Box::new(move |ctx| value_fn(ctx).map(|value| value.into())),
+            key.into(),
+            Box::new(move |ctx| value_fn(ctx).map(Into::into)),
         );
         self
     }
 
     #[must_use]
     #[allow(clippy::needless_pass_by_value)]
-    pub fn with_static_page(mut self, key: impl ToString, page: impl Into<Page>) -> Self {
-        let value = page.into().0;
-        self.key_to_value_fn.insert(
-            key.to_string(),
-            Box::new(move |_rebuilder| Ok(value.clone())),
-        );
+    pub fn with_static_page(mut self, key: impl Into<String>, page: impl Into<Page>) -> Self {
+        let value = page.into();
+        self.key_to_value_fn
+            .insert(key.into(), Box::new(move |_rebuilder| Ok(value.to_value())));
         self
     }
 
     #[must_use]
     #[allow(clippy::needless_pass_by_value)]
-    pub fn with_static_value(mut self, key: impl ToString, value: impl Into<Value>) -> Self {
+    pub fn with_static_value(mut self, key: impl Into<String>, value: impl Into<Value>) -> Self {
         let value = value.into();
-        self.key_to_value_fn.insert(
-            key.to_string(),
-            Box::new(move |_rebuilder| Ok(value.clone())),
-        );
+        self.key_to_value_fn
+            .insert(key.into(), Box::new(move |_rebuilder| Ok(value.clone())));
         self
     }
 
     #[allow(clippy::needless_pass_by_value)]
-    pub fn add_page_fn<F, P: Into<Page>>(&mut self, key: impl ToString, page_fn: F)
+    pub fn add_page_fn<F, P: Into<Page>>(&mut self, key: impl Into<String>, page_fn: F)
     where
         F: 'static + Send + Sync + Fn(&Context<T>) -> Result<P, Box<dyn std::error::Error>>,
     {
         self.key_to_value_fn.insert(
-            key.to_string(),
-            Box::new(move |ctx| page_fn(ctx).map(|page| page.into().0)),
+            key.into(),
+            Box::new(move |ctx| {
+                page_fn(ctx)
+                    .map(Into::into)
+                    .map(|page: Page| page.to_value())
+            }),
         );
     }
 
     #[allow(clippy::needless_pass_by_value)]
-    pub fn add_value_fn<F, V: Into<Value>>(&mut self, key: impl ToString, value_fn: F)
+    pub fn add_value_fn<F, V: Into<Value>>(&mut self, key: impl Into<String>, value_fn: F)
     where
         F: 'static + Send + Sync + Fn(&Context<T>) -> Result<V, Box<dyn std::error::Error>>,
     {
         self.key_to_value_fn.insert(
-            key.to_string(),
-            Box::new(move |ctx| value_fn(ctx).map(|value| value.into())),
+            key.into(),
+            Box::new(move |ctx| value_fn(ctx).map(Into::into)),
         );
     }
 
     #[allow(clippy::needless_pass_by_value)]
-    pub fn add_static_page(&mut self, key: impl ToString, page: impl Into<Page>) {
-        let value = page.into().0;
-        self.key_to_value_fn.insert(
-            key.to_string(),
-            Box::new(move |_rebuilder| Ok(value.clone())),
-        );
+    pub fn add_static_page(&mut self, key: impl Into<String>, page: impl Into<Page>) {
+        let value = page.into();
+        self.key_to_value_fn
+            .insert(key.into(), Box::new(move |_rebuilder| Ok(value.to_value())));
     }
 
     #[allow(clippy::needless_pass_by_value)]
-    pub fn add_static_value(&mut self, key: impl ToString, value: impl Into<Value>) {
+    pub fn add_static_value(&mut self, key: impl Into<String>, value: impl Into<Value>) {
         let value = value.into();
-        self.key_to_value_fn.insert(
-            key.to_string(),
-            Box::new(move |_rebuilder| Ok(value.clone())),
-        );
+        self.key_to_value_fn
+            .insert(key.into(), Box::new(move |_rebuilder| Ok(value.clone())));
     }
 }
 impl<T> Debug for KeySet<T> {

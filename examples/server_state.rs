@@ -50,11 +50,10 @@
 
 use beatrice::reexport::{safina_executor, safina_timer};
 use beatrice::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
-use maggie::key_set::KeySet;
-use maggie::pages::NavPage;
-use maggie::roster::Roster;
-use maggie::session_set::SessionSet;
-use maggie::widgets::{Button, Column, Text};
+use maggie::builder::{rpc, Button, Column, NavPage, Text};
+use maggie::data::Roster;
+use maggie::page::KeySet;
+use maggie::session::SessionSet;
 use std::ops::AddAssign;
 use std::sync::Arc;
 
@@ -87,7 +86,7 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
                     // and pushes it to the client.
                     *state_clone.counter.read(ctx)
                 )),
-                Button::new("Increment").with_action("rpc:/increment"),
+                Button::new("Increment").with_action(rpc("/increment")),
             )),
         ))
     });

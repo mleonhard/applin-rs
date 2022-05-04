@@ -1,5 +1,5 @@
-use crate::session::Session;
 use crate::session_id::SessionId;
+use crate::session_struct::Session;
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Weak};

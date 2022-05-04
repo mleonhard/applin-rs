@@ -1,40 +1,49 @@
-use crate::widgets::Widget;
-use serde_json::Value;
+#![allow(clippy::many_single_char_names)]
+use crate::widget_enum::Widget;
 
-pub struct WidgetList(pub Vec<Value>);
+/// This struct converts a tuple of widget builders (`Into<Widget>`) to a vector of widgets.
+/// It supports tuples of length 0 through 20.
+pub struct WidgetList(pub Vec<Widget>);
+
+impl From<Vec<Widget>> for WidgetList {
+    fn from(v: Vec<Widget>) -> Self {
+        Self(v)
+    }
+}
+
+// From tuples of length 0 through 20.
+impl From<()> for WidgetList {
+    fn from(_: ()) -> Self {
+        WidgetList(vec![])
+    }
+}
 impl<A: Into<Widget>> From<(A,)> for WidgetList {
     fn from((a,): (A,)) -> Self {
-        WidgetList(vec![a.into().0])
+        WidgetList(vec![a.into()])
     }
 }
 impl<A: Into<Widget>, B: Into<Widget>> From<(A, B)> for WidgetList {
     fn from((a, b): (A, B)) -> Self {
-        WidgetList(vec![a.into().0, b.into().0])
+        WidgetList(vec![a.into(), b.into()])
     }
 }
 impl<A: Into<Widget>, B: Into<Widget>, C: Into<Widget>> From<(A, B, C)> for WidgetList {
     fn from((a, b, c): (A, B, C)) -> Self {
-        WidgetList(vec![a.into().0, b.into().0, c.into().0])
+        WidgetList(vec![a.into(), b.into(), c.into()])
     }
 }
 impl<A: Into<Widget>, B: Into<Widget>, C: Into<Widget>, D: Into<Widget>> From<(A, B, C, D)>
     for WidgetList
 {
     fn from((a, b, c, d): (A, B, C, D)) -> Self {
-        WidgetList(vec![a.into().0, b.into().0, c.into().0, d.into().0])
+        WidgetList(vec![a.into(), b.into(), c.into(), d.into()])
     }
 }
 impl<A: Into<Widget>, B: Into<Widget>, C: Into<Widget>, D: Into<Widget>, E: Into<Widget>>
     From<(A, B, C, D, E)> for WidgetList
 {
     fn from((a, b, c, d, e): (A, B, C, D, E)) -> Self {
-        WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-        ])
+        WidgetList(vec![a.into(), b.into(), c.into(), d.into(), e.into()])
     }
 }
 impl<
@@ -48,12 +57,12 @@ impl<
 {
     fn from((a, b, c, d, e, f): (A, B, C, D, E, F)) -> Self {
         WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-            f.into().0,
+            a.into(),
+            b.into(),
+            c.into(),
+            d.into(),
+            e.into(),
+            f.into(),
         ])
     }
 }
@@ -69,13 +78,13 @@ impl<
 {
     fn from((a, b, c, d, e, f, g): (A, B, C, D, E, F, G)) -> Self {
         WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-            f.into().0,
-            g.into().0,
+            a.into(),
+            b.into(),
+            c.into(),
+            d.into(),
+            e.into(),
+            f.into(),
+            g.into(),
         ])
     }
 }
@@ -92,14 +101,14 @@ impl<
 {
     fn from((a, b, c, d, e, f, g, h): (A, B, C, D, E, F, G, H)) -> Self {
         WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-            f.into().0,
-            g.into().0,
-            h.into().0,
+            a.into(),
+            b.into(),
+            c.into(),
+            d.into(),
+            e.into(),
+            f.into(),
+            g.into(),
+            h.into(),
         ])
     }
 }
@@ -117,15 +126,15 @@ impl<
 {
     fn from((a, b, c, d, e, f, g, h, i): (A, B, C, D, E, F, G, H, I)) -> Self {
         WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-            f.into().0,
-            g.into().0,
-            h.into().0,
-            i.into().0,
+            a.into(),
+            b.into(),
+            c.into(),
+            d.into(),
+            e.into(),
+            f.into(),
+            g.into(),
+            h.into(),
+            i.into(),
         ])
     }
 }
@@ -144,16 +153,16 @@ impl<
 {
     fn from((a, b, c, d, e, f, g, h, i, j): (A, B, C, D, E, F, G, H, I, J)) -> Self {
         WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-            f.into().0,
-            g.into().0,
-            h.into().0,
-            i.into().0,
-            j.into().0,
+            a.into(),
+            b.into(),
+            c.into(),
+            d.into(),
+            e.into(),
+            f.into(),
+            g.into(),
+            h.into(),
+            i.into(),
+            j.into(),
         ])
     }
 }
@@ -173,17 +182,17 @@ impl<
 {
     fn from((a, b, c, d, e, f, g, h, i, j, k): (A, B, C, D, E, F, G, H, I, J, K)) -> Self {
         WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-            f.into().0,
-            g.into().0,
-            h.into().0,
-            i.into().0,
-            j.into().0,
-            k.into().0,
+            a.into(),
+            b.into(),
+            c.into(),
+            d.into(),
+            e.into(),
+            f.into(),
+            g.into(),
+            h.into(),
+            i.into(),
+            j.into(),
+            k.into(),
         ])
     }
 }
@@ -204,18 +213,18 @@ impl<
 {
     fn from((a, b, c, d, e, f, g, h, i, j, k, l): (A, B, C, D, E, F, G, H, I, J, K, L)) -> Self {
         WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-            f.into().0,
-            g.into().0,
-            h.into().0,
-            i.into().0,
-            j.into().0,
-            k.into().0,
-            l.into().0,
+            a.into(),
+            b.into(),
+            c.into(),
+            d.into(),
+            e.into(),
+            f.into(),
+            g.into(),
+            h.into(),
+            i.into(),
+            j.into(),
+            k.into(),
+            l.into(),
         ])
     }
 }
@@ -239,19 +248,19 @@ impl<
         (a, b, c, d, e, f, g, h, i, j, k, l, m): (A, B, C, D, E, F, G, H, I, J, K, L, M),
     ) -> Self {
         WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-            f.into().0,
-            g.into().0,
-            h.into().0,
-            i.into().0,
-            j.into().0,
-            k.into().0,
-            l.into().0,
-            m.into().0,
+            a.into(),
+            b.into(),
+            c.into(),
+            d.into(),
+            e.into(),
+            f.into(),
+            g.into(),
+            h.into(),
+            i.into(),
+            j.into(),
+            k.into(),
+            l.into(),
+            m.into(),
         ])
     }
 }
@@ -276,20 +285,20 @@ impl<
         (a, b, c, d, e, f, g, h, i, j, k, l, m, n): (A, B, C, D, E, F, G, H, I, J, K, L, M, N),
     ) -> Self {
         WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-            f.into().0,
-            g.into().0,
-            h.into().0,
-            i.into().0,
-            j.into().0,
-            k.into().0,
-            l.into().0,
-            m.into().0,
-            n.into().0,
+            a.into(),
+            b.into(),
+            c.into(),
+            d.into(),
+            e.into(),
+            f.into(),
+            g.into(),
+            h.into(),
+            i.into(),
+            j.into(),
+            k.into(),
+            l.into(),
+            m.into(),
+            n.into(),
         ])
     }
 }
@@ -331,21 +340,21 @@ impl<
         ),
     ) -> Self {
         WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-            f.into().0,
-            g.into().0,
-            h.into().0,
-            i.into().0,
-            j.into().0,
-            k.into().0,
-            l.into().0,
-            m.into().0,
-            n.into().0,
-            o.into().0,
+            a.into(),
+            b.into(),
+            c.into(),
+            d.into(),
+            e.into(),
+            f.into(),
+            g.into(),
+            h.into(),
+            i.into(),
+            j.into(),
+            k.into(),
+            l.into(),
+            m.into(),
+            n.into(),
+            o.into(),
         ])
     }
 }
@@ -389,22 +398,22 @@ impl<
         ),
     ) -> Self {
         WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-            f.into().0,
-            g.into().0,
-            h.into().0,
-            i.into().0,
-            j.into().0,
-            k.into().0,
-            l.into().0,
-            m.into().0,
-            n.into().0,
-            o.into().0,
-            p.into().0,
+            a.into(),
+            b.into(),
+            c.into(),
+            d.into(),
+            e.into(),
+            f.into(),
+            g.into(),
+            h.into(),
+            i.into(),
+            j.into(),
+            k.into(),
+            l.into(),
+            m.into(),
+            n.into(),
+            o.into(),
+            p.into(),
         ])
     }
 }
@@ -450,23 +459,23 @@ impl<
         ),
     ) -> Self {
         WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-            f.into().0,
-            g.into().0,
-            h.into().0,
-            i.into().0,
-            j.into().0,
-            k.into().0,
-            l.into().0,
-            m.into().0,
-            n.into().0,
-            o.into().0,
-            p.into().0,
-            q.into().0,
+            a.into(),
+            b.into(),
+            c.into(),
+            d.into(),
+            e.into(),
+            f.into(),
+            g.into(),
+            h.into(),
+            i.into(),
+            j.into(),
+            k.into(),
+            l.into(),
+            m.into(),
+            n.into(),
+            o.into(),
+            p.into(),
+            q.into(),
         ])
     }
 }
@@ -514,24 +523,24 @@ impl<
         ),
     ) -> Self {
         WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-            f.into().0,
-            g.into().0,
-            h.into().0,
-            i.into().0,
-            j.into().0,
-            k.into().0,
-            l.into().0,
-            m.into().0,
-            n.into().0,
-            o.into().0,
-            p.into().0,
-            q.into().0,
-            r.into().0,
+            a.into(),
+            b.into(),
+            c.into(),
+            d.into(),
+            e.into(),
+            f.into(),
+            g.into(),
+            h.into(),
+            i.into(),
+            j.into(),
+            k.into(),
+            l.into(),
+            m.into(),
+            n.into(),
+            o.into(),
+            p.into(),
+            q.into(),
+            r.into(),
         ])
     }
 }
@@ -581,25 +590,25 @@ impl<
         ),
     ) -> Self {
         WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-            f.into().0,
-            g.into().0,
-            h.into().0,
-            i.into().0,
-            j.into().0,
-            k.into().0,
-            l.into().0,
-            m.into().0,
-            n.into().0,
-            o.into().0,
-            p.into().0,
-            q.into().0,
-            r.into().0,
-            s.into().0,
+            a.into(),
+            b.into(),
+            c.into(),
+            d.into(),
+            e.into(),
+            f.into(),
+            g.into(),
+            h.into(),
+            i.into(),
+            j.into(),
+            k.into(),
+            l.into(),
+            m.into(),
+            n.into(),
+            o.into(),
+            p.into(),
+            q.into(),
+            r.into(),
+            s.into(),
         ])
     }
 }
@@ -651,26 +660,26 @@ impl<
         ),
     ) -> Self {
         WidgetList(vec![
-            a.into().0,
-            b.into().0,
-            c.into().0,
-            d.into().0,
-            e.into().0,
-            f.into().0,
-            g.into().0,
-            h.into().0,
-            i.into().0,
-            j.into().0,
-            k.into().0,
-            l.into().0,
-            m.into().0,
-            n.into().0,
-            o.into().0,
-            p.into().0,
-            q.into().0,
-            r.into().0,
-            s.into().0,
-            t.into().0,
+            a.into(),
+            b.into(),
+            c.into(),
+            d.into(),
+            e.into(),
+            f.into(),
+            g.into(),
+            h.into(),
+            i.into(),
+            j.into(),
+            k.into(),
+            l.into(),
+            m.into(),
+            n.into(),
+            o.into(),
+            p.into(),
+            q.into(),
+            r.into(),
+            s.into(),
+            t.into(),
         ])
     }
 }

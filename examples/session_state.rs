@@ -38,13 +38,10 @@
 
 use beatrice::reexport::{safina_executor, safina_timer};
 use beatrice::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
-use maggie::context::Context;
-use maggie::key_set::KeySet;
-use maggie::pages::NavPage;
-use maggie::random::random_u64;
-use maggie::roster::Roster;
-use maggie::session_set::SessionSet;
-use maggie::widgets::{Button, Column, Text};
+use maggie::builder::{rpc, Button, Column, NavPage, Text};
+use maggie::data::{random_u64, Context, Roster};
+use maggie::page::KeySet;
+use maggie::session::SessionSet;
 use std::error::Error;
 use std::fmt::{Debug, Formatter};
 use std::ops::AddAssign;
@@ -107,7 +104,7 @@ fn key_set(
                     // and pushes it to the client.
                     *ctx.session()?.state().count.read(ctx)
                 )),
-                Button::new("Increment").with_action("rpc:/increment"),
+                Button::new("Increment").with_action(rpc("/increment")),
             )),
         ))
     });

@@ -21,12 +21,10 @@
 
 use beatrice::reexport::{safina_executor, safina_timer};
 use beatrice::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
-use maggie::context::Context;
-use maggie::key_set::KeySet;
-use maggie::pages::NavPage;
-use maggie::roster::Roster;
-use maggie::session_set::SessionSet;
-use maggie::widgets::Text;
+use maggie::builder::{NavPage, Text};
+use maggie::data::{Context, Roster};
+use maggie::page::KeySet;
+use maggie::session::SessionSet;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -55,7 +53,7 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
                 // Get the string and subscribe to updates.
                 // Whenever the value changes, the server rebuilds this key
                 // and pushes it to the client.
-                state_clone.displayed_string.read(ctx),
+                state_clone.displayed_string.read(ctx).to_string(),
             ),
         ))
     });
@@ -92,7 +90,7 @@ pub fn main() {
         let new_string = format!("elapsed: {}", elapsed.as_secs());
         *state_clone.displayed_string.write(&Context::Empty) = new_string;
         let nanos_to_sleep = 1_000_000_000 - elapsed.as_nanos() % 1_000_000_000;
-        std::thread::sleep(Duration::from_nanos(nanos_to_sleep as u64));
+        std::thread::sleep(Duration::from_nanos(u64::try_from(nanos_to_sleep).unwrap()));
     });
     let request_handler = move |req: Request| print_log_response(&req, handle_req(&state, &req));
     executor
