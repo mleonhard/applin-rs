@@ -5,6 +5,20 @@ use serde_json::Value;
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Serialize, Ord, PartialEq, PartialOrd)]
 #[serde(tag = "typ")]
 pub enum Page {
+    #[serde(rename = "alert-modal")]
+    Alert {
+        title: String,
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        #[serde(default)]
+        widgets: Vec<Widget>,
+    },
+    #[serde(rename = "info-modal")]
+    Info {
+        title: String,
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        #[serde(default)]
+        widgets: Vec<Widget>,
+    },
     #[serde(rename = "nav-page")]
     Nav {
         title: String,
@@ -16,6 +30,8 @@ pub enum Page {
     },
     #[serde(rename = "plain-page")]
     Plain { title: String, widget: Widget },
+    #[serde(rename = "question-modal")]
+    Question { title: String, widgets: Vec<Widget> },
 }
 impl Page {
     #[must_use]

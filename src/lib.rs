@@ -100,6 +100,7 @@
 
 mod action;
 mod action_builders;
+mod alert_modal;
 mod back_button;
 mod button;
 mod column;
@@ -108,10 +109,12 @@ mod context_set;
 mod detail_cell;
 mod error;
 mod h_alignment;
+mod info_modal;
 mod key_set;
 mod nav_page;
 mod page_enum;
 mod plain_page;
+mod question_modal;
 mod random;
 mod roster;
 mod session_cookie;
@@ -150,12 +153,15 @@ pub mod page {
 
 pub mod builder {
     pub use crate::action_builders::*;
+    pub use crate::alert_modal::*;
     pub use crate::back_button::*;
     pub use crate::button::*;
     pub use crate::column::*;
     pub use crate::detail_cell::*;
+    pub use crate::info_modal::*;
     pub use crate::nav_page::*;
     pub use crate::plain_page::*;
+    pub use crate::question_modal::*;
     pub use crate::text::*;
     pub use crate::widget_builders::*;
 }
