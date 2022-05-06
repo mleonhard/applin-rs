@@ -11,8 +11,8 @@ use beatrice::{
     print_log_response, socket_addr_all_interfaces, HttpServerBuilder, Request, Response,
 };
 use maggie::builder::{
-    empty, ok_button, pop, push, rpc, BackButton, Button, Column, DetailCell, InfoModal, NavPage,
-    Text,
+    empty, ok_button, pop, push, rpc, BackButton, Button, Column, DetailCell, InfoModal, List,
+    NavPage, Text,
 };
 use maggie::data::Context;
 use maggie::page::KeySet;
@@ -45,18 +45,21 @@ fn key_set(
         "/",
         NavPage::new(
             "Maggie Demo",
-            Column::new((DetailCell::new("Back Button").with_action(push("/back-button")),)),
+            List::new()
+                .with_widgets((DetailCell::new("Back Button").with_action(push("/back-button")),)),
         ),
     );
     keys.add_static_page(
         "/back-button",
         NavPage::new(
             "Back Button",
-            Column::new((
+            List::new().with_widgets((
                 Text::new("↑ the default back button"),
                 DetailCell::new("Disabled Back Button").with_action(push("/back-button-disabled")),
                 DetailCell::new("Missing Back Button").with_action(push("/back-button-missing")),
-                DetailCell::new("RPC Back Button").with_action(push("/back-button-rpc")),
+                DetailCell::new("RPC Back Button").with_action(push("/back-button-rpc-ok")),
+                DetailCell::new("RPC Error Back Button")
+                    .with_action(push("/back-button-rpc-error")),
             )),
         ),
     );
@@ -81,14 +84,26 @@ fn key_set(
         InfoModal::new("RPC Succeeded").with_widget(ok_button()),
     );
     keys.add_static_page(
-        "/back-button-rpc",
+        "/back-button-rpc-ok",
         NavPage::new(
             "RPC Back Button",
             Column::new((Button::new("Back").with_action(pop()),)),
         )
         .with_start(
-            Button::new("Back")
+            BackButton::new()
                 .with_action(rpc("/example-method"))
+                .with_action(pop()),
+        ),
+    );
+    keys.add_static_page(
+        "/back-button-rpc-error",
+        NavPage::new(
+            "RPC Error Back Button",
+            Column::new((Button::new("Back").with_action(pop()),)),
+        )
+        .with_start(
+            BackButton::new()
+                .with_action(rpc("/nonexistent-method"))
                 .with_action(pop()),
         ),
     );

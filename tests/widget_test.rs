@@ -223,6 +223,57 @@ fn widget_empty_deserialize() {
 }
 
 #[test]
+fn widget_list_serialize() {
+    assert_eq!(
+        serde_json::to_string(&Widget::List {
+            title: None,
+            widgets: Vec::new(),
+        })
+        .unwrap(),
+        r#"{"typ":"list"}"#
+    );
+    assert_eq!(
+        serde_json::to_string(&Widget::List {
+            title: Some("title1".to_string()),
+            widgets: vec![
+                Widget::Empty,
+                Widget::Text {
+                    text: "abc".to_string()
+                }
+            ],
+        })
+        .unwrap(),
+        r#"{"typ":"list","title":"title1","widgets":[{"typ":"empty"},{"typ":"text","text":"abc"}]}"#
+    );
+}
+
+#[test]
+fn widget_list_deserialize() {
+    assert_eq!(
+        serde_json::from_str::<Widget>(r#"{"typ":"list"}"#).unwrap(),
+        Widget::List {
+            title: None,
+            widgets: Vec::new(),
+        }
+    );
+    assert_eq!(
+        serde_json::from_str::<Widget>(
+            r#"{"typ":"list","title":"title1","widgets":[{"typ":"empty"},{"typ":"text","text":"abc"}]}"#
+        )
+            .unwrap(),
+        Widget::List {
+            title: Some("title1".to_string()),
+            widgets: vec![
+                Widget::Empty,
+                Widget::Text {
+                    text: "abc".to_string()
+                }
+            ],
+        }
+    );
+}
+
+#[test]
 fn widget_text_serialize() {
     assert_eq!(
         serde_json::to_string(&Widget::Text {

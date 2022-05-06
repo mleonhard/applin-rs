@@ -40,6 +40,15 @@ pub enum Widget {
         #[serde(skip_serializing_if = "Option::is_none")]
         photo: Option<String>,
     },
+    #[serde(rename = "list")]
+    List {
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
+        title: Option<String>,
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        #[serde(default)]
+        widgets: Vec<Widget>,
+    },
     #[serde(rename = "empty")]
     Empty,
     #[serde(rename = "text")]

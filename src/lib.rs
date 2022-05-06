@@ -111,6 +111,7 @@ mod error;
 mod h_alignment;
 mod info_modal;
 mod key_set;
+mod list;
 mod nav_page;
 mod page_enum;
 mod plain_page;
@@ -159,6 +160,7 @@ pub mod builder {
     pub use crate::column::*;
     pub use crate::detail_cell::*;
     pub use crate::info_modal::*;
+    pub use crate::list::*;
     pub use crate::nav_page::*;
     pub use crate::plain_page::*;
     pub use crate::question_modal::*;
