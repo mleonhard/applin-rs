@@ -12,8 +12,6 @@ use std::error::Error;
 use std::ops::{Deref, DerefMut};
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 
-// TODO: Clean shutdown.
-
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum PendingUpdate {
     KeySet,
@@ -175,7 +173,6 @@ impl<T: 'static + Send + Sync> Session<T> {
 
     #[allow(clippy::missing_panics_doc)]
     pub fn schedule_rebuild_key_set(self: &Arc<Self>, ctx: &Context<T>) {
-        // TODO: Schedule only one worker at a time per session.
         if &Context::Rpc(self.id()) == ctx {
             self.lock_inner().rpc_updates.insert(PendingUpdate::KeySet);
             return;
@@ -183,14 +180,12 @@ impl<T: 'static + Send + Sync> Session<T> {
         let self_clone = self.clone();
         self.executor.schedule_blocking(move || {
             self_clone.build_key_set_and_send().unwrap();
-            // TODO: Disconnect on error or panic.  Also below.
             // self_clone.lock_inner().sender.disconnect();
         });
     }
 
     #[allow(clippy::missing_panics_doc)]
     pub fn schedule_rebuild_value(self: &Arc<Self>, key: impl AsRef<str>, ctx: &Context<T>) {
-        // TODO: Schedule only one worker at a time per session.
         let key = key.as_ref().to_string();
         if &Context::Rpc(self.id()) == ctx {
             self.lock_inner()

@@ -37,8 +37,9 @@ pub enum Widget {
         #[serde(skip_serializing_if = "Vec::is_empty")]
         #[serde(default)]
         actions: Vec<Action>,
+        #[serde(rename = "photo-url")]
         #[serde(skip_serializing_if = "Option::is_none")]
-        photo: Option<String>,
+        photo_url: Option<String>,
     },
     #[serde(rename = "list")]
     List {

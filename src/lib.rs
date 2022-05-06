@@ -96,6 +96,13 @@
 //! - v0.1.0 - First published version
 //!
 //! # TO DO
+//! - Clean shutdown.
+//! - `SessionSet`: Remove disconnected clients from the set after a delay.
+//! - Send keepalives.
+//! - Session: Schedule only one worker at a time per session.
+//! - Session: When not in an RPC, when building and an error or panic occurs, disconnect.
+//! - Action to refresh an image
+//! - Server to push refresh an image
 #![forbid(unsafe_code)]
 
 mod action;

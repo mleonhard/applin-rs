@@ -165,7 +165,7 @@ fn widget_detail_cell_serialize() {
         serde_json::to_string(&Widget::DetailCell {
             text: "".to_string(),
             actions: Vec::new(),
-            photo: None,
+            photo_url: None,
         })
         .unwrap(),
         r#"{"typ":"detail-cell","text":""}"#
@@ -174,10 +174,10 @@ fn widget_detail_cell_serialize() {
         serde_json::to_string(&Widget::DetailCell {
             text: "t1".to_string(),
             actions: vec![Action::Pop, Action::Logout],
-            photo: Some("/p1".to_string()),
+            photo_url: Some("/p1".to_string()),
         })
         .unwrap(),
-        r#"{"typ":"detail-cell","text":"t1","actions":["pop","logout"],"photo":"/p1"}"#
+        r#"{"typ":"detail-cell","text":"t1","actions":["pop","logout"],"photo-url":"/p1"}"#
     );
 }
 
@@ -190,18 +190,18 @@ fn widget_detail_cell_deserialize() {
         Widget::DetailCell {
             text: "".to_string(),
             actions: Vec::new(),
-            photo: None,
+            photo_url: None,
         }
     );
     assert_eq!(
         serde_json::from_str::<Widget>(
-            r#"{"typ":"detail-cell","text":"t1","actions":["pop","logout"],"photo":"/p1"}"#
+            r#"{"typ":"detail-cell","text":"t1","actions":["pop","logout"],"photo-url":"/p1"}"#
         )
         .unwrap(),
         Widget::DetailCell {
             text: "t1".to_string(),
             actions: vec![Action::Pop, Action::Logout],
-            photo: Some("/p1".to_string()),
+            photo_url: Some("/p1".to_string()),
         }
     );
 }

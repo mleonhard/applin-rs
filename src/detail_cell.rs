@@ -5,7 +5,7 @@ use crate::widget_enum::Widget;
 pub struct DetailCell {
     text: String,
     actions: Vec<Action>,
-    photo: Option<String>,
+    photo_url: Option<String>,
 }
 impl DetailCell {
     #[must_use]
@@ -13,7 +13,7 @@ impl DetailCell {
         Self {
             text: text.into(),
             actions: vec![],
-            photo: None,
+            photo_url: None,
         }
     }
 
@@ -32,8 +32,8 @@ impl DetailCell {
     }
 
     #[must_use]
-    pub fn with_photo(mut self, url: impl Into<String>) -> Self {
-        self.photo = Some(url.into());
+    pub fn with_photo_url(mut self, url: impl Into<String>) -> Self {
+        self.photo_url = Some(url.into());
         self
     }
 
@@ -42,7 +42,7 @@ impl DetailCell {
         Widget::DetailCell {
             text: self.text,
             actions: self.actions,
-            photo: self.photo,
+            photo_url: self.photo_url,
         }
     }
 }

@@ -15,8 +15,6 @@ pub fn session_not_found() -> Response {
 
 pub struct SessionSet<T> {
     pub executor: Arc<Executor>,
-    // TODO: Remove disconnected clients from the set after a delay.
-    // TODO: Send keepalives.
     pub set: Arc<RwLock<HashMap<SessionId, Arc<Session<T>>>>>,
 }
 impl<T: 'static + Send + Sync> SessionSet<T> {

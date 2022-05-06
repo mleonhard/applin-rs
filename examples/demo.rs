@@ -8,10 +8,11 @@
 
 use beatrice::reexport::{safina_executor, safina_timer};
 use beatrice::{
-    print_log_response, socket_addr_all_interfaces, HttpServerBuilder, Request, Response,
+    print_log_response, socket_addr_all_interfaces, ContentType, HttpServerBuilder, Request,
+    Response, ResponseBody,
 };
 use maggie::builder::{
-    empty, pop, push, rpc, BackButton, Button, Column, DetailCell, List, NavPage,
+    empty, nothing, pop, push, rpc, BackButton, Button, Column, DetailCell, List, NavPage, Text,
 };
 use maggie::data::Context;
 use maggie::page::{KeySet, PageKey};
@@ -100,16 +101,80 @@ fn key_set(
     _ctx: &Context<SessionState>,
 ) -> Result<KeySet<SessionState>, Box<dyn Error>> {
     let mut keys = KeySet::new();
-    let back_button = add_back_button_pages(&mut keys);
+    let back_buttons_page = add_back_button_pages(&mut keys);
+    let buttons_page = keys.add_static_page(
+        "/button",
+        NavPage::new(
+            "Button",
+            Column::new((
+                Button::new("Button").with_action(nothing()),
+                Button::new(
+                    "Button With Very Very Very Very Very Very Very Very Very Very Very Long Text",
+                )
+                .with_action(nothing()),
+                Button::new(
+                    "Mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
+                )
+                .with_action(nothing()),
+                Text::new("Button with empty label:"),
+                Button::new("").with_action(nothing()),
+                Button::new("Disabled Button"),
+                List::new().with_title("A List").with_widgets((
+                    Button::new("Button").with_action(nothing()),
+                    Button::new(
+                        "Button With Very Very Very Very Very Very Very Very Very Very Very Long Text",
+                    )
+                        .with_action(nothing()),
+                    Button::new(
+                        "Mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
+                    )
+                        .with_action(nothing()),
+                    Text::new("Button with empty label:"),
+                    Button::new("").with_action(nothing()),
+                    Button::new("Disabled Button"),
+                )),
+            )),
+        ),
+    );
+    let detail_cell_page = keys.add_static_page(
+        "/detail-cell",
+        NavPage::new(
+            "Detail Cell",
+            Column::new((
+                DetailCell::new("Detail Cell").with_action(nothing()),
+                DetailCell::new("Detail Cell with Photo").with_photo_url("/placeholder-200x200.png").with_action(nothing()),
+                DetailCell::new("Detail Cell With Very Very Very Very Very Very Very Very Very Very Very Long Text")
+                    .with_action(nothing()),
+                DetailCell::new("Mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
+                    .with_action(nothing()),
+                Text::new("Detail Cell with empty label:"),
+                DetailCell::new("").with_action(nothing()),
+                DetailCell::new("Disabled Detail Cell"),
+                List::new().with_title("A List").with_widgets((
+                    DetailCell::new("Detail Cell").with_action(nothing()),
+                    DetailCell::new("Detail Cell with Photo").with_photo_url("/placeholder-200x200.png").with_action(nothing()),
+                    DetailCell::new("Detail Cell With Very Very Very Very Very Very Very Very Very Very Very Long Text")
+                        .with_action(nothing()),
+                    DetailCell::new("Mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
+                        .with_action(nothing()),
+                    Text::new("Detail Cell with empty label:"),
+                    DetailCell::new("").with_action(nothing()),
+                    DetailCell::new("Disabled Detail Cell"),
+                )),
+            )),
+        ),
+    );
     keys.add_static_page(
         "/",
         NavPage::new(
             "Maggie Demo",
-            List::new()
-                .with_widgets((DetailCell::new("Back Button").with_action(push(back_button)),)),
+            List::new().with_widgets((
+                DetailCell::new("Back Button").with_action(push(back_buttons_page)),
+                DetailCell::new("Button").with_action(push(buttons_page)),
+                DetailCell::new("Detail Cell").with_action(push(detail_cell_page)),
+            )),
         ),
     );
-
     Ok(keys)
 }
 
@@ -133,6 +198,11 @@ fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Respo
         ("GET", "/health") => Ok(Response::text(200, "ok")),
         ("GET", "/") => connect(state, req),
         ("POST", "/example-method") => example_method(state, req),
+        ("GET", "/placeholder-200x200.png") => Ok(Response::new(200)
+            .with_type(ContentType::Png)
+            .with_body(ResponseBody::StaticBytes(include_bytes!(
+                "placeholder-200x200.png"
+            )))),
         _ => Ok(Response::text(404, "Not found")),
     }
 }

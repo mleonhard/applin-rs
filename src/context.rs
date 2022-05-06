@@ -4,7 +4,6 @@ use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Weak};
 
-// TODO: Make separate types for the kinds of contexts.
 pub enum Context<T> {
     Keys(Weak<Session<T>>),
     Value(Weak<Session<T>>, String),
@@ -60,6 +59,8 @@ impl<T> Context<T> {
         }
     }
 }
+// Deriving `Clone` requires `T: Clone`.
+// We don't want that restriction, so we implement `Clone` here.
 impl<T> Clone for Context<T> {
     fn clone(&self) -> Self {
         match self {
