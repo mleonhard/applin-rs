@@ -11,11 +11,10 @@ use beatrice::{
     print_log_response, socket_addr_all_interfaces, HttpServerBuilder, Request, Response,
 };
 use maggie::builder::{
-    empty, ok_button, pop, push, rpc, BackButton, Button, Column, DetailCell, InfoModal, List,
-    NavPage, Text,
+    empty, pop, push, rpc, BackButton, Button, Column, DetailCell, List, NavPage,
 };
 use maggie::data::Context;
-use maggie::page::KeySet;
+use maggie::page::{KeySet, PageKey};
 use maggie::session::SessionSet;
 use std::error::Error;
 use std::fmt::Debug;
@@ -35,35 +34,12 @@ impl ServerState {
     }
 }
 
-#[allow(clippy::unnecessary_wraps)]
-fn key_set(
-    _state: &Arc<ServerState>,
-    _ctx: &Context<SessionState>,
-) -> Result<KeySet<SessionState>, Box<dyn Error>> {
-    let mut keys = KeySet::new();
-    keys.add_static_page(
-        "/",
-        NavPage::new(
-            "Maggie Demo",
-            List::new()
-                .with_widgets((DetailCell::new("Back Button").with_action(push("/back-button")),)),
-        ),
+fn add_back_button_pages(keys: &mut KeySet<SessionState>) -> PageKey {
+    let back_button_default = keys.add_static_page(
+        "/back-button-default",
+        NavPage::new("Default Back Button", empty()),
     );
-    keys.add_static_page(
-        "/back-button",
-        NavPage::new(
-            "Back Button",
-            List::new().with_widgets((
-                Text::new("↑ the default back button"),
-                DetailCell::new("Disabled Back Button").with_action(push("/back-button-disabled")),
-                DetailCell::new("Missing Back Button").with_action(push("/back-button-missing")),
-                DetailCell::new("RPC Back Button").with_action(push("/back-button-rpc-ok")),
-                DetailCell::new("RPC Error Back Button")
-                    .with_action(push("/back-button-rpc-error")),
-            )),
-        ),
-    );
-    keys.add_static_page(
+    let back_button_disabled = keys.add_static_page(
         "/back-button-disabled",
         NavPage::new(
             "Disabled Back Button",
@@ -71,7 +47,7 @@ fn key_set(
         )
         .with_start(BackButton::new()),
     );
-    keys.add_static_page(
+    let back_button_missing = keys.add_static_page(
         "/back-button-missing",
         NavPage::new(
             "Missing Back Button",
@@ -79,11 +55,7 @@ fn key_set(
         )
         .with_start(empty()),
     );
-    keys.add_static_page(
-        "/rpc-succeeded-modal",
-        InfoModal::new("RPC Succeeded").with_widget(ok_button()),
-    );
-    keys.add_static_page(
+    let back_button_rpc_ok = keys.add_static_page(
         "/back-button-rpc-ok",
         NavPage::new(
             "RPC Back Button",
@@ -95,7 +67,7 @@ fn key_set(
                 .with_action(pop()),
         ),
     );
-    keys.add_static_page(
+    let back_button_rpc_error = keys.add_static_page(
         "/back-button-rpc-error",
         NavPage::new(
             "RPC Error Back Button",
@@ -107,6 +79,37 @@ fn key_set(
                 .with_action(pop()),
         ),
     );
+    keys.add_static_page(
+        "/back-button",
+        NavPage::new(
+            "Back Button",
+            List::new().with_widgets((
+                DetailCell::new("Default Back Button").with_action(push(back_button_default)),
+                DetailCell::new("Disabled Back Button").with_action(push(back_button_disabled)),
+                DetailCell::new("Missing Back Button").with_action(push(back_button_missing)),
+                DetailCell::new("RPC Back Button").with_action(push(back_button_rpc_ok)),
+                DetailCell::new("RPC Error Back Button").with_action(push(back_button_rpc_error)),
+            )),
+        ),
+    )
+}
+
+#[allow(clippy::unnecessary_wraps)]
+fn key_set(
+    _state: &Arc<ServerState>,
+    _ctx: &Context<SessionState>,
+) -> Result<KeySet<SessionState>, Box<dyn Error>> {
+    let mut keys = KeySet::new();
+    let back_button = add_back_button_pages(&mut keys);
+    keys.add_static_page(
+        "/",
+        NavPage::new(
+            "Maggie Demo",
+            List::new()
+                .with_widgets((DetailCell::new("Back Button").with_action(push(back_button)),)),
+        ),
+    );
+
     Ok(keys)
 }
 

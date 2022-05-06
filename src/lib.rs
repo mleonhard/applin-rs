@@ -114,6 +114,7 @@ mod key_set;
 mod list;
 mod nav_page;
 mod page_enum;
+mod page_key;
 mod plain_page;
 mod question_modal;
 mod random;
@@ -150,6 +151,7 @@ pub mod session {
 pub mod page {
     pub use crate::key_set::*;
     pub use crate::page_enum::*;
+    pub use crate::page_key::*;
 }
 
 pub mod builder {

@@ -1,4 +1,5 @@
 use crate::action::Action;
+use crate::page_key::PageKey;
 
 #[must_use]
 pub fn copy_to_clipboard(s: impl Into<String>) -> Action {
@@ -11,8 +12,8 @@ pub fn launch_url(s: impl Into<String>) -> Action {
 }
 
 #[must_use]
-pub fn push(page: impl Into<String>) -> Action {
-    Action::Push(page.into())
+pub fn push(page_key: PageKey) -> Action {
+    Action::Push(page_key.into_inner())
 }
 
 #[must_use]

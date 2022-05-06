@@ -53,15 +53,27 @@ fn key_set(
     ctx: &Context<SessionState>,
 ) -> Result<KeySet<SessionState>, Box<dyn Error>> {
     let mut keys = KeySet::new();
-    let state_clone = state.clone();
-    keys.add_page_fn("/", move |ctx| {
+    assert!(matches!(ctx, Context::Keys(_)));
+    // Read the value and subscribe to changes.
+    // Since `ctx` is `Context::Keys`, Maggie will rebuild all keys next time the value changes.
+    let show_page_2 = *state.show_page_2.read(ctx);
+    let opt_page_2 = if show_page_2 {
+        let page_2 = keys.add_static_page(
+            "/page_2",
+            NavPage::new("Page 2", Text::new("This is page 2.")),
+        );
+        Some(page_2)
+    } else {
+        None
+    };
+    keys.add_page_fn("/", move |_ctx| {
         Ok(NavPage::new(
             "Dynamic Page Example",
             Column::new((
                 Text::new("The page below appears and disappears every 5 seconds:"),
-                if *state_clone.show_page_2.read(ctx) {
+                if let Some(page_2) = &opt_page_2 {
                     DetailCell::new("Page 2")
-                        .with_action(push("/page_2"))
+                        .with_action(push(page_2.clone()))
                         .into()
                 } else {
                     empty()
@@ -69,12 +81,6 @@ fn key_set(
             )),
         ))
     });
-    if *state.show_page_2.read(ctx) {
-        keys.add_static_page(
-            "/page_2",
-            NavPage::new("Page 2", Text::new("This is page 2.")),
-        );
-    }
     Ok(keys)
 }
 
