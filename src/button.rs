@@ -21,6 +21,7 @@ pub fn cancel_button() -> Widget {
 pub struct Button {
     text: String,
     actions: Vec<Action>,
+    is_cancel: bool,
     is_default: bool,
     is_destructive: bool,
 }
@@ -30,9 +31,15 @@ impl Button {
         Self {
             text: text.into(),
             actions: Vec::new(),
+            is_cancel: false,
             is_default: false,
             is_destructive: false,
         }
+    }
+
+    #[must_use]
+    pub fn ok() -> Self {
+        Self::new("OK").with_is_default()
     }
 
     /// Appends `action`.
@@ -46,6 +53,12 @@ impl Button {
     #[must_use]
     pub fn with_actions(mut self, actions: impl IntoIterator<Item = Action>) -> Self {
         self.actions.extend(actions.into_iter());
+        self
+    }
+
+    #[must_use]
+    pub fn with_is_cancel(mut self) -> Self {
+        self.is_cancel = true;
         self
     }
 
@@ -66,6 +79,9 @@ impl Button {
         Widget::Button {
             text: self.text,
             actions: self.actions,
+            is_cancel: self.is_cancel,
+            is_default: self.is_default,
+            is_destructive: self.is_destructive,
         }
     }
 }

@@ -15,43 +15,57 @@ pub enum Widget {
     #[serde(rename = "button")]
     Button {
         text: String,
-        #[serde(skip_serializing_if = "Vec::is_empty")]
-        #[serde(default)]
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
         actions: Vec<Action>,
+        #[serde(default, rename = "is-cancel")]
+        #[serde(skip_serializing_if = "std::ops::Not::not")]
+        is_cancel: bool,
+        #[serde(default, rename = "is-default")]
+        #[serde(skip_serializing_if = "std::ops::Not::not")]
+        is_default: bool,
+        #[serde(default, rename = "is-destructive")]
+        #[serde(skip_serializing_if = "std::ops::Not::not")]
+        is_destructive: bool,
+    },
+    #[serde(rename = "checkbox")]
+    CheckBox {
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        actions: Vec<Action>,
+        id: String,
+        #[serde(default, rename = "initial-bool")]
+        #[serde(skip_serializing_if = "std::ops::Not::not")]
+        initial_bool: bool,
     },
     #[serde(rename = "column")]
     Column {
-        #[serde(skip_serializing_if = "Vec::is_empty")]
-        #[serde(default)]
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
         widgets: Vec<Widget>,
-        #[serde(rename = "h-alignment")]
-        #[serde(default)]
+        #[serde(default, rename = "h-alignment")]
         h_alignment: HAlignment,
-        #[serde(skip_serializing_if = "is_default")]
-        #[serde(default)]
+        #[serde(default, skip_serializing_if = "is_default")]
         spacing: u16,
     },
     #[serde(rename = "detail-cell")]
     DetailCell {
         text: String,
-        #[serde(skip_serializing_if = "Vec::is_empty")]
-        #[serde(default)]
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
         actions: Vec<Action>,
-        #[serde(rename = "photo-url")]
-        #[serde(skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "photo-url", skip_serializing_if = "Option::is_none")]
         photo_url: Option<String>,
-    },
-    #[serde(rename = "list")]
-    List {
-        #[serde(skip_serializing_if = "Option::is_none")]
-        #[serde(default)]
-        title: Option<String>,
-        #[serde(skip_serializing_if = "Vec::is_empty")]
-        #[serde(default)]
-        widgets: Vec<Widget>,
     },
     #[serde(rename = "empty")]
     Empty,
+    #[serde(rename = "horizontal-scroll")]
+    HorizontalScroll { widget: Box<Widget> },
+    #[serde(rename = "list")]
+    List {
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        title: Option<String>,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        widgets: Vec<Widget>,
+    },
+    #[serde(rename = "scroll")]
+    Scroll { widget: Box<Widget> },
     #[serde(rename = "text")]
     Text { text: String },
 }

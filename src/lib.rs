@@ -110,6 +110,7 @@ mod action_builders;
 mod alert_modal;
 mod back_button;
 mod button;
+mod checkbox;
 mod column;
 mod context;
 mod context_set;
@@ -126,6 +127,7 @@ mod plain_page;
 mod question_modal;
 mod random;
 mod roster;
+mod scroll;
 mod session_cookie;
 mod session_id;
 mod session_set;
@@ -166,6 +168,7 @@ pub mod builder {
     pub use crate::alert_modal::*;
     pub use crate::back_button::*;
     pub use crate::button::*;
+    pub use crate::checkbox::*;
     pub use crate::column::*;
     pub use crate::detail_cell::*;
     pub use crate::info_modal::*;
@@ -173,6 +176,7 @@ pub mod builder {
     pub use crate::nav_page::*;
     pub use crate::plain_page::*;
     pub use crate::question_modal::*;
+    pub use crate::scroll::*;
     pub use crate::text::*;
     pub use crate::widget_builders::*;
 }
