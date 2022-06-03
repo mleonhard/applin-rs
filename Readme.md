@@ -27,6 +27,7 @@ Complete examples: [`examples/`](examples/).
 
 Simple example:
 ```rust
+// TODO: Add this.
 ```
 # Cargo Geiger Safety Report
 ```
@@ -149,22 +150,31 @@ Functions  Expressions  Impls  Traits  Methods  Dependency
 # Alternatives
 
 - [React Native](https://reactnative.dev/)
+  <details><summary>Details</summary>
+
   - Very popular
   - iOS & Android
   - Write apps in TypeScript or JavaScript
   - Immediately deploy new versions
   - Develop on Linux, macOS, & Windows
   - Toolchain is diverse and not cohesive.
+  </details>
 - [Xcode](https://developer.apple.com/xcode/)
+  <details><summary>Details</summary>
+
   - Very popular
   - iOS
   - Write apps in Swift or Objective-C
+  - Use UIKit or SwiftUI libraries
   - Updates take multiple days to deploy.
   - Users choose when to update.
     Server must support multiple app versions or demand that users update.
   - Develop on macOS only
   - [Docs are not searchable](https://github.com/apple/swift-org-website/issues/24)
+  </details>
 - [Android Studio](https://developer.android.com/studio/)
+  <details><summary>Details</summary>
+
   - Very popular
   - Android
   - Write apps in Kotlin or Java
@@ -172,14 +182,20 @@ Functions  Expressions  Impls  Traits  Methods  Dependency
   - Users choose when to update.
     Server must support multiple app versions or demand that users update.
   - Develop on Linux, macOS, Windows, & Chrome OS
+  </details>
 - [Xamarin](https://dotnet.microsoft.com/en-us/apps/xamarin)
+  <details><summary>Details</summary>
+
   - iOS & Android
   - Write apps in C# and other .Net language
   - Updates take multiple days to deploy.
   - Users choose when to update.
     Server must support multiple app versions or demand that users update.
   - Develop on Linux, macOS, & Windows
+  </details>
 - [Flutter](https://flutter.dev/)
+  <details><summary>Details</summary>
+
   - iOS & Android
   - Web version has unusable performance
   - Write apps in async Dart
@@ -203,11 +219,30 @@ Functions  Expressions  Impls  Traits  Methods  Dependency
     - [Integration test support is broken & deprecated](https://github.com/flutter/flutter/issues?q=is%3Aissue+author%3Amleonhard+integration+test+).
     - Camera & photo module has a [show-stopping bug](https://github.com/flutter/flutter/issues/70751), ignored for 3 years
     - [No high-quality location module](https://github.com/flutter/flutter/issues/31453)
-    - Debugger lacks async support
+    - Debugger lacks async support, cannot display tasks or task info
     - [UI inspection tools are buggy](https://github.com/flutter/flutter-intellij/issues/4426), not fixed in 3 years
     - When your Dart code times out waiting for an HTTP request,
       [the request continues in the background](https://github.com/dart-lang/http/issues/424),
       wasting mobile device CPU & RAM, data transfer, battery, and server resources.
+  </details>
+- [Jasonelle](https://jasonelle.com)
+  - Define app UI with JSON and JavaScript.
+  - Incomplete documentation
+- [Hyperview](https://github.com/instawork/hyperview)
+  - Server-driven mobile apps
+  - Define app UI in XML
+  - iOS & Android (via ReactNative)
+- [DocUI](https://nexusdev.tools)
+- [Ionic](https://ionicframework.com)
+  - Write app in HTML, CSS, and JavaScript.
+- [Adaptive Cards](https://adaptivecards.io)
+  - Libraries for rendering simple JSON UIs on iOS, Android, and Windows.
+  - From Microsoft
+
+Companies using server-driven UI for popular apps:
+- [A Deep Dive into Airbnb’s Server-Driven UI System](https://medium.com/airbnb-engineering/a-deep-dive-into-airbnbs-server-driven-ui-system-842244c5f5)
+- [How we built Facebook Lite for every Android phone and network](https://engineering.fb.com/2016/03/09/android/how-we-built-facebook-lite-for-every-android-phone-and-network/)
+- [Facebook Lite: Building for 2G Connections and Typical Devices (Video)](https://www.facebook.com/watch/?v=10153625275313553)
 
 # Changelog
 - v0.1.0 - First published version
