@@ -1,12 +1,12 @@
 [package]
 authors = ["Michael Leonhard <michael@leonhardllc.com>"]
-description = "Maggie remote UI server"
+description = "Graphical application server with iOS and Android clients"
 categories = ["gui", "network-programming"]
 edition = "2021"
 keywords = ["mobile", "ui", "reactnative", "flutter"]
 license = "MIT OR Apache-2.0"
-name = "maggie"
-repository = "https://github.com/mleonhard/maggie-rs"
+name = "applin"
+repository = "https://github.com/mleonhard/applin"
 version = "0.1.0"
 
 [dependencies]

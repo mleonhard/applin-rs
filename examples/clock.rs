@@ -3,8 +3,8 @@
 //!
 //! Start the server:
 //! ```
-//! $ cargo run --package maggie --example clock
-//! Access the app with a Maggie client at http://127.0.0.1:8000/
+//! $ cargo run --package applin --example clock
+//! Access the app with an Applin client at http://127.0.0.1:8000/
 //! INFO GET / => 200 streamed
 //! ```
 //!
@@ -19,10 +19,10 @@
 //! ```
 #![forbid(unsafe_code)]
 
-use maggie::builder::{NavPage, Text};
-use maggie::data::{Context, Roster};
-use maggie::page::KeySet;
-use maggie::session::SessionSet;
+use applin::builder::{NavPage, Text};
+use applin::data::{Context, Roster};
+use applin::page::KeySet;
+use applin::session::SessionSet;
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
 use std::sync::Arc;
@@ -79,7 +79,7 @@ fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Respo
 }
 
 pub fn main() {
-    println!("Access the app with a Maggie client at http://127.0.0.1:8000/");
+    println!("Access the app with an Applin client at http://127.0.0.1:8000/");
     safina_timer::start_timer_thread();
     let executor = safina_executor::Executor::default();
     let state = Arc::new(ServerState::new(&executor));

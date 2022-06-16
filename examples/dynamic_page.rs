@@ -3,7 +3,7 @@
 //!
 //! Start the server:
 //! ```
-//! $ cargo run --package maggie --example dynamic_page
+//! $ cargo run --package applin --example dynamic_page
 //! Access the app at http://127.0.0.1:8000/
 //! INFO GET / => 200 streamed
 //! ```
@@ -20,10 +20,10 @@
 //! ```
 #![forbid(unsafe_code)]
 
-use maggie::builder::{empty, push, Column, DetailCell, NavPage, Text};
-use maggie::data::{Context, Roster};
-use maggie::page::KeySet;
-use maggie::session::SessionSet;
+use applin::builder::{empty, push, Column, DetailCell, NavPage, Text};
+use applin::data::{Context, Roster};
+use applin::page::KeySet;
+use applin::session::SessionSet;
 use servlin::reexport::permit::Permit;
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
@@ -55,7 +55,7 @@ fn key_set(
     let mut keys = KeySet::new();
     assert!(matches!(ctx, Context::Keys(_)));
     // Read the value and subscribe to changes.
-    // Since `ctx` is `Context::Keys`, Maggie will rebuild all keys next time the value changes.
+    // Since `ctx` is `Context::Keys`, Applin will rebuild all keys next time the value changes.
     let show_page_2 = *state.show_page_2.read(ctx);
     let opt_page_2 = if show_page_2 {
         let page_2 = keys.add_static_page(

@@ -1,4 +1,4 @@
-use maggie::widget::Action;
+use applin::widget::Action;
 use serde_json::Value;
 
 #[test]

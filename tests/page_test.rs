@@ -1,5 +1,5 @@
-use maggie::page::Page;
-use maggie::widget::Widget;
+use applin::page::Page;
+use applin::widget::Widget;
 use serde_json::{json, Value};
 
 #[test]

@@ -1,15 +1,15 @@
-Maggie
+Applin
 ======
-[![crates.io version](https://img.shields.io/crates/v/maggie.svg)](https://crates.io/crates/maggie)
-[![license: Apache 2.0](https://raw.githubusercontent.com/mleonhard/maggie-rs/main/license-apache-2.0.svg)](http://www.apache.org/licenses/LICENSE-2.0)
-[![unsafe forbidden](https://raw.githubusercontent.com/mleonhard/maggie-rs/main/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/)
-[![pipeline status](https://github.com/mleonhard/maggie-rs/workflows/CI/badge.svg)](https://github.com/mleonhard/maggie-rs/actions)
+[![crates.io version](https://img.shields.io/crates/v/applin.svg)](https://crates.io/crates/applin)
+[![license: Apache 2.0](https://raw.githubusercontent.com/mleonhard/applin-rs/main/license-apache-2.0.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+[![unsafe forbidden](https://raw.githubusercontent.com/mleonhard/applin-rs/main/unsafe-forbidden-success.svg)](https://github.com/rust-secure-code/safety-dance/)
+[![pipeline status](https://github.com/mleonhard/applin-rs/workflows/CI/badge.svg)](https://github.com/mleonhard/applin-rs/actions)
 
 An app server library in Rust.
 
-Use a Maggie client to access the app:
-- `maggie-ios`
-- `maggie-android`
+Use an Applin client to access the app:
+- [applin-ios](https://github.com/mleonhard/applin-ios)
+- [applin-android](https://github.com/mleonhard/applin-android)
 
 # Features
 - `forbid(unsafe_code)`
@@ -43,7 +43,7 @@ Symbols:
 
 Functions  Expressions  Impls  Traits  Methods  Dependency
 
-0/0        0/0          0/0    0/0     0/0      🔒  maggie 0.1.0
+0/0        0/0          0/0    0/0     0/0      🔒  applin 0.1.0
 0/0        7/20         0/0    0/0     0/0      ☢️  ├── nanorand 0.7.0
 1/1        74/93        4/6    0/0     2/3      ☢️  ├── once_cell 1.10.0
 0/0        5/5          0/0    0/0     0/0      ☢️  ├── serde 1.0.136

@@ -1,17 +1,17 @@
-//! Maggie Demo
+//! Applin Demo
 //! =================
 //! Start the server with:
-//! `cargo run --package maggie --example demo`
+//! `cargo run --package applin --example demo`
 //!
-//! Then connect to it with a Maggie client.
+//! Then connect to it with an Applin client.
 #![forbid(unsafe_code)]
 
-use maggie::builder::{
+use applin::builder::{
     empty, nothing, pop, push, rpc, BackButton, Button, Column, DetailCell, List, NavPage, Text,
 };
-use maggie::data::Context;
-use maggie::page::{KeySet, PageKey};
-use maggie::session::SessionSet;
+use applin::data::Context;
+use applin::page::{KeySet, PageKey};
+use applin::session::SessionSet;
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{
     print_log_response, socket_addr_all_interfaces, ContentType, HttpServerBuilder, Request,
@@ -167,7 +167,7 @@ fn key_set(
     keys.add_static_page(
         "/",
         NavPage::new(
-            "Maggie Demo",
+            "Applin Demo",
             List::new().with_widgets((
                 DetailCell::new("Back Button").with_action(push(back_buttons_page)),
                 DetailCell::new("Button").with_action(push(buttons_page)),
@@ -208,7 +208,7 @@ fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Respo
 }
 
 pub fn main() {
-    println!("Access the app with a Maggie client at http://127.0.0.1:8000/");
+    println!("Access the app with an Applin client at http://127.0.0.1:8000/");
     safina_timer::start_timer_thread();
     let executor = safina_executor::Executor::default();
     let state = Arc::new(ServerState::new(&executor));

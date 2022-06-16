@@ -1,4 +1,4 @@
-use maggie::widget::{Action, HAlignment, Widget};
+use applin::widget::{Action, HAlignment, Widget};
 use serde_json::{json, Value};
 
 #[test]

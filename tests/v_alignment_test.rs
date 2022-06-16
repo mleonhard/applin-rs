@@ -1,4 +1,4 @@
-use maggie::widget::VAlignment;
+use applin::widget::VAlignment;
 use serde_json::Value;
 
 #[test]
