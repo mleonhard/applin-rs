@@ -1,9 +1,9 @@
 use crate::error::client_error;
 use crate::random::random_u64;
 use crate::session_id::SessionId;
-use beatrice::internal::escape_and_elide;
-use beatrice::{AsciiString, Cookie, Request, Response};
 use core::fmt::{Debug, Formatter};
+use servlin::internal::escape_and_elide;
+use servlin::{AsciiString, Cookie, Request, Response};
 use std::hash::{Hash, Hasher};
 use std::str::FromStr;
 

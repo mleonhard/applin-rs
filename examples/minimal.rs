@@ -28,12 +28,12 @@
 //! ```
 #![forbid(unsafe_code)]
 
-use beatrice::reexport::{safina_executor, safina_timer};
-use beatrice::{socket_addr_127_0_0_1, HttpServerBuilder, Request};
 use maggie::builder::{PlainPage, Text};
 use maggie::data::Context;
 use maggie::page::KeySet;
 use maggie::session::SessionSet;
+use servlin::reexport::{safina_executor, safina_timer};
+use servlin::{socket_addr_127_0_0_1, HttpServerBuilder, Request};
 use std::sync::Arc;
 
 pub fn main() {

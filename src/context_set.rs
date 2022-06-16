@@ -1,8 +1,8 @@
 use crate::context::Context;
-use beatrice::reexport::safina_executor::Executor;
-use beatrice::reexport::safina_timer;
 use core::sync::atomic::{AtomicBool, Ordering};
 use core::time::Duration;
+use servlin::reexport::safina_executor::Executor;
+use servlin::reexport::safina_timer;
 use std::collections::HashSet;
 use std::sync::{Arc, PoisonError, RwLock, RwLockReadGuard, RwLockWriteGuard};
 

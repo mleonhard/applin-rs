@@ -6,17 +6,17 @@
 //! Then connect to it with a Maggie client.
 #![forbid(unsafe_code)]
 
-use beatrice::reexport::{safina_executor, safina_timer};
-use beatrice::{
-    print_log_response, socket_addr_all_interfaces, ContentType, HttpServerBuilder, Request,
-    Response, ResponseBody,
-};
 use maggie::builder::{
     empty, nothing, pop, push, rpc, BackButton, Button, Column, DetailCell, List, NavPage, Text,
 };
 use maggie::data::Context;
 use maggie::page::{KeySet, PageKey};
 use maggie::session::SessionSet;
+use servlin::reexport::{safina_executor, safina_timer};
+use servlin::{
+    print_log_response, socket_addr_all_interfaces, ContentType, HttpServerBuilder, Request,
+    Response, ResponseBody,
+};
 use std::error::Error;
 use std::fmt::Debug;
 use std::sync::Arc;
@@ -111,11 +111,11 @@ fn key_set(
                 Button::new(
                     "Button With Very Very Very Very Very Very Very Very Very Very Very Long Text",
                 )
-                .with_action(nothing()),
+                    .with_action(nothing()),
                 Button::new(
                     "Mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
                 )
-                .with_action(nothing()),
+                    .with_action(nothing()),
                 Text::new("Button with empty label:"),
                 Button::new("").with_action(nothing()),
                 Button::new("Disabled Button"),

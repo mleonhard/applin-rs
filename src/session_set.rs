@@ -3,8 +3,8 @@ use crate::key_set::KeySet;
 use crate::session_cookie::SessionCookie;
 use crate::session_id::SessionId;
 use crate::session_struct::Session;
-use beatrice::reexport::safina_executor::Executor;
-use beatrice::{Request, Response};
+use servlin::reexport::safina_executor::Executor;
+use servlin::{Request, Response};
 use std::collections::HashMap;
 use std::sync::{Arc, PoisonError, RwLock, RwLockReadGuard, RwLockWriteGuard};
 

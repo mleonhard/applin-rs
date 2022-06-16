@@ -36,12 +36,12 @@
 //! ```
 #![forbid(unsafe_code)]
 
-use beatrice::reexport::{safina_executor, safina_timer};
-use beatrice::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
 use maggie::builder::{rpc, Button, Column, NavPage, Text};
 use maggie::data::{random_u64, Context, Roster};
 use maggie::page::KeySet;
 use maggie::session::SessionSet;
+use servlin::reexport::{safina_executor, safina_timer};
+use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
 use std::error::Error;
 use std::fmt::{Debug, Formatter};
 use std::ops::AddAssign;

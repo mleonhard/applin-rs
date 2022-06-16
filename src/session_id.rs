@@ -1,7 +1,7 @@
 use crate::random::random_u64;
-use beatrice::internal::escape_and_elide;
 use core::fmt::{Debug, Formatter};
 use serde::{Deserialize, Serialize};
+use servlin::internal::escape_and_elide;
 use std::str::FromStr;
 
 #[derive(Clone, Copy, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]

@@ -1,5 +1,5 @@
-use beatrice::Response;
 use serde_json::json;
+use servlin::Response;
 
 #[allow(clippy::needless_pass_by_value)]
 #[allow(clippy::module_name_repetitions)]

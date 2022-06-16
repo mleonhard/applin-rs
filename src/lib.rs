@@ -14,7 +14,7 @@
 //! # Features
 //! - `forbid(unsafe_code)`
 //! - Define your app's UI and RPCs in threaded Rust.
-//! - Uses [`beatrice`](https://github.com/mleonhard/beatrice-rs)
+//! - Uses [`servlin`](https://crates.io/crates/servlin)
 //!   http server for good performance under load. - TODO: Make a benchmark.
 //! - No macros or complicated type params
 //! - Good test coverage (??%) - TODO: Update.
@@ -48,7 +48,7 @@
 //!   - Very popular
 //!   - iOS
 //!   - Write apps in Swift or Objective-C
-//!   - Use UIKit or SwiftUI libraries
+//!   - Use `UIKit` or `SwiftUI` libraries
 //!   - Updates take multiple days to deploy.
 //!   - Users choose when to update.
 //!     Server must support multiple app versions or demand that users update.
@@ -114,8 +114,8 @@
 //! - [Hyperview](https://github.com/instawork/hyperview)
 //!   - Server-driven mobile apps
 //!   - Define app UI in XML
-//!   - iOS & Android (via ReactNative)
-//! - [DocUI](https://nexusdev.tools)
+//!   - iOS & Android (via `ReactNative`)
+//! - [`DocUI`](https://nexusdev.tools)
 //! - [Ionic](https://ionicframework.com)
 //!   - Write app in HTML, CSS, and JavaScript.
 //! - [Adaptive Cards](https://adaptivecards.io)

@@ -19,12 +19,12 @@
 //! ```
 #![forbid(unsafe_code)]
 
-use beatrice::reexport::{safina_executor, safina_timer};
-use beatrice::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
 use maggie::builder::{NavPage, Text};
 use maggie::data::{Context, Roster};
 use maggie::page::KeySet;
 use maggie::session::SessionSet;
+use servlin::reexport::{safina_executor, safina_timer};
+use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
