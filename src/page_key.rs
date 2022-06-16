@@ -4,8 +4,8 @@ use std::ops::Deref;
 pub struct PageKey(String);
 impl PageKey {
     #[must_use]
-    pub fn new(value: String) -> Self {
-        Self(value)
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
     }
 
     #[must_use]

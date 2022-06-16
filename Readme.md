@@ -165,7 +165,7 @@ Functions  Expressions  Impls  Traits  Methods  Dependency
   - Very popular
   - iOS
   - Write apps in Swift or Objective-C
-  - Use UIKit or SwiftUI libraries
+  - Use `UIKit` or `SwiftUI` libraries
   - Updates take multiple days to deploy.
   - Users choose when to update.
     Server must support multiple app versions or demand that users update.
@@ -231,8 +231,8 @@ Functions  Expressions  Impls  Traits  Methods  Dependency
 - [Hyperview](https://github.com/instawork/hyperview)
   - Server-driven mobile apps
   - Define app UI in XML
-  - iOS & Android (via ReactNative)
-- [DocUI](https://nexusdev.tools)
+  - iOS & Android (via `ReactNative`)
+- [`DocUI`](https://nexusdev.tools)
 - [Ionic](https://ionicframework.com)
   - Write app in HTML, CSS, and JavaScript.
 - [Adaptive Cards](https://adaptivecards.io)

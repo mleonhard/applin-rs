@@ -69,6 +69,9 @@ fn widget_button_serialize() {
         serde_json::to_string(&Widget::Button {
             text: "".to_string(),
             actions: Vec::new(),
+            is_cancel: false,
+            is_default: false,
+            is_destructive: false
         })
         .unwrap(),
         r#"{"typ":"button","text":""}"#
@@ -77,6 +80,9 @@ fn widget_button_serialize() {
         serde_json::to_string(&Widget::Button {
             text: "abc".to_string(),
             actions: vec![Action::Pop, Action::Logout],
+            is_cancel: false,
+            is_default: false,
+            is_destructive: false
         })
         .unwrap(),
         r#"{"typ":"button","text":"abc","actions":["pop","logout"]}"#
@@ -90,6 +96,9 @@ fn widget_button_deserialize() {
         Widget::Button {
             text: "".to_string(),
             actions: Vec::new(),
+            is_cancel: false,
+            is_default: false,
+            is_destructive: false
         }
     );
     assert_eq!(
@@ -100,6 +109,9 @@ fn widget_button_deserialize() {
         Widget::Button {
             text: "abc".to_string(),
             actions: vec![Action::Pop, Action::Logout],
+            is_cancel: false,
+            is_default: false,
+            is_destructive: false
         }
     );
 }
