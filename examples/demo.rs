@@ -152,11 +152,11 @@ fn add_alert_page(drawer: &PageKey, keys: &mut KeySet<SessionState>) -> PageKey 
                 .with_action(nothing()),
             ModalButton::cancel(),
             ModalButton::new(
-                "Button With Very Very Very Very Very Very Very Very Very Very Very Long Text",
+                "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
             )
             .with_action(nothing()),
             ModalButton::new(
-                "Mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
+                "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
             )
             .with_action(nothing()),
             ModalButton::new("Disabled Button"),
@@ -176,11 +176,11 @@ fn add_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
             Form::new((
                 Button::new("Button").with_action(push(&pressed)),
                 Button::new(
-                    "Very Very Very Very Very Very Very Very Very Very Very Very Very Long Label",
+                    "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
                 )
                 .with_action(push(&pressed)),
                 Button::new(
-                    "Mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
+                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
                 )
                 .with_action(push(&pressed)),
                 Text::new("Button with empty label:"),
@@ -197,7 +197,7 @@ fn add_form_detail_page(keys: &mut KeySet<SessionState>) -> PageKey {
         "/form-detail-pressed",
         NavPage::new("Form Detail Pressed", Empty::new()),
     );
-    // TODO: File bug about rust-fmt's failure to format this function call.
+    // NOTE: If rust-fmt refuses to format this, try making all lines shorter, under the limit.
     keys.add_static_page(
         "/form-detail",
         NavPage::new(
@@ -214,10 +214,14 @@ fn add_form_detail_page(keys: &mut KeySet<SessionState>) -> PageKey {
                     .with_sub_text("with sub-text")
                     .with_photo_url("/placeholder-200x200.png")
                     .with_action(push(&pressed)),
-                FormDetail::new("Form Detail With Very Very Very Very Very Very Very Very Very Very Very Long Text")
-                    .with_action(push(&pressed)),
-                FormDetail::new("Mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
-                    .with_action(push(&pressed)),
+                FormDetail::new(
+                    "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                )
+                .with_action(push(&pressed)),
+                FormDetail::new(
+                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                )
+                .with_action(push(&pressed)),
                 Text::new("Form Detail with empty label:"),
                 FormDetail::new("").with_action(push(&pressed)),
                 FormDetail::new("Disabled Form Detail"),
@@ -236,8 +240,8 @@ fn add_form_text_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 Text::new("text1"),
                 Text::new("Empty text:"),
                 Text::new(""),
-                Text::new("Very Very Very Very Very Very Very Very Very Very Very Very Very Very Very Very Very Very Long Text"),
-                Text::new("Mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm"),
+                Text::new("MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM"),
+                Text::new("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"),
             )),
         ),
     )
@@ -256,10 +260,14 @@ fn add_form_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 FormButton::new("Button1").with_action(push(&pressed)),
                 Text::new("Button with empty label:"),
                 FormButton::new("").with_action(push(&pressed)),
-                FormButton::new("Very Very Very Very Very Very Very Very Very Very Very Very Very Very Very Very Very Very Long Text")
-                    .with_action(push(&pressed)),
-                FormButton::new("Mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
-                    .with_action(push(&pressed)),
+                FormButton::new(
+                    "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                )
+                .with_action(push(&pressed)),
+                FormButton::new(
+                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                )
+                .with_action(push(&pressed)),
                 FormButton::new("Disabled"),
                 FormButton::new("Does Nothing").with_action(nothing()),
             )),
