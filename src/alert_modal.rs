@@ -1,3 +1,4 @@
+use crate::builder::ModalButton;
 use crate::page_enum::Page;
 use crate::widget_enum::Widget;
 use crate::widget_list::WidgetList;
@@ -16,6 +17,12 @@ impl AlertModal {
             title: title.into(),
             widgets: Vec::new(),
         }
+    }
+
+    #[must_use]
+    pub fn with_ok(mut self) -> Self {
+        self.widgets.push(ModalButton::ok());
+        self
     }
 
     #[must_use]
