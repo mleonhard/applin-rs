@@ -69,9 +69,6 @@ fn widget_button_serialize() {
         serde_json::to_string(&Widget::Button {
             text: "".to_string(),
             actions: Vec::new(),
-            is_cancel: false,
-            is_default: false,
-            is_destructive: false
         })
         .unwrap(),
         r#"{"typ":"button","text":""}"#
@@ -80,9 +77,6 @@ fn widget_button_serialize() {
         serde_json::to_string(&Widget::Button {
             text: "abc".to_string(),
             actions: vec![Action::Pop, Action::Logout],
-            is_cancel: false,
-            is_default: false,
-            is_destructive: false
         })
         .unwrap(),
         r#"{"typ":"button","text":"abc","actions":["pop","logout"]}"#
@@ -96,9 +90,6 @@ fn widget_button_deserialize() {
         Widget::Button {
             text: "".to_string(),
             actions: Vec::new(),
-            is_cancel: false,
-            is_default: false,
-            is_destructive: false
         }
     );
     assert_eq!(
@@ -109,9 +100,6 @@ fn widget_button_deserialize() {
         Widget::Button {
             text: "abc".to_string(),
             actions: vec![Action::Pop, Action::Logout],
-            is_cancel: false,
-            is_default: false,
-            is_destructive: false
         }
     );
 }
@@ -139,7 +127,7 @@ fn widget_column_serialize() {
             spacing: 5
         })
         .unwrap(),
-        r#"{"typ":"column","widgets":[{"typ":"empty"},{"typ":"text","text":"abc"}],"h-alignment":"center","spacing":5}"#
+        r#"{"typ":"column","h-alignment":"center","spacing":5,"widgets":[{"typ":"empty"},{"typ":"text","text":"abc"}]}"#
     );
 }
 
@@ -172,53 +160,6 @@ fn widget_column_deserialize() {
 }
 
 #[test]
-fn widget_detail_cell_serialize() {
-    assert_eq!(
-        serde_json::to_string(&Widget::DetailCell {
-            text: "".to_string(),
-            actions: Vec::new(),
-            photo_url: None,
-        })
-        .unwrap(),
-        r#"{"typ":"detail-cell","text":""}"#
-    );
-    assert_eq!(
-        serde_json::to_string(&Widget::DetailCell {
-            text: "t1".to_string(),
-            actions: vec![Action::Pop, Action::Logout],
-            photo_url: Some("/p1".to_string()),
-        })
-        .unwrap(),
-        r#"{"typ":"detail-cell","text":"t1","actions":["pop","logout"],"photo-url":"/p1"}"#
-    );
-}
-
-#[test]
-fn widget_detail_cell_deserialize() {
-    serde_json::from_str::<Widget>(r#"{"typ":"detail-cell"}"#)
-        .expect_err("detail-cell requires `text`");
-    assert_eq!(
-        serde_json::from_str::<Widget>(r#"{"typ":"detail-cell","text":""}"#).unwrap(),
-        Widget::DetailCell {
-            text: "".to_string(),
-            actions: Vec::new(),
-            photo_url: None,
-        }
-    );
-    assert_eq!(
-        serde_json::from_str::<Widget>(
-            r#"{"typ":"detail-cell","text":"t1","actions":["pop","logout"],"photo-url":"/p1"}"#
-        )
-        .unwrap(),
-        Widget::DetailCell {
-            text: "t1".to_string(),
-            actions: vec![Action::Pop, Action::Logout],
-            photo_url: Some("/p1".to_string()),
-        }
-    );
-}
-
-#[test]
 fn widget_empty_serialize() {
     assert_eq!(
         serde_json::to_string(&Widget::Empty).unwrap(),
@@ -235,17 +176,68 @@ fn widget_empty_deserialize() {
 }
 
 #[test]
-fn widget_list_serialize() {
+fn widget_form_detail_serialize() {
     assert_eq!(
-        serde_json::to_string(&Widget::List {
+        serde_json::to_string(&Widget::FormDetail {
+            actions: Vec::new(),
+            photo_url: None,
+            sub_text: None,
+            text: "".to_string(),
+        })
+        .unwrap(),
+        r#"{"typ":"form-detail","text":""}"#
+    );
+    assert_eq!(
+        serde_json::to_string(&Widget::FormDetail {
+            actions: vec![Action::Pop, Action::Logout],
+            photo_url: Some("/p1".to_string()),
+            sub_text: Some("s1".to_string()),
+            text: "t1".to_string(),
+        })
+        .unwrap(),
+        r#"{"typ":"form-detail","text":"t1","sub-text":"s1","photo-url":"/p1","actions":["pop","logout"]}"#
+    );
+}
+
+#[test]
+fn widget_form_detail_deserialize() {
+    serde_json::from_str::<Widget>(r#"{"typ":"form-detail"}"#)
+        .expect_err("form-detail requires `text`");
+    assert_eq!(
+        serde_json::from_str::<Widget>(r#"{"typ":"form-detail","text":""}"#).unwrap(),
+        Widget::FormDetail {
+            actions: Vec::new(),
+            photo_url: None,
+            sub_text: None,
+            text: "".to_string(),
+        }
+    );
+    assert_eq!(
+        serde_json::from_str::<Widget>(
+            r#"{"typ":"form-detail","actions":["pop","logout"],"photo-url":"/p1","sub-text":"s1","text":"t1"}"#
+        )
+        .unwrap(),
+        Widget::FormDetail {
+            actions: vec![Action::Pop, Action::Logout],
+            photo_url: Some("/p1".to_string()),
+            sub_text: Some("s1".to_string()),
+            text: "t1".to_string(),
+        }
+    );
+}
+
+#[test]
+fn widget_form_section_serialize() {
+    assert_eq!(
+        serde_json::to_string(&Widget::FormSection {
             title: None,
             widgets: Vec::new(),
         })
         .unwrap(),
-        r#"{"typ":"list"}"#
+        r#"{"typ":"form-section"}"#
     );
     assert_eq!(
-        serde_json::to_string(&Widget::List {
+        serde_json::to_string(&Widget::FormSection {
             title: Some("title1".to_string()),
             widgets: vec![
                 Widget::Empty,
@@ -255,25 +247,25 @@ fn widget_list_serialize() {
             ],
         })
         .unwrap(),
-        r#"{"typ":"list","title":"title1","widgets":[{"typ":"empty"},{"typ":"text","text":"abc"}]}"#
+        r#"{"typ":"form-section","title":"title1","widgets":[{"typ":"empty"},{"typ":"text","text":"abc"}]}"#
     );
 }
 
 #[test]
-fn widget_list_deserialize() {
+fn widget_form_section_deserialize() {
     assert_eq!(
-        serde_json::from_str::<Widget>(r#"{"typ":"list"}"#).unwrap(),
-        Widget::List {
+        serde_json::from_str::<Widget>(r#"{"typ":"form-section"}"#).unwrap(),
+        Widget::FormSection {
             title: None,
             widgets: Vec::new(),
         }
     );
     assert_eq!(
         serde_json::from_str::<Widget>(
-            r#"{"typ":"list","title":"title1","widgets":[{"typ":"empty"},{"typ":"text","text":"abc"}]}"#
+            r#"{"typ":"form-section","title":"title1","widgets":[{"typ":"empty"},{"typ":"text","text":"abc"}]}"#
         )
             .unwrap(),
-        Widget::List {
+        Widget::FormSection {
             title: Some("title1".to_string()),
             widgets: vec![
                 Widget::Empty,
@@ -281,6 +273,59 @@ fn widget_list_deserialize() {
                     text: "abc".to_string()
                 }
             ],
+        }
+    );
+}
+
+#[test]
+fn widget_modal_button_serialize() {
+    assert_eq!(
+        serde_json::to_string(&Widget::ModalButton {
+            text: "".to_string(),
+            actions: Vec::new(),
+            is_cancel: false,
+            is_default: false,
+            is_destructive: false
+        })
+        .unwrap(),
+        r#"{"typ":"modal-button","text":""}"#
+    );
+    assert_eq!(
+        serde_json::to_string(&Widget::ModalButton {
+            text: "abc".to_string(),
+            actions: vec![Action::Pop, Action::Logout],
+            is_cancel: false,
+            is_default: false,
+            is_destructive: false
+        })
+        .unwrap(),
+        r#"{"typ":"modal-button","text":"abc","actions":["pop","logout"]}"#
+    );
+}
+
+#[test]
+fn widget_modal_button_deserialize() {
+    assert_eq!(
+        serde_json::from_str::<Widget>(r#"{"typ":"modal-button","text":""}"#).unwrap(),
+        Widget::ModalButton {
+            text: "".to_string(),
+            actions: Vec::new(),
+            is_cancel: false,
+            is_default: false,
+            is_destructive: false
+        }
+    );
+    assert_eq!(
+        serde_json::from_str::<Widget>(
+            r#"{"typ":"modal-button","text":"abc","actions":["pop","logout"]}"#
+        )
+        .unwrap(),
+        Widget::ModalButton {
+            text: "abc".to_string(),
+            actions: vec![Action::Pop, Action::Logout],
+            is_cancel: false,
+            is_default: false,
+            is_destructive: false
         }
     );
 }

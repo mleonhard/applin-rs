@@ -149,17 +149,21 @@ mod checkbox;
 mod column;
 mod context;
 mod context_set;
-mod detail_cell;
+mod drawer_modal;
+mod empty;
 mod error;
+mod error_details;
+mod form;
+mod form_button;
+mod form_detail;
+mod form_section;
 mod h_alignment;
-mod info_modal;
 mod key_set;
-mod list;
+mod modal_button;
 mod nav_page;
 mod page_enum;
 mod page_key;
 mod plain_page;
-mod question_modal;
 mod random;
 mod roster;
 mod scroll;
@@ -169,7 +173,6 @@ mod session_set;
 mod session_struct;
 mod text;
 mod v_alignment;
-mod widget_builders;
 mod widget_enum;
 mod widget_list;
 
@@ -205,15 +208,18 @@ pub mod builder {
     pub use crate::button::*;
     pub use crate::checkbox::*;
     pub use crate::column::*;
-    pub use crate::detail_cell::*;
-    pub use crate::info_modal::*;
-    pub use crate::list::*;
+    pub use crate::drawer_modal::*;
+    pub use crate::empty::*;
+    pub use crate::error_details::*;
+    pub use crate::form::*;
+    pub use crate::form_button::*;
+    pub use crate::form_detail::*;
+    pub use crate::form_section::*;
+    pub use crate::modal_button::*;
     pub use crate::nav_page::*;
     pub use crate::plain_page::*;
-    pub use crate::question_modal::*;
     pub use crate::scroll::*;
     pub use crate::text::*;
-    pub use crate::widget_builders::*;
 }
 
 pub mod widget {

@@ -2,18 +2,18 @@ use crate::action::Action;
 use crate::widget_enum::Widget;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct DetailCell {
-    text: String,
+pub struct FormButton {
     actions: Vec<Action>,
-    photo_url: Option<String>,
+    is_destructive: bool,
+    text: String,
 }
-impl DetailCell {
+impl FormButton {
     #[must_use]
     pub fn new(text: impl Into<String>) -> Self {
         Self {
+            actions: Vec::new(),
+            is_destructive: false,
             text: text.into(),
-            actions: vec![],
-            photo_url: None,
         }
     }
 
@@ -32,22 +32,22 @@ impl DetailCell {
     }
 
     #[must_use]
-    pub fn with_photo_url(mut self, url: impl Into<String>) -> Self {
-        self.photo_url = Some(url.into());
+    pub fn with_is_destructive(mut self) -> Self {
+        self.is_destructive = true;
         self
     }
 
     #[must_use]
-    pub fn into_widget(self) -> Widget {
-        Widget::DetailCell {
-            text: self.text,
+    pub fn to_widget(self) -> Widget {
+        Widget::FormButton {
             actions: self.actions,
-            photo_url: self.photo_url,
+            is_destructive: self.is_destructive,
+            text: self.text,
         }
     }
 }
-impl From<DetailCell> for Widget {
-    fn from(src: DetailCell) -> Self {
-        src.into_widget()
+impl From<FormButton> for Widget {
+    fn from(src: FormButton) -> Self {
+        src.to_widget()
     }
 }

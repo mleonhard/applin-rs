@@ -1,3 +1,4 @@
+use crate::builder::BackButton;
 use crate::page_enum::Page;
 use crate::widget_enum::Widget;
 
@@ -26,8 +27,8 @@ impl NavPage {
     }
 
     #[must_use]
-    pub fn with_start(mut self, widget: impl Into<Widget>) -> Self {
-        self.start = Some(widget.into());
+    pub fn with_start(mut self, back_button: BackButton) -> Self {
+        self.start = Some(back_button.into());
         self
     }
 

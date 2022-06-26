@@ -1,20 +1,27 @@
+use crate::page_enum::Page;
 use crate::widget_enum::Widget;
 use crate::widget_list::WidgetList;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct List {
-    title: Option<String>,
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct DrawerModal {
+    text: Option<String>,
+    title: String,
     widgets: Vec<Widget>,
 }
-impl List {
-    /// Makes a new `list` empty widget with no title.
+impl DrawerModal {
     #[must_use]
-    #[allow(clippy::new_without_default)]
-    pub fn new() -> Self {
+    pub fn new(title: impl Into<String>) -> Self {
         Self {
-            title: None,
+            text: None,
+            title: title.into(),
             widgets: Vec::new(),
         }
+    }
+
+    #[must_use]
+    pub fn with_text(mut self, text: impl Into<String>) -> Self {
+        self.text = Some(text.into());
+        self
     }
 
     /// Appends `widget`.
@@ -32,21 +39,16 @@ impl List {
     }
 
     #[must_use]
-    pub fn with_title(mut self, title: impl Into<String>) -> Self {
-        self.title = Some(title.into());
-        self
-    }
-
-    #[must_use]
-    pub fn into_widget(self) -> Widget {
-        Widget::List {
+    pub fn to_page(self) -> Page {
+        Page::Drawer {
+            text: self.text,
             title: self.title,
             widgets: self.widgets,
         }
     }
 }
-impl From<List> for Widget {
-    fn from(src: List) -> Self {
-        src.into_widget()
+impl From<DrawerModal> for Page {
+    fn from(src: DrawerModal) -> Self {
+        src.to_page()
     }
 }

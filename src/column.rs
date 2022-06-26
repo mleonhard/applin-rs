@@ -4,9 +4,9 @@ use crate::widget_list::WidgetList;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Column {
-    widgets: Vec<Widget>,
     h_alignment: HAlignment,
     spacing: u16,
+    widgets: Vec<Widget>,
 }
 impl Column {
     /// Makes a `column` widget with horizontal alignment `start` and spacing `0`.
@@ -14,10 +14,22 @@ impl Column {
     #[allow(clippy::new_without_default)]
     pub fn new(widgets: impl Into<WidgetList>) -> Self {
         Self {
-            widgets: widgets.into().0,
             h_alignment: HAlignment::Start,
             spacing: 0,
+            widgets: widgets.into().0,
         }
+    }
+
+    #[must_use]
+    pub fn with_alignment(mut self, h_alignment: HAlignment) -> Self {
+        self.h_alignment = h_alignment;
+        self
+    }
+
+    #[must_use]
+    pub fn with_spacing(mut self, spacing: u16) -> Self {
+        self.spacing = spacing;
+        self
     }
 
     /// Appends `widget`.
@@ -35,17 +47,11 @@ impl Column {
     }
 
     #[must_use]
-    pub fn with_spacing(mut self, spacing: u16) -> Self {
-        self.spacing = spacing;
-        self
-    }
-
-    #[must_use]
     pub fn into_widget(self) -> Widget {
         Widget::Column {
-            widgets: self.widgets,
             h_alignment: self.h_alignment,
             spacing: self.spacing,
+            widgets: self.widgets,
         }
     }
 }

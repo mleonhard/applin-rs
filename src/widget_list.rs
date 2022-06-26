@@ -11,6 +11,12 @@ impl From<Vec<Widget>> for WidgetList {
     }
 }
 
+impl<A: Into<Widget>> From<A> for WidgetList {
+    fn from(a: A) -> Self {
+        WidgetList(vec![a.into()])
+    }
+}
+
 // From tuples of length 0 through 20.
 impl From<()> for WidgetList {
     fn from(_: ()) -> Self {

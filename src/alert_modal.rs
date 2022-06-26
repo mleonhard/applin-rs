@@ -4,6 +4,7 @@ use crate::widget_list::WidgetList;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AlertModal {
+    text: Option<String>,
     title: String,
     widgets: Vec<Widget>,
 }
@@ -11,9 +12,16 @@ impl AlertModal {
     #[must_use]
     pub fn new(title: impl Into<String>) -> Self {
         Self {
+            text: None,
             title: title.into(),
             widgets: Vec::new(),
         }
+    }
+
+    #[must_use]
+    pub fn with_text(mut self, text: impl Into<String>) -> Self {
+        self.text = Some(text.into());
+        self
     }
 
     /// Appends `widget`.
@@ -33,6 +41,7 @@ impl AlertModal {
     #[must_use]
     pub fn to_page(self) -> Page {
         Page::Alert {
+            text: self.text,
             title: self.title,
             widgets: self.widgets,
         }

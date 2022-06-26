@@ -1,19 +1,26 @@
-use crate::page_enum::Page;
 use crate::widget_enum::Widget;
 use crate::widget_list::WidgetList;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct InfoModal {
-    title: String,
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct FormSection {
+    title: Option<String>,
     widgets: Vec<Widget>,
 }
-impl InfoModal {
+impl FormSection {
+    /// Makes a `form-section` widget.
     #[must_use]
-    pub fn new(title: impl Into<String>) -> Self {
+    #[allow(clippy::new_without_default)]
+    pub fn new() -> Self {
         Self {
-            title: title.into(),
+            title: None,
             widgets: Vec::new(),
         }
+    }
+
+    #[must_use]
+    pub fn with_title(mut self, title: impl Into<String>) -> Self {
+        self.title = Some(title.into());
+        self
     }
 
     /// Appends `widget`.
@@ -31,15 +38,15 @@ impl InfoModal {
     }
 
     #[must_use]
-    pub fn to_page(self) -> Page {
-        Page::Info {
+    pub fn into_widget(self) -> Widget {
+        Widget::FormSection {
             title: self.title,
             widgets: self.widgets,
         }
     }
 }
-impl From<InfoModal> for Page {
-    fn from(src: InfoModal) -> Self {
-        src.to_page()
+impl From<FormSection> for Widget {
+    fn from(src: FormSection) -> Self {
+        src.into_widget()
     }
 }

@@ -1,18 +1,17 @@
-use crate::page_enum::Page;
 use crate::widget_enum::Widget;
 use crate::widget_list::WidgetList;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct QuestionModal {
-    title: String,
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct Form {
     widgets: Vec<Widget>,
 }
-impl QuestionModal {
+impl Form {
+    /// Makes a `form` widget.
     #[must_use]
-    pub fn new(title: impl Into<String>) -> Self {
+    #[allow(clippy::new_without_default)]
+    pub fn new(widgets: impl Into<WidgetList>) -> Self {
         Self {
-            title: title.into(),
-            widgets: Vec::new(),
+            widgets: widgets.into().0,
         }
     }
 
@@ -31,15 +30,14 @@ impl QuestionModal {
     }
 
     #[must_use]
-    pub fn to_page(self) -> Page {
-        Page::Question {
-            title: self.title,
+    pub fn into_widget(self) -> Widget {
+        Widget::Form {
             widgets: self.widgets,
         }
     }
 }
-impl From<QuestionModal> for Page {
-    fn from(src: QuestionModal) -> Self {
-        src.to_page()
+impl From<Form> for Widget {
+    fn from(src: Form) -> Self {
+        src.into_widget()
     }
 }

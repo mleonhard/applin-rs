@@ -2,19 +2,24 @@ use crate::widget_enum::Widget;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Serialize, Ord, PartialEq, PartialOrd)]
 #[serde(tag = "typ")]
 pub enum Page {
     #[serde(rename = "alert-modal")]
     Alert {
         title: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        text: Option<String>,
         #[serde(skip_serializing_if = "Vec::is_empty")]
         #[serde(default)]
         widgets: Vec<Widget>,
     },
-    #[serde(rename = "info-modal")]
-    Info {
+    #[serde(rename = "drawer-modal")]
+    Drawer {
         title: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        text: Option<String>,
         #[serde(skip_serializing_if = "Vec::is_empty")]
         #[serde(default)]
         widgets: Vec<Widget>,
@@ -30,8 +35,6 @@ pub enum Page {
     },
     #[serde(rename = "plain-page")]
     Plain { title: String, widget: Widget },
-    #[serde(rename = "question-modal")]
-    Question { title: String, widgets: Vec<Widget> },
 }
 impl Page {
     #[must_use]

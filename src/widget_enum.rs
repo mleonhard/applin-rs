@@ -17,52 +17,74 @@ pub enum Widget {
         text: String,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         actions: Vec<Action>,
-        #[serde(default, rename = "is-cancel")]
-        #[serde(skip_serializing_if = "std::ops::Not::not")]
-        is_cancel: bool,
-        #[serde(default, rename = "is-default")]
-        #[serde(skip_serializing_if = "std::ops::Not::not")]
-        is_default: bool,
-        #[serde(default, rename = "is-destructive")]
-        #[serde(skip_serializing_if = "std::ops::Not::not")]
-        is_destructive: bool,
     },
     #[serde(rename = "checkbox")]
     CheckBox {
+        id: String,
+        #[serde(rename = "initial-bool")]
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        initial_bool: bool,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         actions: Vec<Action>,
-        id: String,
-        #[serde(default, rename = "initial-bool")]
-        #[serde(skip_serializing_if = "std::ops::Not::not")]
-        initial_bool: bool,
     },
     #[serde(rename = "column")]
     Column {
-        #[serde(default, skip_serializing_if = "Vec::is_empty")]
-        widgets: Vec<Widget>,
         #[serde(default, rename = "h-alignment")]
         h_alignment: HAlignment,
         #[serde(default, skip_serializing_if = "is_default")]
         spacing: u16,
-    },
-    #[serde(rename = "detail-cell")]
-    DetailCell {
-        text: String,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
-        actions: Vec<Action>,
-        #[serde(rename = "photo-url", skip_serializing_if = "Option::is_none")]
-        photo_url: Option<String>,
+        widgets: Vec<Widget>,
     },
     #[serde(rename = "empty")]
     Empty,
-    #[serde(rename = "horizontal-scroll")]
-    HorizontalScroll { widget: Box<Widget> },
-    #[serde(rename = "list")]
-    List {
+    #[serde(rename = "error-details")]
+    ErrorDetails,
+    #[serde(rename = "form")]
+    Form {
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        widgets: Vec<Widget>,
+    },
+    #[serde(rename = "form-button")]
+    FormButton {
+        text: String,
+        #[serde(rename = "is-destructive")]
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        is_destructive: bool,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        actions: Vec<Action>,
+    },
+    #[serde(rename = "form-detail")]
+    FormDetail {
+        text: String,
+        #[serde(rename = "sub-text", skip_serializing_if = "Option::is_none")]
+        sub_text: Option<String>,
+        #[serde(rename = "photo-url", skip_serializing_if = "Option::is_none")]
+        photo_url: Option<String>,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        actions: Vec<Action>,
+    },
+    #[serde(rename = "form-section")]
+    FormSection {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         title: Option<String>,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         widgets: Vec<Widget>,
+    },
+    #[serde(rename = "modal-button")]
+    ModalButton {
+        text: String,
+        #[serde(rename = "is-cancel")]
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        is_cancel: bool,
+        #[serde(rename = "is-default")]
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        is_default: bool,
+        #[serde(rename = "is-destructive")]
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        is_destructive: bool,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        actions: Vec<Action>,
     },
     #[serde(rename = "scroll")]
     Scroll { widget: Box<Widget> },

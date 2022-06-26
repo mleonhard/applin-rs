@@ -14,7 +14,7 @@ Use an Applin client to access the app:
 # Features
 - `forbid(unsafe_code)`
 - Define your app's UI and RPCs in threaded Rust.
-- Uses [`servlin`](https://crates.io/crates/servlin)
+- Uses [Servlin](https://crates.io/crates/servlin)
   http server for good performance under load. - TODO: Make a benchmark.
 - No macros or complicated type params
 - Good test coverage (??%) - TODO: Update.

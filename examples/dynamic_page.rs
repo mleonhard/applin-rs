@@ -20,7 +20,7 @@
 //! ```
 #![forbid(unsafe_code)]
 
-use applin::builder::{empty, push, Column, DetailCell, NavPage, Text};
+use applin::builder::{empty, push, Column, FormDetail, NavPage, Text};
 use applin::data::{Context, Roster};
 use applin::page::KeySet;
 use applin::session::SessionSet;
@@ -72,7 +72,7 @@ fn key_set(
             Column::new((
                 Text::new("The page below appears and disappears every 5 seconds:"),
                 if let Some(page_2) = &opt_page_2 {
-                    DetailCell::new("Page 2")
+                    FormDetail::new("Page 2")
                         .with_action(push(page_2.clone()))
                         .into()
                 } else {
