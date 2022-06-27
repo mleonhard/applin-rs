@@ -47,7 +47,7 @@ impl Column {
     }
 
     #[must_use]
-    pub fn into_widget(self) -> Widget {
+    pub fn to_widget(self) -> Widget {
         Widget::Column {
             h_alignment: self.h_alignment,
             spacing: self.spacing,
@@ -57,6 +57,6 @@ impl Column {
 }
 impl From<Column> for Widget {
     fn from(src: Column) -> Self {
-        src.into_widget()
+        src.to_widget()
     }
 }

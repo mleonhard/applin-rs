@@ -5,33 +5,25 @@
 //! ```
 //! $ cargo run --package applin --example session_state
 //! Access the app with an Applin client at http://127.0.0.1:8000/
-//! INFO GET / => 200 streamed
-//! INFO POST /increment => 200 len=204
-//! INFO POST /increment => 200 len=204
+//! INFO GET / => 200 len=226
+//! INFO POST /increment => 200 len=226
+//! INFO POST /increment => 200 len=226
 //! ```
 //!
 //! Connect to it, get the session cookie, and call the `/increment` RPC a few times.
 //! ```
-//! $ curl -v http://127.0.0.1:8000/
-//! *   Trying 127.0.0.1...
-//! * TCP_NODELAY set
-//! * Connected to 127.0.0.1 (127.0.0.1) port 8000 (#0)
-//! > GET / HTTP/1.1
-//! > Host: 127.0.0.1:8000
-//! > User-Agent: curl/7.64.1
-//! > Accept: */*
-//! >
-//! < HTTP/1.1 200 OK
-//! < content-type: text/event-stream
-//! < transfer-encoding: chunked
-//! < set-cookie: session=2623053141802024565-240601519532896979; HttpOnly; Max-Age=2592000; SameSite=Strict; Secure
-//! <
-//! data: {"pages":{"/":{"title":"Session State Example","typ":"nav-page","widget":{"typ":"column","widgets":[{"text":"Counter: 0","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
-//! ^C
+//! $ curl --include http://127.0.0.1:8000/
+//! HTTP/1.1 200 OK
+//! content-type: application/json; charset=UTF-8
+//! content-length: 226
+//! cache-control: no-store
+//! set-cookie: session=2623053141802024565-240601519532896979; HttpOnly; Max-Age=2592000; SameSite=Strict
+//!
+//! {"pages":{"/":{"title":"Session State Example","typ":"nav-page","widget":{"h-alignment":"start","typ":"column","widgets":[{"text":"Counter: 0","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
 //! $ curl -X POST http://127.0.0.1:8000/increment --data '' --cookie session=2623053141802024565-240601519532896979
-//! {"pages":{"/":{"title":"Session State Example","typ":"nav-page","widget":{"typ":"column","widgets":[{"text":"Counter: 1","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
+//! {"pages":{"/":{"title":"Session State Example","typ":"nav-page","widget":{"h-alignment":"start","typ":"column","widgets":[{"text":"Counter: 1","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
 //! $ curl -X POST http://127.0.0.1:8000/increment --data '' --cookie session=2623053141802024565-240601519532896979
-//! {"pages":{"/":{"title":"Session State Example","typ":"nav-page","widget":{"typ":"column","widgets":[{"text":"Counter: 2","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
+//! {"pages":{"/":{"title":"Session State Example","typ":"nav-page","widget":{"h-alignment":"start","typ":"column","widgets":[{"text":"Counter: 2","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
 //! $
 //! ```
 #![forbid(unsafe_code)]
@@ -39,7 +31,7 @@
 use applin::builder::{rpc, Button, Column, NavPage, Text};
 use applin::data::{random_u64, Context, Roster};
 use applin::page::KeySet;
-use applin::session::SessionSet;
+use applin::session::{Session, SessionSet};
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
 use std::error::Error;
@@ -111,14 +103,16 @@ fn key_set(
     Ok(keys)
 }
 
-fn connect(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
+fn get_or_new_session(
+    state: &Arc<ServerState>,
+    req: &Request,
+) -> Result<Arc<Session<SessionState>>, Response> {
     let state_clone = state.clone();
-    let (_session, response) = state.sessions.resume_or_new(
+    state.sessions.get_or_new(
         req,
         move |ctx| key_set(&state_clone, ctx),
         || SessionState::new(UserId::new_random()),
-    )?;
-    Ok(response)
+    )
 }
 
 fn increment(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
@@ -134,7 +128,8 @@ fn increment(state: &Arc<ServerState>, req: &Request) -> Result<Response, Respon
 fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     match (req.method(), req.url().path()) {
         ("GET", "/health") => Ok(Response::text(200, "ok")),
-        ("GET", "/") => connect(state, req),
+        ("GET", "/") => get_or_new_session(state, req)?.poll(),
+        ("GET", "/stream") => get_or_new_session(state, req)?.stream(),
         ("POST", "/increment") => increment(state, req),
         _ => Ok(Response::text(404, "Not found")),
     }

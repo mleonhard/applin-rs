@@ -30,7 +30,7 @@ impl Form {
     }
 
     #[must_use]
-    pub fn into_widget(self) -> Widget {
+    pub fn to_widget(self) -> Widget {
         Widget::Form {
             widgets: self.widgets,
         }
@@ -38,6 +38,6 @@ impl Form {
 }
 impl From<Form> for Widget {
     fn from(src: Form) -> Self {
-        src.into_widget()
+        src.to_widget()
     }
 }

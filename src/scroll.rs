@@ -14,7 +14,7 @@ impl Scroll {
     }
 
     #[must_use]
-    pub fn into_widget(self) -> Widget {
+    pub fn to_widget(self) -> Widget {
         Widget::Scroll {
             widget: Box::new(self.widget),
         }
@@ -22,6 +22,6 @@ impl Scroll {
 }
 impl From<Scroll> for Widget {
     fn from(src: Scroll) -> Self {
-        src.into_widget()
+        src.to_widget()
     }
 }

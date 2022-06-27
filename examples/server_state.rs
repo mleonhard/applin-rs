@@ -5,44 +5,40 @@
 //! ```
 //! $ cargo run --package applin --example server_state
 //! Access the app with an Applin client at http://127.0.0.1:8000/
-//! INFO GET / => 200 streamed
-//! INFO GET / => 200 streamed
-//! INFO POST /increment => 200 len=203
-//! INFO POST /increment => 200 len=203
+//! Access the app with an Applin client at http://127.0.0.1:8000/
+//! INFO GET / => 200 len=239
+//! INFO GET /stream => 200 streamed
+//! INFO GET / => 200 len=239
+//! INFO POST /increment => 200 len=239
+//! INFO POST /increment => 200 len=239
 //! ```
 //!
 //! Connect one client:
 //! ```
 //! $ curl http://127.0.0.1:8000/
-//! data: {"pages":{"/":{"title":"Server State Example","typ":"nav-page","widget":{"typ":"column","widgets":[{"text":"Counter: 0","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
-//! data: {"pages":{"/":{"title":"Server State Example","typ":"nav-page","widget":{"typ":"column","widgets":[{"text":"Counter: 1","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
-//! data: {"pages":{"/":{"title":"Server State Example","typ":"nav-page","widget":{"typ":"column","widgets":[{"text":"Counter: 2","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
+//! {"pages":{"/":{"stream":true,"title":"Server State Example","typ":"nav-page","widget":{"h-alignment":"start","typ":"column","widgets":[{"text":"Counter: 0","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
+//! $ curl http://127.0.0.1:8000/stream
+//! data: {"pages":{"/":{"stream":true,"title":"Server State Example","typ":"nav-page","widget":{"h-alignment":"start","typ":"column","widgets":[{"text":"Counter: 0","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
+//! data: {"pages":{"/":{"stream":true,"title":"Server State Example","typ":"nav-page","widget":{"h-alignment":"start","typ":"column","widgets":[{"text":"Counter: 1","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
+//! data: {"pages":{"/":{"stream":true,"title":"Server State Example","typ":"nav-page","widget":{"h-alignment":"start","typ":"column","widgets":[{"text":"Counter: 2","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
 //! ^C
 //! ```
 //!
-//! Connect another client and press CTRL-C.  Then call the `/increment` RPC twice.
+//! Connect another client and call the `/increment` RPC twice.
 //! The first client will immediately receive updates.
 //! ```
-//! $ curl -v http://127.0.0.1:8000/
-//! *   Trying 127.0.0.1...
-//! * TCP_NODELAY set
-//! * Connected to 127.0.0.1 (127.0.0.1) port 8000 (#0)
-//! > GET / HTTP/1.1
-//! > Host: 127.0.0.1:8000
-//! > User-Agent: curl/7.64.1
-//! > Accept: */*
-//! >
-//! < HTTP/1.1 200 OK
-//! < content-type: text/event-stream
-//! < transfer-encoding: chunked
-//! < set-cookie: session=10710489863702200797-4063056143104496287; HttpOnly; Max-Age=2592000; SameSite=Strict; Secure
-//! <
-//! data: {"pages":{"/":{"title":"Server State Example","typ":"nav-page","widget":{"typ":"column","widgets":[{"text":"Counter: 0","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
-//! ^C
+//! $ curl --include http://127.0.0.1:8000/
+//! HTTP/1.1 200 OK
+//! content-type: application/json; charset=UTF-8
+//! content-length: 239
+//! cache-control: no-store
+//! set-cookie: session=10710489863702200797-4063056143104496287; HttpOnly; Max-Age=2592000; SameSite=Strict
+//!
+//! {"pages":{"/":{"stream":true,"title":"Server State Example","typ":"nav-page","widget":{"h-alignment":"start","typ":"column","widgets":[{"text":"Counter: 0","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
 //! $ curl http://127.0.0.1:8000/increment -X POST -d '' --cookie session=10710489863702200797-4063056143104496287
-//! {"pages":{"/":{"title":"Server State Example","typ":"nav-page","widget":{"typ":"column","widgets":[{"text":"Counter: 1","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
+//! {"pages":{"/":{"stream":true,"title":"Server State Example","typ":"nav-page","widget":{"h-alignment":"start","typ":"column","widgets":[{"text":"Counter: 1","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
 //! $ curl http://127.0.0.1:8000/increment -X POST -d '' --cookie session=10710489863702200797-4063056143104496287
-//! {"pages":{"/":{"title":"Server State Example","typ":"nav-page","widget":{"typ":"column","widgets":[{"text":"Counter: 2","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
+//! {"pages":{"/":{"stream":true,"title":"Server State Example","typ":"nav-page","widget":{"h-alignment":"start","typ":"column","widgets":[{"text":"Counter: 2","typ":"text"},{"actions":["rpc:/increment"],"text":"Increment","typ":"button"}]}}}}
 //! $
 //! ```
 //!
@@ -51,7 +47,7 @@
 use applin::builder::{rpc, Button, Column, NavPage, Text};
 use applin::data::Roster;
 use applin::page::KeySet;
-use applin::session::SessionSet;
+use applin::session::{Session, SessionSet};
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
 use std::ops::AddAssign;
@@ -88,20 +84,22 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
                 )),
                 Button::new("Increment").with_action(rpc("/increment")),
             )),
-        ))
+        )
+        .with_stream())
     });
     keys
 }
 
-fn connect(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
+fn get_or_new_session(
+    state: &Arc<ServerState>,
+    req: &Request,
+) -> Result<Arc<Session<SessionState>>, Response> {
     let state_clone = state.clone();
-    let (_session, response) = state.sessions.resume_or_new(
+    state.sessions.get_or_new(
         req,
         move |_ctx| Ok(key_set(&state_clone)),
         || SessionState {},
-    )?;
-    //dbg!(&response);
-    Ok(response)
+    )
 }
 
 fn increment(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
@@ -114,7 +112,8 @@ fn increment(state: &Arc<ServerState>, req: &Request) -> Result<Response, Respon
 fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     match (req.method(), req.url().path()) {
         ("GET", "/health") => Ok(Response::text(200, "ok")),
-        ("GET", "/") => connect(state, req),
+        ("GET", "/") => get_or_new_session(state, req)?.poll(),
+        ("GET", "/stream") => get_or_new_session(state, req)?.stream(),
         ("POST", "/increment") => increment(state, req),
         _ => Ok(Response::text(404, "Not found")),
     }

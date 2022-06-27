@@ -8,11 +8,11 @@
 
 use applin::builder::{
     nothing, pop, push, rpc, AlertModal, BackButton, Button, Column, DrawerModal, Empty, Form,
-    FormButton, FormDetail, FormSection, ModalButton, NavPage, PlainPage, Text,
+    FormButton, FormDetail, FormSection, ModalButton, NavPage, Text,
 };
 use applin::data::{Context, Roster};
 use applin::page::{KeySet, PageKey};
-use applin::session::SessionSet;
+use applin::session::{Session, SessionSet};
 use core::fmt::Debug;
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{
@@ -46,7 +46,7 @@ impl ServerState {
     }
 }
 
-static RPC1_PATH: &'static str = "/rpc1";
+static RPC1_PATH: &str = "/rpc1";
 
 fn rpc1(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     let session = state.sessions.get(req)?;
@@ -126,7 +126,8 @@ fn add_clock_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) -> 
                 // Checkbox::new("clock-check0"),
                 // Text::new("Hello"),
             )),
-        ))
+        )
+        .with_stream())
     })
 }
 
@@ -146,7 +147,7 @@ fn add_alert_page(drawer: &PageKey, keys: &mut KeySet<SessionState>) -> PageKey 
     keys.add_static_page(
         "/alert",
         AlertModal::new("Title1").with_widgets((
-            ModalButton::new("Drawer Modal").with_action(push(&drawer)),
+            ModalButton::new("Drawer Modal").with_action(push(drawer)),
             ModalButton::new("Destructive Button")
                 .with_is_destructive()
                 .with_action(nothing()),
@@ -235,7 +236,7 @@ fn add_form_text_page(keys: &mut KeySet<SessionState>) -> PageKey {
     keys.add_static_page(
         "/form-text",
         NavPage::new(
-            "Form Detail",
+            "Form Text",
             Form::new((
                 Text::new("text1"),
                 Text::new("Empty text:"),
@@ -313,10 +314,10 @@ fn key_set(
     let form_section_page = add_form_section_page(&mut keys);
     keys.add_static_page(
         "/",
-        PlainPage::new(
+        NavPage::new(
             "Applin Demo",
             Form::new((
-                Button::new("Clock Page").with_action(push(&clock_page)),
+                FormDetail::new("Clock Page").with_action(push(&clock_page)),
                 FormDetail::new("Alert Modal").with_action(push(&alert_modal)),
                 FormDetail::new("Drawer Modal").with_action(push(&drawer_modal)),
                 FormDetail::new("Back Button").with_action(push(&back_buttons_page)),
@@ -326,25 +327,29 @@ fn key_set(
                 FormDetail::new("Form Button").with_action(push(&form_button_page)),
                 FormDetail::new("Form Section").with_action(push(&form_section_page)),
             )),
-        ),
+        )
+        .with_poll(10),
     );
     Ok(keys)
 }
 
-fn connect(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
+fn get_or_new_session(
+    state: &Arc<ServerState>,
+    req: &Request,
+) -> Result<Arc<Session<SessionState>>, Response> {
     let state_clone = state.clone();
-    let (_session, response) = state.sessions.resume_or_new(
+    state.sessions.get_or_new(
         req,
         move |ctx| key_set(&state_clone, ctx),
         || SessionState {},
-    )?;
-    Ok(response)
+    )
 }
 
 fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     match (req.method(), req.url().path()) {
         ("GET", "/health") => Ok(Response::text(200, "ok")),
-        ("GET", "/") => connect(state, req),
+        ("GET", "/") => get_or_new_session(state, req)?.poll(),
+        ("GET", "/stream") => get_or_new_session(state, req)?.stream(),
         ("POST", path) if path == RPC1_PATH => rpc1(state, req),
         ("GET", "/placeholder-200x200.png") => Ok(Response::new(200)
             .with_type(ContentType::Png)

@@ -46,7 +46,7 @@ impl FormDetail {
     }
 
     #[must_use]
-    pub fn into_widget(self) -> Widget {
+    pub fn to_widget(self) -> Widget {
         Widget::FormDetail {
             actions: self.actions,
             photo_url: self.photo_url,
@@ -57,6 +57,6 @@ impl FormDetail {
 }
 impl From<FormDetail> for Widget {
     fn from(src: FormDetail) -> Self {
-        src.into_widget()
+        src.to_widget()
     }
 }

@@ -6,6 +6,8 @@ use serde_json::{json, Value};
 fn page_to_value() {
     assert_eq!(
         Page::Plain {
+            poll_seconds: 0,
+            stream: false,
             title: "T1".to_string(),
             widget: Widget::Empty
         }
@@ -17,6 +19,8 @@ fn page_to_value() {
 #[test]
 fn value_from_page() {
     let value: Value = Page::Plain {
+        poll_seconds: 0,
+        stream: false,
         title: "T1".to_string(),
         widget: Widget::Empty,
     }
@@ -39,29 +43,33 @@ fn page_default() {
 fn page_nav_serialize() {
     assert_eq!(
         serde_json::to_string(&Page::Nav {
+            end: None,
+            poll_seconds: 0,
+            start: None,
+            stream: false,
             title: "".to_string(),
             widget: Widget::Empty,
-            start: None,
-            end: None,
         })
         .unwrap(),
         r#"{"typ":"nav-page","title":"","widget":{"typ":"empty"}}"#
     );
     assert_eq!(
         serde_json::to_string(&Page::Nav {
+            end: Some(Widget::Text {
+                text: "e1".to_string()
+            }),
+            poll_seconds: 0,
+            start: Some(Widget::Text {
+                text: "s1".to_string()
+            }),
+            stream: false,
             title: "T1".to_string(),
             widget: Widget::Text {
                 text: "w1".to_string()
             },
-            start: Some(Widget::Text {
-                text: "s1".to_string()
-            }),
-            end: Some(Widget::Text {
-                text: "e1".to_string()
-            }),
         })
         .unwrap(),
-        r#"{"typ":"nav-page","title":"T1","widget":{"typ":"text","text":"w1"},"start":{"typ":"text","text":"s1"},"end":{"typ":"text","text":"e1"}}"#
+        r#"{"typ":"nav-page","end":{"typ":"text","text":"e1"},"start":{"typ":"text","text":"s1"},"title":"T1","widget":{"typ":"text","text":"w1"}}"#
     );
 }
 
@@ -75,10 +83,12 @@ fn page_nav_deserialize() {
         serde_json::from_str::<Page>(r#"{"typ":"nav-page","title":"","widget":{"typ":"empty"}}"#)
             .unwrap(),
         Page::Nav {
+            end: None,
+            poll_seconds: 0,
+            start: None,
+            stream: false,
             title: "".to_string(),
             widget: Widget::Empty,
-            start: None,
-            end: None,
         }
     );
     assert_eq!(
@@ -86,16 +96,18 @@ fn page_nav_deserialize() {
             r#"{"typ":"nav-page","title":"T1","widget":{"typ":"text","text":"w1"},"start":{"typ":"text","text":"s1"},"end":{"typ":"text","text":"e1"}}"#
         ).unwrap(),
         Page::Nav {
+            end: Some(Widget::Text {
+                text: "e1".to_string()
+            }),
+            poll_seconds: 0,
+            start: Some(Widget::Text {
+                text: "s1".to_string()
+            }),
+            stream: false,
             title: "T1".to_string(),
             widget: Widget::Text {
                 text: "w1".to_string()
             },
-            start: Some(Widget::Text {
-                text: "s1".to_string()
-            }),
-            end: Some(Widget::Text {
-                text: "e1".to_string()
-            }),
         }
     );
 }
@@ -104,6 +116,8 @@ fn page_nav_deserialize() {
 fn page_plain_serialize() {
     assert_eq!(
         serde_json::to_string(&Page::Plain {
+            poll_seconds: 0,
+            stream: false,
             title: "".to_string(),
             widget: Widget::Empty,
         })
@@ -112,6 +126,8 @@ fn page_plain_serialize() {
     );
     assert_eq!(
         serde_json::to_string(&Page::Plain {
+            poll_seconds: 0,
+            stream: false,
             title: "T1".to_string(),
             widget: Widget::Text {
                 text: "w1".to_string()
@@ -132,6 +148,8 @@ fn page_plain_deserialize() {
         serde_json::from_str::<Page>(r#"{"typ":"plain-page","title":"","widget":{"typ":"empty"}}"#)
             .unwrap(),
         Page::Plain {
+            poll_seconds: 0,
+            stream: false,
             title: "".to_string(),
             widget: Widget::Empty,
         }
@@ -142,6 +160,8 @@ fn page_plain_deserialize() {
         )
         .unwrap(),
         Page::Plain {
+            poll_seconds: 0,
+            stream: false,
             title: "T1".to_string(),
             widget: Widget::Text {
                 text: "w1".to_string()

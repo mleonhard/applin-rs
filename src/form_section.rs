@@ -38,7 +38,7 @@ impl FormSection {
     }
 
     #[must_use]
-    pub fn into_widget(self) -> Widget {
+    pub fn to_widget(self) -> Widget {
         Widget::FormSection {
             title: self.title,
             widgets: self.widgets,
@@ -47,6 +47,6 @@ impl FormSection {
 }
 impl From<FormSection> for Widget {
     fn from(src: FormSection) -> Self {
-        src.into_widget()
+        src.to_widget()
     }
 }

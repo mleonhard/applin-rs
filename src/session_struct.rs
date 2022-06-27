@@ -8,7 +8,6 @@ use serde_json::{json, Value};
 use servlin::reexport::safina_executor::Executor;
 use servlin::{Event, EventSender, Response};
 use std::collections::{HashMap, HashSet};
-use std::error::Error;
 use std::ops::{Deref, DerefMut};
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 
@@ -44,34 +43,33 @@ pub struct Session<T> {
     pub executor: Arc<Executor>,
     pub cookie: SessionCookie,
     #[allow(clippy::type_complexity)]
-    pub key_set_fn:
-        Box<dyn 'static + Send + Sync + Fn(&Context<T>) -> Result<KeySet<T>, Box<dyn Error>>>,
+    pub key_set_fn: Box<
+        dyn 'static
+            + Send
+            + Sync
+            + Fn(&Context<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
+    >,
     pub scheduled_updates: Mutex<HashSet<PendingUpdate>>,
     pub state: Mutex<T>,
     pub inner: Mutex<InnerSession<T>>,
 }
 impl<T: 'static + Send + Sync> Session<T> {
-    pub fn new<F>(executor: &Arc<Executor>, key_set_fn: F, state: T) -> (Arc<Self>, Response)
+    pub fn new<F>(executor: &Arc<Executor>, key_set_fn: F, state: T) -> Arc<Self>
     where
         F: 'static + Send + Sync + Fn(&Context<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
     {
-        let cookie = SessionCookie::new_random();
-        let (sender, response) = Response::event_stream();
-        let response = response.with_set_cookie(cookie.to_cookie());
-        let session = Arc::new(Self {
+        Arc::new(Self {
             executor: executor.clone(),
             key_set_fn: Box::new(key_set_fn),
-            cookie,
+            cookie: SessionCookie::new_random(),
             scheduled_updates: Mutex::new(HashSet::new()),
             state: Mutex::new(state),
             inner: Mutex::new(InnerSession {
                 key_set: KeySet::new(),
                 rpc_updates: HashSet::new(),
-                sender,
+                sender: EventSender::unconnected(),
             }),
-        });
-        session.schedule_rebuild_key_set(&Context::Empty);
-        (session, response)
+        })
     }
 
     pub fn id(&self) -> SessionId {
@@ -97,23 +95,28 @@ impl<T: 'static + Send + Sync> Session<T> {
         SessionStateGuard(self.state.lock().unwrap_or_else(PoisonError::into_inner))
     }
 
-    #[must_use]
-    pub fn resume(self: &Arc<Self>) -> Response {
+    /// # Errors
+    /// Returns an error when it cannot start the stream.
+    pub fn stream(self: &Arc<Self>) -> Result<Response, Response> {
         self.lock_scheduled_updates().clear();
         let mut inner_guard = self.lock_inner();
         inner_guard.key_set = KeySet::new();
         let (sender, response) = Response::event_stream();
         inner_guard.sender = sender;
         drop(inner_guard);
+        // TODO: Send the client an opaque version ID
+        //       and skip rebuilding all if it matches.
         self.schedule_rebuild_key_set(&Context::Empty);
-        response
+        Ok(response
             .with_set_cookie(self.cookie.to_cookie())
-            .with_no_store()
+            .with_no_store())
     }
 
     /// # Errors
     /// Returns an error when we fail to build the new key set or fail to build the value for a key.
-    pub fn build_key_set(self: &Arc<Self>) -> Result<HashMap<String, Value>, Box<dyn Error>> {
+    pub fn build_key_set(
+        self: &Arc<Self>,
+    ) -> Result<HashMap<String, Value>, Box<dyn std::error::Error>> {
         let mut inner_guard = self.lock_inner();
         let mut new_key_set = (*self.key_set_fn)(&Context::Keys(Arc::downgrade(self)))?;
         let mut diff = HashMap::new();
@@ -138,7 +141,7 @@ impl<T: 'static + Send + Sync> Session<T> {
     /// # Errors
     /// Returns an error when we fail to build the new key set or fail to build the value for a key.
     #[allow(clippy::missing_panics_doc)]
-    pub fn build_key_set_and_send(self: &Arc<Self>) -> Result<(), Box<dyn Error>> {
+    pub fn build_key_set_and_send(self: &Arc<Self>) -> Result<(), Box<dyn std::error::Error>> {
         let diff = self.build_key_set()?;
         let update = json!({ "pages": diff });
         let json_string = serde_json::to_string(&update).unwrap();
@@ -149,7 +152,7 @@ impl<T: 'static + Send + Sync> Session<T> {
 
     /// # Errors
     /// Returns an error when we build the value for the key.
-    pub fn build_value(self: &Arc<Self>, key: &str) -> Result<Value, Box<dyn Error>> {
+    pub fn build_value(self: &Arc<Self>, key: &str) -> Result<Value, Box<dyn std::error::Error>> {
         let inner_guard = self.lock_inner();
         let value_fn = inner_guard
             .key_set
@@ -162,7 +165,10 @@ impl<T: 'static + Send + Sync> Session<T> {
 
     /// # Errors
     /// Returns an error when we fail to build the value for the key.
-    pub fn build_value_and_send(self: &Arc<Self>, key: &str) -> Result<(), Box<dyn Error>> {
+    pub fn build_value_and_send(
+        self: &Arc<Self>,
+        key: &str,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         let value = self.build_value(key)?;
         let json_obj = json!({"pages": { key: value }});
         let json_string = json_obj.to_string();
@@ -230,6 +236,16 @@ impl<T: 'static + Send + Sync> Session<T> {
         Ok(Response::json(200, json!({ "pages": diff }))
             .unwrap()
             .with_no_store())
+    }
+
+    /// # Errors
+    /// Returns an error when it fails building keys.
+    pub fn poll(self: &Arc<Self>) -> Result<Response, Response> {
+        // TODO: Send the client an opaque version ID
+        //       and skip rebuilding all if it matches.
+        self.schedule_rebuild_key_set(&Context::Rpc(self.id()));
+        let response = self.rpc_response()?;
+        Ok(response.with_set_cookie(self.cookie.to_cookie()))
     }
 }
 impl<T> PartialEq for Session<T> {

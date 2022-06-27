@@ -229,3 +229,7 @@ pub mod widget {
     pub use crate::widget_enum::*;
     pub use crate::widget_list::*;
 }
+
+fn is_default<T: Default + PartialEq>(t: &T) -> bool {
+    *t == Default::default()
+}

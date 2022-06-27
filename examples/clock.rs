@@ -5,24 +5,27 @@
 //! ```
 //! $ cargo run --package applin --example clock
 //! Access the app with an Applin client at http://127.0.0.1:8000/
-//! INFO GET / => 200 streamed
+//! INFO GET / => 200 len=116
 //! ```
 //!
 //! Connect one client:
 //! ```
-//! $ curl http://127.0.0.1:8000/
-//! data: {"pages":{"/":{"title":"Clock Example","typ":"nav-page","widget":{"text":"elapsed: 20","typ":"text"}}}}
-//! data: {"pages":{"/":{"title":"Clock Example","typ":"nav-page","widget":{"text":"elapsed: 21","typ":"text"}}}}
-//! data: {"pages":{"/":{"title":"Clock Example","typ":"nav-page","widget":{"text":"elapsed: 22","typ":"text"}}}}
-//! data: {"pages":{"/":{"title":"Clock Example","typ":"nav-page","widget":{"text":"elapsed: 23","typ":"text"}}}}
-//! ^C
+//! $ curl --include http://127.0.0.1:8000/
+//! HTTP/1.1 200 OK
+//! content-type: application/json; charset=UTF-8
+//! content-length: 117
+//! cache-control: no-store
+//! set-cookie: session=13048651617783089387-5269282997511680177; HttpOnly; Max-Age=2592000; SameSite=Strict
+//!
+//! {"pages":{"/":{"stream":true,"title":"Clock Example","typ":"nav-page","widget":{"text":"elapsed: 69","typ":"text"}}}}
+//! $
 //! ```
 #![forbid(unsafe_code)]
 
 use applin::builder::{NavPage, Text};
 use applin::data::{Context, Roster};
 use applin::page::KeySet;
-use applin::session::SessionSet;
+use applin::session::{Session, SessionSet};
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
 use std::sync::Arc;
@@ -55,25 +58,29 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
                 // and pushes it to the client.
                 state_clone.displayed_string.read(ctx).to_string(),
             ),
-        ))
+        )
+        .with_stream())
     });
     keys
 }
 
-fn connect(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
+fn get_or_new_session(
+    state: &Arc<ServerState>,
+    req: &Request,
+) -> Result<Arc<Session<SessionState>>, Response> {
     let state_clone = state.clone();
-    let (_session, response) = state.sessions.resume_or_new(
+    state.sessions.get_or_new(
         req,
         move |_ctx| Ok(key_set(&state_clone)),
         || SessionState {},
-    )?;
-    Ok(response)
+    )
 }
 
 fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     match (req.method(), req.url().path()) {
         ("GET", "/health") => Ok(Response::text(200, "ok")),
-        ("GET", "/") => connect(state, req),
+        ("GET", "/") => get_or_new_session(state, req)?.poll(),
+        ("GET", "/stream") => get_or_new_session(state, req)?.stream(),
         _ => Ok(Response::text(404, "Not found")),
     }
 }

@@ -5,25 +5,31 @@
 //! ```
 //! $ cargo run --package applin --example dynamic_page
 //! Access the app at http://127.0.0.1:8000/
-//! INFO GET / => 200 streamed
+//! INFO GET /stream => 200 streamed
 //! ```
 //!
 //! Connect to it and see the updates arrive periodically:
 //! ```
-//! $ curl http://127.0.0.1:8000/
-//! data: {"pages":{"/":{"title":"Dynamic Page Example","typ":"nav-page","widget":{"typ":"column","widgets":[{"text":"The page below appears and disappears every 5 seconds:","typ":"text"},{"typ":"empty"}]}}}}
-//! data: {"pages":{"/page_2":{"title":"Page 2","typ":"nav-page","widget":{"text":"This is page 2.","typ":"text"}}}}
-//! data: {"pages":{"/":{"title":"Dynamic Page Example","typ":"nav-page","widget":{"typ":"column","widgets":[{"text":"The page below appears and disappears every 5 seconds:","typ":"text"},{"actions":["/page_2"],"text":"Page 2","typ":"detail-cell"}]}}}}
+//! $ curl --include http://127.0.0.1:8000/stream
+//! HTTP/1.1 200 OK
+//! content-type: text/event-stream
+//! transfer-encoding: chunked
+//! set-cookie: session=5753770736856528337-7154909175280483379; HttpOnly; Max-Age=2592000; SameSite=Strict
+//! cache-control: no-store
+//!
+//! data: {"pages":{"/":{"poll-seconds":5,"title":"Dynamic Page Example","typ":"nav-page","widget":{"h-alignment":"start","typ":"column","widgets":[{"text":"The page below appears and disappears every 5 seconds:","typ":"text"},{"actions":["push:/page_2"],"text":"Page 2","typ":"button"}]}},"/page_2":{"title":"Page 2","typ":"nav-page","widget":{"text":"This is page 2.","typ":"text"}}}}
 //! data: {"pages":{"/page_2":null}}
-//! data: {"pages":{"/":{"title":"Dynamic Page Example","typ":"nav-page","widget":{"typ":"column","widgets":[{"text":"The page below appears and disappears every 5 seconds:","typ":"text"},{"typ":"empty"}]}}}}
+//! data: {"pages":{"/page_2":{"title":"Page 2","typ":"nav-page","widget":{"text":"This is page 2.","typ":"text"}}}}
+//! data: {"pages":{"/page_2":null}}
+//! data: {"pages":{"/page_2":{"title":"Page 2","typ":"nav-page","widget":{"text":"This is page 2.","typ":"text"}}}}
 //! ^C
 //! ```
 #![forbid(unsafe_code)]
 
-use applin::builder::{empty, push, Column, FormDetail, NavPage, Text};
+use applin::builder::{push, Button, Column, Empty, NavPage, Text};
 use applin::data::{Context, Roster};
 use applin::page::KeySet;
-use applin::session::SessionSet;
+use applin::session::{Session, SessionSet};
 use servlin::reexport::permit::Permit;
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
@@ -72,34 +78,35 @@ fn key_set(
             Column::new((
                 Text::new("The page below appears and disappears every 5 seconds:"),
                 if let Some(page_2) = &opt_page_2 {
-                    FormDetail::new("Page 2")
-                        .with_action(push(page_2.clone()))
-                        .into()
+                    Button::new("Page 2").with_action(push(page_2)).to_widget()
                 } else {
-                    empty()
+                    Empty::new().to_widget()
                 },
             )),
-        ))
+        )
+        .with_poll(5))
     });
     Ok(keys)
 }
 
-#[allow(clippy::unnecessary_wraps)]
-fn connect(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
+fn get_or_new_session(
+    state: &Arc<ServerState>,
+    req: &Request,
+) -> Result<Arc<Session<SessionState>>, Response> {
     let state_clone = state.clone();
-    let (_session, response) = state.sessions.resume_or_new(
+    state.sessions.get_or_new(
         req,
         move |ctx| key_set(&state_clone, ctx),
         || SessionState {},
-    )?;
-    Ok(response)
+    )
 }
 
 #[allow(clippy::unnecessary_wraps)]
 fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     match (req.method(), req.url().path()) {
         ("GET", "/health") => Ok(Response::text(200, "ok")),
-        ("GET", "/") => connect(state, req),
+        ("GET", "/") => get_or_new_session(state, req)?.poll(),
+        ("GET", "/stream") => get_or_new_session(state, req)?.stream(),
         _ => Ok(Response::text(404, "Not found")),
     }
 }

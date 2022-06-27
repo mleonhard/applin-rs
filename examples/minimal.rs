@@ -9,22 +9,14 @@
 //!
 //! Make a request to the server
 //! ```
-//! $ curl -v http://127.0.0.1:8000/
-//! *   Trying 127.0.0.1...
-//! * TCP_NODELAY set
-//! * Connected to 127.0.0.1 (127.0.0.1) port 8000 (#0)
-//! > GET / HTTP/1.1
-//! > Host: 127.0.0.1:8000
-//! > User-Agent: curl/7.64.1
-//! > Accept: */*
-//! >
-//! < HTTP/1.1 200 OK
-//! < content-type: text/event-stream
-//! < transfer-encoding: chunked
-//! < set-cookie: session=7324714364658396595-8735568333978848934; HttpOnly; Max-Age=2592000; SameSite=Strict; Secure
-//! <
-//! data: {"pages":{"/":{"title":"Dynamic Page Example","typ":"plain-page","widget":{"text":"Hello","typ":"text"}}}}
-//! ^C
+//! $ curl --include http://127.0.0.1:8000/
+//! HTTP/1.1 200 OK
+//! content-type: application/json; charset=UTF-8
+//! content-length: 101
+//! cache-control: no-store
+//! set-cookie: session=3809352776013307961-9190653589617809531; HttpOnly; Max-Age=2592000; SameSite=Strict
+//!
+// {"pages":{"/":{"title":"Minimal Example","typ":"plain-page","widget":{"text":"Hello","typ":"text"}}}}
 //! ```
 #![forbid(unsafe_code)]
 
@@ -42,15 +34,13 @@ pub fn main() {
     let executor = safina_executor::Executor::default();
     let sessions: Arc<SessionSet<()>> = Arc::new(SessionSet::new(&executor));
     let key_set_fn = move |_ctx: &Context<()>| {
-        Ok(KeySet::new().with_static_page(
-            "/",
-            PlainPage::new("Dynamic Page Example", Text::new("Hello")),
-        ))
+        Ok(KeySet::new()
+            .with_static_page("/", PlainPage::new("Minimal Example", Text::new("Hello"))))
     };
     let session_state_fn = move || ();
     let req_handler =
-        move |req: Request| match sessions.resume_or_new(&req, key_set_fn, session_state_fn) {
-            Ok((_session, response)) => response,
+        move |req: Request| match sessions.get_or_new(&req, key_set_fn, session_state_fn) {
+            Ok(session) => session.poll().unwrap_or_else(|response| response),
             Err(response) => response,
         };
     executor

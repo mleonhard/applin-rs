@@ -1,11 +1,8 @@
 use crate::action::Action;
 use crate::h_alignment::HAlignment;
+use crate::is_default;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-
-fn is_default<T: Default + PartialEq>(t: &T) -> bool {
-    *t == Default::default()
-}
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Serialize, Ord, PartialEq, PartialOrd)]
 #[serde(tag = "typ")]

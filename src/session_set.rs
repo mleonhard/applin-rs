@@ -58,38 +58,37 @@ impl<T: 'static + Send + Sync> SessionSet<T> {
 
     /// # Errors
     /// Returns an error when the request has the session cookie but we fail to parse it.
-    pub fn resume_opt(&self, req: &Request) -> Result<Option<Response>, Response> {
+    pub fn try_get(&self, req: &Request) -> Result<Option<Response>, Response> {
         if let Some(session) = self.get_opt(req)? {
-            Ok(Some(session.resume()))
+            Ok(Some(session.stream()?))
         } else {
             Ok(None)
         }
     }
 
-    pub fn new_session<F>(&self, key_set_fn: F, value: T) -> (Arc<Session<T>>, Response)
+    pub fn new_session<F>(&self, key_set_fn: F, value: T) -> Arc<Session<T>>
     where
         F: 'static + Send + Sync + Fn(&Context<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
     {
-        let (session, response) = Session::new(&self.executor, key_set_fn, value);
+        let session = Session::new(&self.executor, key_set_fn, value);
         self.write_lock()
             .insert(session.cookie.id(), session.clone());
-        (session, response)
+        session
     }
 
     /// # Errors
     /// Returns an error when the request has the session cookie but we fail to parse it.
-    pub fn resume_or_new<F>(
+    pub fn get_or_new<F>(
         &self,
         req: &Request,
         key_set_fn: F,
         session_state_fn: impl FnOnce() -> T,
-    ) -> Result<(Arc<Session<T>>, Response), Response>
+    ) -> Result<Arc<Session<T>>, Response>
     where
         F: 'static + Send + Sync + Fn(&Context<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
     {
         if let Some(session) = self.get_opt(req)? {
-            let response = session.resume();
-            Ok((session, response))
+            Ok(session)
         } else {
             let session_state = session_state_fn();
             Ok(self.new_session(key_set_fn, session_state))
