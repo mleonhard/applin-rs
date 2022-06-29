@@ -9,11 +9,6 @@ use serde_json::Value;
 pub enum Page {
     #[serde(rename = "alert-modal")]
     Alert {
-        #[serde(rename = "poll-seconds")]
-        #[serde(default, skip_serializing_if = "is_default")]
-        poll_seconds: u32,
-        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-        stream: bool,
         #[serde(skip_serializing_if = "Option::is_none")]
         text: Option<String>,
         title: String,
@@ -23,11 +18,6 @@ pub enum Page {
     },
     #[serde(rename = "drawer-modal")]
     Drawer {
-        #[serde(rename = "poll-seconds")]
-        #[serde(default, skip_serializing_if = "is_default")]
-        poll_seconds: u32,
-        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-        stream: bool,
         #[serde(skip_serializing_if = "Option::is_none")]
         text: Option<String>,
         title: String,
