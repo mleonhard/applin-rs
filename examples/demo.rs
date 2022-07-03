@@ -144,9 +144,13 @@ fn add_drawer_modal_page(keys: &mut KeySet<SessionState>) -> PageKey {
 }
 
 fn add_alert_page(drawer: &PageKey, keys: &mut KeySet<SessionState>) -> PageKey {
+    const KEY: &str = "/alert";
+    let alert2 = keys.add_static_page("/alert2", AlertModal::new("Alert 2").with_ok());
     keys.add_static_page(
-        "/alert",
-        AlertModal::new("Title1").with_widgets((
+        KEY,
+        AlertModal::new("Alert Modal").with_widgets((
+            ModalButton::new("Alert 2").with_action(push(&alert2)),
+            ModalButton::new("Alert Modal").with_action(push(&PageKey::new(KEY))),
             ModalButton::new("Drawer Modal").with_action(push(drawer)),
             ModalButton::new("Destructive Button")
                 .with_is_destructive()
@@ -204,29 +208,130 @@ fn add_form_detail_page(keys: &mut KeySet<SessionState>) -> PageKey {
         NavPage::new(
             "Form Detail",
             Form::new((
-                FormDetail::new("Form Detail").with_action(push(&pressed)),
-                FormDetail::new("Form Detail")
-                    .with_sub_text("with sub-text")
+                FormSection::new().with_title("Text").with_widgets((
+                    FormDetail::new("Text").with_action(push(&pressed)),
+                    FormDetail::new("Disabled"),
+                    FormDetail::new("Does Nothing").with_action(nothing()),
+                    FormDetail::new("").with_action(push(&pressed)),
+                    FormDetail::new(
+                        "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                    )
                     .with_action(push(&pressed)),
-                FormDetail::new("Form Detail with Photo")
+                    FormDetail::new(
+                        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                    )
+                    .with_action(push(&pressed)),
+                )),
+                FormSection::new()
+                    .with_title("Text + Sub-text")
+                    .with_widgets((
+                    FormDetail::new("Text")
+                        .with_sub_text("Sub-text")
+                        .with_action(push(&pressed)),
+                    FormDetail::new("Disabled").with_sub_text("Sub-text"),
+                    FormDetail::new(
+                        "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                    )
+                    .with_sub_text("Sub-text")
+                    .with_action(push(&pressed)),
+                    FormDetail::new(
+                        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                    )
+                    .with_sub_text("Sub-text")
+                    .with_action(push(&pressed)),
+                    FormDetail::new("Text")
+                        .with_sub_text(
+                            "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                        )
+                        .with_action(push(&pressed)),
+                    FormDetail::new("Text")
+                        .with_sub_text(
+                            "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                        )
+                        .with_action(push(&pressed)),
+                    FormDetail::new("")
+                        .with_sub_text("")
+                        .with_action(push(&pressed)),
+                    FormDetail::new("Sub-text is empty")
+                        .with_sub_text("")
+                        .with_action(push(&pressed)),
+                    FormDetail::new("")
+                        .with_sub_text("Text is empty")
+                        .with_action(push(&pressed)),
+                )),
+                FormSection::new().with_title("Image + Text").with_widgets((
+                    FormDetail::new("Text")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                    FormDetail::new("Disabled").with_photo_url("/placeholder-200x200.png"),
+                    FormDetail::new(
+                        "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                    )
                     .with_photo_url("/placeholder-200x200.png")
                     .with_action(push(&pressed)),
-                FormDetail::new("Form Detail with Photo")
-                    .with_sub_text("with sub-text")
+                    FormDetail::new(
+                        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                    )
                     .with_photo_url("/placeholder-200x200.png")
                     .with_action(push(&pressed)),
-                FormDetail::new(
-                    "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
-                )
-                .with_action(push(&pressed)),
-                FormDetail::new(
-                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
-                )
-                .with_action(push(&pressed)),
-                Text::new("Form Detail with empty label:"),
-                FormDetail::new("").with_action(push(&pressed)),
-                FormDetail::new("Disabled Form Detail"),
-                FormDetail::new("Does Nothing").with_action(nothing()),
+                    FormDetail::new("")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                    FormDetail::new("Image not found")
+                        .with_photo_url("/nonexistent")
+                        .with_action(push(&pressed)),
+                    FormDetail::new("Not an image")
+                        .with_photo_url("/health")
+                        .with_action(push(&pressed)),
+                    // TODO: Use a URL that never returns a result.
+                )),
+                FormSection::new()
+                    .with_title("Image + Text + Sub-text")
+                    .with_widgets((
+                    FormDetail::new("Text")
+                        .with_sub_text("Sub-text")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                    FormDetail::new("Disabled")
+                        .with_sub_text("Sub-text")
+                        .with_photo_url("/placeholder-200x200.png"),
+                    FormDetail::new(
+                        "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                    )
+                    .with_sub_text("Sub-text")
+                    .with_photo_url("/placeholder-200x200.png")
+                    .with_action(push(&pressed)),
+                    FormDetail::new(
+                        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                    )
+                    .with_sub_text("Sub-text")
+                    .with_photo_url("/placeholder-200x200.png")
+                    .with_action(push(&pressed)),
+                    FormDetail::new("Text")
+                        .with_sub_text(
+                            "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                        )
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                    FormDetail::new("Text")
+                        .with_sub_text(
+                            "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                        )
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                    FormDetail::new("")
+                        .with_sub_text("")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                    FormDetail::new("Sub-text is empty")
+                        .with_sub_text("")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                    FormDetail::new("")
+                        .with_sub_text("Text is empty")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                )),
             )),
         ),
     )
@@ -284,14 +389,19 @@ fn add_form_section_page(keys: &mut KeySet<SessionState>) -> PageKey {
             Form::new((
                 FormSection::new()
                     .with_title("Section A")
-                    .with_widgets((Text::new("one"),)),
+                    .with_widgets((Text::new("aaa"), Text::new("aaaa"))),
+                FormSection::new().with_title("Empty Section"),
                 FormSection::new()
                     .with_title("Section B")
-                    .with_widgets((Text::new("one"), Text::new("two"))),
-                FormSection::new()
-                    .with_widgets((Text::new("This section has no title."), Text::new("two"))),
-                FormSection::new().with_title("Empty Section"),
+                    .with_widgets((Text::new("bbb"), Text::new("bbbb"))),
+                FormSection::new().with_widgets((
+                    Text::new("First item of a section with no title."),
+                    Text::new("Below is an empty section with no title."),
+                )),
                 FormSection::new(),
+                FormSection::new()
+                    .with_title("Section C")
+                    .with_widgets((Text::new("ccc"), Text::new("cccc"))),
             )),
         ),
     )
