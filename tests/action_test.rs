@@ -1,4 +1,4 @@
-use applin::widget::Action;
+use applin::internal::Action;
 use serde_json::Value;
 
 #[test]

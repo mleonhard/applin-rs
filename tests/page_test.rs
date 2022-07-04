@@ -1,5 +1,4 @@
-use applin::page::Page;
-use applin::widget::Widget;
+use applin::internal::{Page, Widget};
 use serde_json::{json, Value};
 
 #[test]

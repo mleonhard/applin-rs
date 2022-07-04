@@ -1,4 +1,5 @@
-use applin::widget::{Action, HAlignment, Widget};
+use applin::internal::{Action, Widget};
+use applin::widget::HAlignment;
 use serde_json::{json, Value};
 
 #[test]

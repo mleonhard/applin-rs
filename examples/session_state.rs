@@ -28,10 +28,10 @@
 //! ```
 #![forbid(unsafe_code)]
 
-use applin::builder::{rpc, Button, Column, NavPage, Text};
+use applin::action::rpc;
 use applin::data::{random_u64, Context, Roster};
-use applin::page::KeySet;
-use applin::session::{Session, SessionSet};
+use applin::session::{KeySet, Session, SessionSet};
+use applin::widget::{Button, Column, NavPage, Text};
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
 use std::error::Error;

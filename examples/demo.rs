@@ -6,13 +6,13 @@
 //! Then connect to it with an Applin client.
 #![forbid(unsafe_code)]
 
-use applin::builder::{
-    nothing, pop, push, rpc, AlertModal, BackButton, Button, Column, DrawerModal, Empty, Form,
-    FormButton, FormDetail, FormSection, ModalButton, NavPage, Text,
-};
+use applin::action::{nothing, pop, push, rpc};
 use applin::data::{Context, Roster};
-use applin::page::{KeySet, PageKey};
-use applin::session::{Session, SessionSet};
+use applin::session::{KeySet, PageKey, Session, SessionSet};
+use applin::widget::{
+    AlertModal, BackButton, Button, Column, DrawerModal, Empty, Form, FormButton, FormDetail,
+    FormSection, ModalButton, NavPage, Text,
+};
 use core::fmt::Debug;
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{
@@ -197,6 +197,7 @@ fn add_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
     )
 }
 
+#[allow(clippy::too_many_lines)]
 fn add_form_detail_page(keys: &mut KeySet<SessionState>) -> PageKey {
     let pressed = keys.add_static_page(
         "/form-detail-pressed",

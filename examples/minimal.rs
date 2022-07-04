@@ -20,10 +20,9 @@
 //! ```
 #![forbid(unsafe_code)]
 
-use applin::builder::{PlainPage, Text};
 use applin::data::Context;
-use applin::page::KeySet;
-use applin::session::SessionSet;
+use applin::session::{KeySet, SessionSet};
+use applin::widget::{PlainPage, Text};
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{socket_addr_127_0_0_1, HttpServerBuilder, Request};
 use std::sync::Arc;

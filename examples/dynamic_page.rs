@@ -26,10 +26,10 @@
 //! ```
 #![forbid(unsafe_code)]
 
-use applin::builder::{push, Button, Column, Empty, NavPage, Text};
+use applin::action::push;
 use applin::data::{Context, Roster};
-use applin::page::KeySet;
-use applin::session::{Session, SessionSet};
+use applin::session::{KeySet, Session, SessionSet};
+use applin::widget::{Button, Column, Empty, NavPage, Text};
 use servlin::reexport::permit::Permit;
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};

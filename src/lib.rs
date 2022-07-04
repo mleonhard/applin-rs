@@ -140,94 +140,15 @@
 //! - Server to push refresh an image
 #![forbid(unsafe_code)]
 
-mod action;
-mod action_builders;
-mod alert_modal;
-mod back_button;
-mod button;
-mod checkbox;
-mod column;
-mod context;
-mod context_set;
-mod drawer_modal;
-mod empty;
-mod error;
-mod error_details;
-mod form;
-mod form_button;
-mod form_detail;
-mod form_section;
-mod h_alignment;
-mod key_set;
-mod modal_button;
-mod nav_page;
-mod page_enum;
-mod page_key;
-mod plain_page;
-mod random;
-mod roster;
-mod scroll;
-mod session_cookie;
-mod session_id;
-mod session_set;
-mod session_struct;
-mod text;
-mod v_alignment;
-mod widget_enum;
-mod widget_list;
+pub mod action;
+pub mod data;
+pub mod error;
+pub mod internal;
+pub mod session;
+pub mod widget;
 
 pub mod reexports {
     pub use serde_json;
-}
-
-pub mod data {
-    pub use crate::context::*;
-    pub use crate::context_set::*;
-    pub use crate::error::*;
-    pub use crate::random::*;
-    pub use crate::roster::*;
-}
-
-pub mod session {
-    pub use crate::session_cookie::*;
-    pub use crate::session_id::*;
-    pub use crate::session_set::*;
-    pub use crate::session_struct::*;
-}
-
-pub mod page {
-    pub use crate::key_set::*;
-    pub use crate::page_enum::*;
-    pub use crate::page_key::*;
-}
-
-pub mod builder {
-    pub use crate::action_builders::*;
-    pub use crate::alert_modal::*;
-    pub use crate::back_button::*;
-    pub use crate::button::*;
-    pub use crate::checkbox::*;
-    pub use crate::column::*;
-    pub use crate::drawer_modal::*;
-    pub use crate::empty::*;
-    pub use crate::error_details::*;
-    pub use crate::form::*;
-    pub use crate::form_button::*;
-    pub use crate::form_detail::*;
-    pub use crate::form_section::*;
-    pub use crate::modal_button::*;
-    pub use crate::nav_page::*;
-    pub use crate::plain_page::*;
-    pub use crate::scroll::*;
-    pub use crate::text::*;
-}
-
-pub mod widget {
-    pub use crate::action::*;
-    pub use crate::h_alignment::*;
-    pub use crate::v_alignment::*;
-    pub use crate::widget_enum::*;
-    pub use crate::widget_list::*;
 }
 
 fn is_default<T: Default + PartialEq>(t: &T) -> bool {

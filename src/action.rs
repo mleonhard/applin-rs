@@ -1,85 +1,37 @@
-use serde::de::Visitor;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use serde_json::Value;
+use crate::internal::Action;
+use crate::session::PageKey;
 
-#[derive(Debug, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub enum Action {
-    CopyToClipboard(String),
-    LaunchUrl(String),
-    Logout,
-    Nothing,
-    Pop,
-    Push(String),
-    Rpc(String),
+#[must_use]
+pub fn copy_to_clipboard(s: impl Into<String>) -> Action {
+    Action::CopyToClipboard(s.into())
 }
-impl Action {
-    #[must_use]
-    #[allow(clippy::missing_panics_doc)]
-    pub fn to_value(&self) -> Value {
-        serde_json::to_value(&self).unwrap()
-    }
-}
-impl From<Action> for Value {
-    fn from(src: Action) -> Self {
-        src.to_value()
-    }
-}
-impl Serialize for Action {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        match self {
-            Action::CopyToClipboard(s) => {
-                serializer.serialize_str(&format!("copy-to-clipboard:{}", s))
-            }
-            Action::LaunchUrl(s) => serializer.serialize_str(&format!("launch-url:{}", s)),
-            Action::Logout => serializer.serialize_str("logout"),
-            Action::Nothing => serializer.serialize_str("nothing"),
-            Action::Pop => serializer.serialize_str("pop"),
-            Action::Push(s) => serializer.serialize_str(&format!("push:{}", s)),
-            Action::Rpc(s) => serializer.serialize_str(&format!("rpc:{}", s)),
-        }
-    }
-}
-impl<'de> Deserialize<'de> for Action {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        struct ActionVisitor;
-        impl<'de> Visitor<'de> for ActionVisitor {
-            type Value = Action;
 
-            fn expecting(
-                &self,
-                formatter: &mut core::fmt::Formatter,
-            ) -> Result<(), core::fmt::Error> {
-                formatter.write_str("a string matching the action string format")
-            }
+#[must_use]
+pub fn launch_url(s: impl Into<String>) -> Action {
+    Action::LaunchUrl(s.into())
+}
 
-            fn visit_str<E: serde::de::Error>(self, value: &str) -> Result<Self::Value, E> {
-                let mut parts = value.splitn(2, ':');
-                match (parts.next(), parts.next()) {
-                    (Some("copy-to-clipboard"), Some(value)) => {
-                        Ok(Action::CopyToClipboard(value.to_string()))
-                    }
-                    (Some("launch-url"), Some(value)) if !value.is_empty() => {
-                        Ok(Action::LaunchUrl(value.to_string()))
-                    }
-                    (Some("logout"), None) => Ok(Action::Logout),
-                    (Some("nothing"), None) => Ok(Action::Nothing),
-                    (Some("pop"), None) => Ok(Action::Pop),
-                    (Some("push"), Some(value)) if !value.is_empty() => {
-                        Ok(Action::Push(value.to_string()))
-                    }
-                    (Some("rpc"), Some(value)) if !value.is_empty() => {
-                        Ok(Action::Rpc(value.to_string()))
-                    }
-                    _ => Err(E::custom(format!("invalid action: {:?}", value))),
-                }
-            }
-        }
-        deserializer.deserialize_str(ActionVisitor {})
-    }
+#[must_use]
+pub fn push(page_key: &PageKey) -> Action {
+    Action::Push(page_key.clone().into_inner())
+}
+
+#[must_use]
+pub fn logout() -> Action {
+    Action::Logout
+}
+
+#[must_use]
+pub fn nothing() -> Action {
+    Action::Nothing
+}
+
+#[must_use]
+pub fn pop() -> Action {
+    Action::Pop
+}
+
+#[must_use]
+pub fn rpc(url: impl Into<String>) -> Action {
+    Action::Rpc(url.into())
 }
