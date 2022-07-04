@@ -343,8 +343,7 @@ fn add_form_text_page(keys: &mut KeySet<SessionState>) -> PageKey {
         NavPage::new(
             "Form Text",
             Form::new((
-                Text::new("text1"),
-                Text::new("Empty text:"),
+                Text::new("Text"),
                 Text::new(""),
                 Text::new("MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM"),
                 Text::new("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"),
@@ -364,7 +363,6 @@ fn add_form_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
             "Form Button",
             Form::new((
                 FormButton::new("Button1").with_action(push(&pressed)),
-                Text::new("Button with empty label:"),
                 FormButton::new("").with_action(push(&pressed)),
                 FormButton::new(
                     "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
