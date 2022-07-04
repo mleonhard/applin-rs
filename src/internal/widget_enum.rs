@@ -61,6 +61,8 @@ pub enum Widget {
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         actions: Vec<Action>,
     },
+    #[serde(rename = "form-error")]
+    FormErrorVariant { text: String },
     #[serde(rename = "form-section")]
     FormSectionVariant {
         #[serde(default, skip_serializing_if = "Option::is_none")]

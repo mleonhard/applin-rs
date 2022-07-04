@@ -11,7 +11,7 @@ use applin::data::{Context, Roster};
 use applin::session::{KeySet, PageKey, Session, SessionSet};
 use applin::widget::{
     AlertModal, BackButton, Button, Column, DrawerModal, Empty, Form, FormButton, FormDetail,
-    FormSection, ModalButton, NavPage, Text,
+    FormError, FormSection, ModalButton, NavPage, Text,
 };
 use core::fmt::Debug;
 use servlin::reexport::{safina_executor, safina_timer};
@@ -380,6 +380,13 @@ fn add_form_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
     )
 }
 
+fn add_form_error_page(keys: &mut KeySet<SessionState>) -> PageKey {
+    keys.add_static_page(
+        "/form-error",
+        NavPage::new("Form Error", Form::new(FormError::new("Error Message"))),
+    )
+}
+
 fn add_form_section_page(keys: &mut KeySet<SessionState>) -> PageKey {
     keys.add_static_page(
         "/form-section",
@@ -418,6 +425,7 @@ fn key_set(
     let back_buttons_page = add_back_button_pages(&mut keys);
     let buttons_page = add_button_page(&mut keys);
     let form_detail_page = add_form_detail_page(&mut keys);
+    let form_error_page = add_form_error_page(&mut keys);
     let form_text_page = add_form_text_page(&mut keys);
     let form_button_page = add_form_button_page(&mut keys);
     let form_section_page = add_form_section_page(&mut keys);
@@ -432,6 +440,7 @@ fn key_set(
                 FormDetail::new("Back Button").with_action(push(&back_buttons_page)),
                 FormDetail::new("Button").with_action(push(&buttons_page)),
                 FormDetail::new("Form Detail").with_action(push(&form_detail_page)),
+                FormDetail::new("Form Error").with_action(push(&form_error_page)),
                 FormDetail::new("Form Text").with_action(push(&form_text_page)),
                 FormDetail::new("Form Button").with_action(push(&form_button_page)),
                 FormDetail::new("Form Section").with_action(push(&form_section_page)),
