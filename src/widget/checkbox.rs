@@ -38,7 +38,7 @@ impl Checkbox {
 
     #[must_use]
     pub fn to_widget(self) -> Widget {
-        Widget::CheckBox {
+        Widget::CheckBoxVariant {
             actions: self.actions,
             id: self.id,
             initial_bool: self.initial_bool,

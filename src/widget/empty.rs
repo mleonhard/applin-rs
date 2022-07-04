@@ -12,7 +12,7 @@ impl Empty {
     #[allow(clippy::unused_self)]
     #[must_use]
     pub fn to_widget(self) -> Widget {
-        Widget::Empty {}
+        Widget::EmptyVariant {}
     }
 }
 impl From<Empty> for Widget {

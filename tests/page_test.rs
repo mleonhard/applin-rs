@@ -8,7 +8,7 @@ fn page_to_value() {
             poll_seconds: 0,
             stream: false,
             title: "T1".to_string(),
-            widget: Widget::Empty
+            widget: Widget::EmptyVariant
         }
         .to_value(),
         json!({"typ": "plain-page", "title": "T1", "widget": { "typ":"empty" }})
@@ -21,7 +21,7 @@ fn value_from_page() {
         poll_seconds: 0,
         stream: false,
         title: "T1".to_string(),
-        widget: Widget::Empty,
+        widget: Widget::EmptyVariant,
     }
     .into();
     assert_eq!(
@@ -47,23 +47,23 @@ fn page_nav_serialize() {
             start: None,
             stream: false,
             title: "".to_string(),
-            widget: Widget::Empty,
+            widget: Widget::EmptyVariant,
         })
         .unwrap(),
         r#"{"typ":"nav-page","title":"","widget":{"typ":"empty"}}"#
     );
     assert_eq!(
         serde_json::to_string(&Page::Nav {
-            end: Some(Widget::Text {
+            end: Some(Widget::TextVariant {
                 text: "e1".to_string()
             }),
             poll_seconds: 0,
-            start: Some(Widget::Text {
+            start: Some(Widget::TextVariant {
                 text: "s1".to_string()
             }),
             stream: false,
             title: "T1".to_string(),
-            widget: Widget::Text {
+            widget: Widget::TextVariant {
                 text: "w1".to_string()
             },
         })
@@ -87,7 +87,7 @@ fn page_nav_deserialize() {
             start: None,
             stream: false,
             title: "".to_string(),
-            widget: Widget::Empty,
+            widget: Widget::EmptyVariant,
         }
     );
     assert_eq!(
@@ -95,16 +95,16 @@ fn page_nav_deserialize() {
             r#"{"typ":"nav-page","title":"T1","widget":{"typ":"text","text":"w1"},"start":{"typ":"text","text":"s1"},"end":{"typ":"text","text":"e1"}}"#
         ).unwrap(),
         Page::Nav {
-            end: Some(Widget::Text {
+            end: Some(Widget::TextVariant {
                 text: "e1".to_string()
             }),
             poll_seconds: 0,
-            start: Some(Widget::Text {
+            start: Some(Widget::TextVariant {
                 text: "s1".to_string()
             }),
             stream: false,
             title: "T1".to_string(),
-            widget: Widget::Text {
+            widget: Widget::TextVariant {
                 text: "w1".to_string()
             },
         }
@@ -118,7 +118,7 @@ fn page_plain_serialize() {
             poll_seconds: 0,
             stream: false,
             title: "".to_string(),
-            widget: Widget::Empty,
+            widget: Widget::EmptyVariant,
         })
         .unwrap(),
         r#"{"typ":"plain-page","title":"","widget":{"typ":"empty"}}"#
@@ -128,7 +128,7 @@ fn page_plain_serialize() {
             poll_seconds: 0,
             stream: false,
             title: "T1".to_string(),
-            widget: Widget::Text {
+            widget: Widget::TextVariant {
                 text: "w1".to_string()
             },
         })
@@ -150,7 +150,7 @@ fn page_plain_deserialize() {
             poll_seconds: 0,
             stream: false,
             title: "".to_string(),
-            widget: Widget::Empty,
+            widget: Widget::EmptyVariant,
         }
     );
     assert_eq!(
@@ -162,7 +162,7 @@ fn page_plain_deserialize() {
             poll_seconds: 0,
             stream: false,
             title: "T1".to_string(),
-            widget: Widget::Text {
+            widget: Widget::TextVariant {
                 text: "w1".to_string()
             },
         }

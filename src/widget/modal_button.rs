@@ -68,7 +68,7 @@ impl ModalButton {
 
     #[must_use]
     pub fn to_widget(self) -> Widget {
-        Widget::ModalButton {
+        Widget::ModalButtonVariant {
             actions: self.actions,
             is_cancel: self.is_cancel,
             is_default: self.is_default,

@@ -38,7 +38,7 @@ impl FormSection {
 
     #[must_use]
     pub fn to_widget(self) -> Widget {
-        Widget::FormSection {
+        Widget::FormSectionVariant {
             title: self.title,
             widgets: self.widgets,
         }

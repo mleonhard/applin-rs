@@ -47,7 +47,7 @@ impl Column {
 
     #[must_use]
     pub fn to_widget(self) -> Widget {
-        Widget::Column {
+        Widget::ColumnVariant {
             h_alignment: self.h_alignment,
             spacing: self.spacing,
             widgets: self.widgets,

@@ -30,7 +30,7 @@ impl Button {
 
     #[must_use]
     pub fn to_widget(self) -> Widget {
-        Widget::Button {
+        Widget::ButtonVariant {
             actions: self.actions,
             text: self.text,
         }

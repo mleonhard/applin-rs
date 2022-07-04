@@ -8,15 +8,15 @@ use serde_json::Value;
 #[serde(tag = "typ")]
 pub enum Widget {
     #[serde(rename = "back-button")]
-    BackButton { actions: Vec<Action> },
+    BackButtonVariant { actions: Vec<Action> },
     #[serde(rename = "button")]
-    Button {
+    ButtonVariant {
         text: String,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         actions: Vec<Action>,
     },
     #[serde(rename = "checkbox")]
-    CheckBox {
+    CheckBoxVariant {
         id: String,
         #[serde(rename = "initial-bool")]
         #[serde(default, skip_serializing_if = "std::ops::Not::not")]
@@ -25,7 +25,7 @@ pub enum Widget {
         actions: Vec<Action>,
     },
     #[serde(rename = "column")]
-    Column {
+    ColumnVariant {
         #[serde(default, rename = "h-alignment")]
         h_alignment: HAlignment,
         #[serde(default, skip_serializing_if = "is_default")]
@@ -34,16 +34,16 @@ pub enum Widget {
         widgets: Vec<Widget>,
     },
     #[serde(rename = "empty")]
-    Empty,
+    EmptyVariant,
     #[serde(rename = "error-details")]
-    ErrorDetails,
+    ErrorDetailsVariant,
     #[serde(rename = "form")]
-    Form {
+    FormVariant {
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         widgets: Vec<Widget>,
     },
     #[serde(rename = "form-button")]
-    FormButton {
+    FormButtonVariant {
         text: String,
         #[serde(rename = "is-destructive")]
         #[serde(default, skip_serializing_if = "std::ops::Not::not")]
@@ -52,7 +52,7 @@ pub enum Widget {
         actions: Vec<Action>,
     },
     #[serde(rename = "form-detail")]
-    FormDetail {
+    FormDetailVariant {
         text: String,
         #[serde(rename = "sub-text", skip_serializing_if = "Option::is_none")]
         sub_text: Option<String>,
@@ -62,14 +62,14 @@ pub enum Widget {
         actions: Vec<Action>,
     },
     #[serde(rename = "form-section")]
-    FormSection {
+    FormSectionVariant {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         title: Option<String>,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         widgets: Vec<Widget>,
     },
     #[serde(rename = "modal-button")]
-    ModalButton {
+    ModalButtonVariant {
         text: String,
         #[serde(rename = "is-cancel")]
         #[serde(default, skip_serializing_if = "std::ops::Not::not")]
@@ -84,9 +84,9 @@ pub enum Widget {
         actions: Vec<Action>,
     },
     #[serde(rename = "scroll")]
-    Scroll { widget: Box<Widget> },
+    ScrollVariant { widget: Box<Widget> },
     #[serde(rename = "text")]
-    Text { text: String },
+    TextVariant { text: String },
 }
 impl Widget {
     #[must_use]
@@ -102,6 +102,6 @@ impl From<Widget> for Value {
 }
 impl Default for Widget {
     fn default() -> Self {
-        Self::Empty
+        Self::EmptyVariant
     }
 }

@@ -70,7 +70,7 @@ impl Default for Page {
             start: None,
             stream: false,
             title: "Default Page".to_string(),
-            widget: Widget::Empty,
+            widget: Widget::EmptyVariant,
         }
     }
 }

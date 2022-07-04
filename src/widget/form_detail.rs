@@ -46,7 +46,7 @@ impl FormDetail {
 
     #[must_use]
     pub fn to_widget(self) -> Widget {
-        Widget::FormDetail {
+        Widget::FormDetailVariant {
             actions: self.actions,
             photo_url: self.photo_url,
             sub_text: self.sub_text,

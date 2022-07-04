@@ -25,7 +25,7 @@ impl NavPage {
 
     #[must_use]
     pub fn without_back(mut self) -> Self {
-        self.start = Some(Widget::Empty);
+        self.start = Some(Widget::EmptyVariant);
         self
     }
 

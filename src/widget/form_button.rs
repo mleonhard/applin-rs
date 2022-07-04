@@ -38,7 +38,7 @@ impl FormButton {
 
     #[must_use]
     pub fn to_widget(self) -> Widget {
-        Widget::FormButton {
+        Widget::FormButtonVariant {
             actions: self.actions,
             is_destructive: self.is_destructive,
             text: self.text,

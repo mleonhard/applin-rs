@@ -5,7 +5,7 @@ use serde_json::{json, Value};
 #[test]
 fn widget_to_value() {
     assert_eq!(
-        Widget::Text {
+        Widget::TextVariant {
             text: "abc".to_string()
         }
         .to_value(),
@@ -15,7 +15,7 @@ fn widget_to_value() {
 
 #[test]
 fn value_from_widget() {
-    let value: Value = Widget::Text {
+    let value: Value = Widget::TextVariant {
         text: "abc".to_string(),
     }
     .into();
@@ -24,20 +24,20 @@ fn value_from_widget() {
 
 #[test]
 fn widget_default() {
-    assert_eq!(Widget::default(), Widget::Empty);
+    assert_eq!(Widget::default(), Widget::EmptyVariant);
 }
 
 #[test]
 fn widget_back_button_serialize() {
     assert_eq!(
-        serde_json::to_string(&Widget::BackButton {
+        serde_json::to_string(&Widget::BackButtonVariant {
             actions: Vec::new()
         })
         .unwrap(),
         r#"{"typ":"back-button","actions":[]}"#
     );
     assert_eq!(
-        serde_json::to_string(&Widget::BackButton {
+        serde_json::to_string(&Widget::BackButtonVariant {
             actions: vec![Action::Pop, Action::Logout]
         })
         .unwrap(),
@@ -51,14 +51,14 @@ fn widget_back_button_deserialize() {
         .expect_err("back-button requires `actions`");
     assert_eq!(
         serde_json::from_str::<Widget>(r#"{"typ":"back-button","actions":[]}"#).unwrap(),
-        Widget::BackButton {
+        Widget::BackButtonVariant {
             actions: Vec::new()
         }
     );
     assert_eq!(
         serde_json::from_str::<Widget>(r#"{"typ":"back-button","actions":["pop","logout"]}"#)
             .unwrap(),
-        Widget::BackButton {
+        Widget::BackButtonVariant {
             actions: vec![Action::Pop, Action::Logout]
         }
     );
@@ -67,7 +67,7 @@ fn widget_back_button_deserialize() {
 #[test]
 fn widget_button_serialize() {
     assert_eq!(
-        serde_json::to_string(&Widget::Button {
+        serde_json::to_string(&Widget::ButtonVariant {
             text: "".to_string(),
             actions: Vec::new(),
         })
@@ -75,7 +75,7 @@ fn widget_button_serialize() {
         r#"{"typ":"button","text":""}"#
     );
     assert_eq!(
-        serde_json::to_string(&Widget::Button {
+        serde_json::to_string(&Widget::ButtonVariant {
             text: "abc".to_string(),
             actions: vec![Action::Pop, Action::Logout],
         })
@@ -88,7 +88,7 @@ fn widget_button_serialize() {
 fn widget_button_deserialize() {
     assert_eq!(
         serde_json::from_str::<Widget>(r#"{"typ":"button","text":""}"#).unwrap(),
-        Widget::Button {
+        Widget::ButtonVariant {
             text: "".to_string(),
             actions: Vec::new(),
         }
@@ -98,7 +98,7 @@ fn widget_button_deserialize() {
             r#"{"typ":"button","text":"abc","actions":["pop","logout"]}"#
         )
         .unwrap(),
-        Widget::Button {
+        Widget::ButtonVariant {
             text: "abc".to_string(),
             actions: vec![Action::Pop, Action::Logout],
         }
@@ -108,7 +108,7 @@ fn widget_button_deserialize() {
 #[test]
 fn widget_column_serialize() {
     assert_eq!(
-        serde_json::to_string(&Widget::Column {
+        serde_json::to_string(&Widget::ColumnVariant {
             widgets: Vec::new(),
             h_alignment: HAlignment::Start,
             spacing: 0
@@ -117,10 +117,10 @@ fn widget_column_serialize() {
         r#"{"typ":"column","h-alignment":"start"}"#
     );
     assert_eq!(
-        serde_json::to_string(&Widget::Column {
+        serde_json::to_string(&Widget::ColumnVariant {
             widgets: vec![
-                Widget::Empty,
-                Widget::Text {
+                Widget::EmptyVariant,
+                Widget::TextVariant {
                     text: "abc".to_string()
                 }
             ],
@@ -136,7 +136,7 @@ fn widget_column_serialize() {
 fn widget_column_deserialize() {
     assert_eq!(
         serde_json::from_str::<Widget>(r#"{"typ":"column"}"#).unwrap(),
-        Widget::Column {
+        Widget::ColumnVariant {
             widgets: Vec::new(),
             h_alignment: HAlignment::Start,
             spacing: 0
@@ -147,10 +147,10 @@ fn widget_column_deserialize() {
             r#"{"typ":"column","widgets":[{"typ":"empty"},{"typ":"text","text":"abc"}],"h-alignment":"center","spacing":5}"#
         )
         .unwrap(),
-        Widget::Column {
+        Widget::ColumnVariant {
             widgets: vec![
-                Widget::Empty,
-                Widget::Text {
+                Widget::EmptyVariant,
+                Widget::TextVariant {
                     text: "abc".to_string()
                 }
             ],
@@ -163,7 +163,7 @@ fn widget_column_deserialize() {
 #[test]
 fn widget_empty_serialize() {
     assert_eq!(
-        serde_json::to_string(&Widget::Empty).unwrap(),
+        serde_json::to_string(&Widget::EmptyVariant).unwrap(),
         r#"{"typ":"empty"}"#
     );
 }
@@ -172,14 +172,14 @@ fn widget_empty_serialize() {
 fn widget_empty_deserialize() {
     assert_eq!(
         serde_json::from_str::<Widget>(r#"{"typ":"empty"}"#).unwrap(),
-        Widget::Empty
+        Widget::EmptyVariant
     );
 }
 
 #[test]
 fn widget_form_detail_serialize() {
     assert_eq!(
-        serde_json::to_string(&Widget::FormDetail {
+        serde_json::to_string(&Widget::FormDetailVariant {
             actions: Vec::new(),
             photo_url: None,
             sub_text: None,
@@ -189,7 +189,7 @@ fn widget_form_detail_serialize() {
         r#"{"typ":"form-detail","text":""}"#
     );
     assert_eq!(
-        serde_json::to_string(&Widget::FormDetail {
+        serde_json::to_string(&Widget::FormDetailVariant {
             actions: vec![Action::Pop, Action::Logout],
             photo_url: Some("/p1".to_string()),
             sub_text: Some("s1".to_string()),
@@ -206,7 +206,7 @@ fn widget_form_detail_deserialize() {
         .expect_err("form-detail requires `text`");
     assert_eq!(
         serde_json::from_str::<Widget>(r#"{"typ":"form-detail","text":""}"#).unwrap(),
-        Widget::FormDetail {
+        Widget::FormDetailVariant {
             actions: Vec::new(),
             photo_url: None,
             sub_text: None,
@@ -218,7 +218,7 @@ fn widget_form_detail_deserialize() {
             r#"{"typ":"form-detail","actions":["pop","logout"],"photo-url":"/p1","sub-text":"s1","text":"t1"}"#
         )
         .unwrap(),
-        Widget::FormDetail {
+        Widget::FormDetailVariant {
             actions: vec![Action::Pop, Action::Logout],
             photo_url: Some("/p1".to_string()),
             sub_text: Some("s1".to_string()),
@@ -230,7 +230,7 @@ fn widget_form_detail_deserialize() {
 #[test]
 fn widget_form_section_serialize() {
     assert_eq!(
-        serde_json::to_string(&Widget::FormSection {
+        serde_json::to_string(&Widget::FormSectionVariant {
             title: None,
             widgets: Vec::new(),
         })
@@ -238,11 +238,11 @@ fn widget_form_section_serialize() {
         r#"{"typ":"form-section"}"#
     );
     assert_eq!(
-        serde_json::to_string(&Widget::FormSection {
+        serde_json::to_string(&Widget::FormSectionVariant {
             title: Some("title1".to_string()),
             widgets: vec![
-                Widget::Empty,
-                Widget::Text {
+                Widget::EmptyVariant,
+                Widget::TextVariant {
                     text: "abc".to_string()
                 }
             ],
@@ -256,7 +256,7 @@ fn widget_form_section_serialize() {
 fn widget_form_section_deserialize() {
     assert_eq!(
         serde_json::from_str::<Widget>(r#"{"typ":"form-section"}"#).unwrap(),
-        Widget::FormSection {
+        Widget::FormSectionVariant {
             title: None,
             widgets: Vec::new(),
         }
@@ -266,11 +266,11 @@ fn widget_form_section_deserialize() {
             r#"{"typ":"form-section","title":"title1","widgets":[{"typ":"empty"},{"typ":"text","text":"abc"}]}"#
         )
             .unwrap(),
-        Widget::FormSection {
+        Widget::FormSectionVariant {
             title: Some("title1".to_string()),
             widgets: vec![
-                Widget::Empty,
-                Widget::Text {
+                Widget::EmptyVariant,
+                Widget::TextVariant {
                     text: "abc".to_string()
                 }
             ],
@@ -281,7 +281,7 @@ fn widget_form_section_deserialize() {
 #[test]
 fn widget_modal_button_serialize() {
     assert_eq!(
-        serde_json::to_string(&Widget::ModalButton {
+        serde_json::to_string(&Widget::ModalButtonVariant {
             text: "".to_string(),
             actions: Vec::new(),
             is_cancel: false,
@@ -292,7 +292,7 @@ fn widget_modal_button_serialize() {
         r#"{"typ":"modal-button","text":""}"#
     );
     assert_eq!(
-        serde_json::to_string(&Widget::ModalButton {
+        serde_json::to_string(&Widget::ModalButtonVariant {
             text: "abc".to_string(),
             actions: vec![Action::Pop, Action::Logout],
             is_cancel: false,
@@ -308,7 +308,7 @@ fn widget_modal_button_serialize() {
 fn widget_modal_button_deserialize() {
     assert_eq!(
         serde_json::from_str::<Widget>(r#"{"typ":"modal-button","text":""}"#).unwrap(),
-        Widget::ModalButton {
+        Widget::ModalButtonVariant {
             text: "".to_string(),
             actions: Vec::new(),
             is_cancel: false,
@@ -321,7 +321,7 @@ fn widget_modal_button_deserialize() {
             r#"{"typ":"modal-button","text":"abc","actions":["pop","logout"]}"#
         )
         .unwrap(),
-        Widget::ModalButton {
+        Widget::ModalButtonVariant {
             text: "abc".to_string(),
             actions: vec![Action::Pop, Action::Logout],
             is_cancel: false,
@@ -334,14 +334,14 @@ fn widget_modal_button_deserialize() {
 #[test]
 fn widget_text_serialize() {
     assert_eq!(
-        serde_json::to_string(&Widget::Text {
+        serde_json::to_string(&Widget::TextVariant {
             text: "".to_string()
         })
         .unwrap(),
         r#"{"typ":"text","text":""}"#
     );
     assert_eq!(
-        serde_json::to_string(&Widget::Text {
+        serde_json::to_string(&Widget::TextVariant {
             text: "t1".to_string()
         })
         .unwrap(),
@@ -354,13 +354,13 @@ fn widget_text_deserialize() {
     serde_json::from_str::<Widget>(r#"{"typ":"text"}"#).expect_err("text requires `text`");
     assert_eq!(
         serde_json::from_str::<Widget>(r#"{"typ":"text","text":""}"#).unwrap(),
-        Widget::Text {
+        Widget::TextVariant {
             text: "".to_string()
         }
     );
     assert_eq!(
         serde_json::from_str::<Widget>(r#"{"typ":"text","text":"t1"}"#).unwrap(),
-        Widget::Text {
+        Widget::TextVariant {
             text: "t1".to_string()
         }
     );

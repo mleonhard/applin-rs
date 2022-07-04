@@ -12,7 +12,7 @@ impl Text {
 
     #[must_use]
     pub fn to_widget(self) -> Widget {
-        Widget::Text { text: self.text }
+        Widget::TextVariant { text: self.text }
     }
 }
 impl From<Text> for Widget {

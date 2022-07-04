@@ -30,7 +30,7 @@ impl Form {
 
     #[must_use]
     pub fn to_widget(self) -> Widget {
-        Widget::Form {
+        Widget::FormVariant {
             widgets: self.widgets,
         }
     }

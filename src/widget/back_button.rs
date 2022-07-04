@@ -31,7 +31,7 @@ impl BackButton {
 
     #[must_use]
     pub fn to_widget(self) -> Widget {
-        Widget::BackButton {
+        Widget::BackButtonVariant {
             actions: self.actions,
         }
     }

@@ -15,7 +15,7 @@ impl Scroll {
 
     #[must_use]
     pub fn to_widget(self) -> Widget {
-        Widget::Scroll {
+        Widget::ScrollVariant {
             widget: Box::new(self.widget),
         }
     }
