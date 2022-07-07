@@ -383,7 +383,19 @@ fn add_form_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
 fn add_form_error_page(keys: &mut KeySet<SessionState>) -> PageKey {
     keys.add_static_page(
         "/form-error",
-        NavPage::new("Form Error", Form::new(FormError::new("Error Message"))),
+        NavPage::new(
+            "Form Error",
+            Form::new((
+                FormError::new("Error Message"),
+                FormError::new(""),
+                FormError::new(
+                    "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                ),
+                FormError::new(
+                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                ),
+            )),
+        ),
     )
 }
 
