@@ -1,4 +1,4 @@
-Applin
+Applin™
 ======
 [![crates.io version](https://img.shields.io/crates/v/applin.svg)](https://crates.io/crates/applin)
 [![license: Apache 2.0](https://raw.githubusercontent.com/mleonhard/applin-rs/main/license-apache-2.0.svg)](http://www.apache.org/licenses/LICENSE-2.0)
@@ -243,6 +243,22 @@ Companies using server-driven UI for popular apps:
 - [A Deep Dive into Airbnb’s Server-Driven UI System](https://medium.com/airbnb-engineering/a-deep-dive-into-airbnbs-server-driven-ui-system-842244c5f5)
 - [How we built Facebook Lite for every Android phone and network](https://engineering.fb.com/2016/03/09/android/how-we-built-facebook-lite-for-every-android-phone-and-network/)
 - [Facebook Lite: Building for 2G Connections and Typical Devices (Video)](https://www.facebook.com/watch/?v=10153625275313553)
+
+# Trademark
+"Applin™" is a trademark of Leonhard LLC.
+You may not use the trademark without written authorization from Leonhard LLC.
+
+Apple released their iOS UIKit library in 2008.
+Then in 2013, another group released a web framework also called "UIKit".
+Because the two libraries have the same name,
+search results contain info for both libraries.
+iOS developers searching for info must 
+waste time reading pages about the web framework.
+This is a serious usability problem.
+I plan to use U.S. trademark law to prevent similar difficulties for Applin users.
+
+I intend to grant authorization to use the "Applin" name
+to high-quality compatible libraries and tools.
 
 # Changelog
 - v0.1.0 - First published version
