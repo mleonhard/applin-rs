@@ -1,4 +1,4 @@
-//! Applin
+//! Applin™
 //! ======
 //! [![crates.io version](https://img.shields.io/crates/v/applin.svg)](https://crates.io/crates/applin)
 //! [![license: Apache 2.0](https://raw.githubusercontent.com/mleonhard/applin-rs/main/license-apache-2.0.svg)](http://www.apache.org/licenses/LICENSE-2.0)
@@ -108,6 +108,9 @@
 //!       [the request continues in the background](https://github.com/dart-lang/http/issues/424),
 //!       wasting mobile device CPU & RAM, data transfer, battery, and server resources.
 //!   </details>
+//! - [ZK](https://www.zkoss.org/)
+//!   - Define app UI and behavior with XML and server-side Java.
+//!   - Commercial product with free Community Edition.
 //! - [Jasonelle](https://jasonelle.com)
 //!   - Define app UI with JSON and JavaScript.
 //!   - Incomplete documentation
@@ -127,6 +130,23 @@
 //! - [How we built Facebook Lite for every Android phone and network](https://engineering.fb.com/2016/03/09/android/how-we-built-facebook-lite-for-every-android-phone-and-network/)
 //! - [Facebook Lite: Building for 2G Connections and Typical Devices (Video)](https://www.facebook.com/watch/?v=10153625275313553)
 //!
+//! # Trademark
+//! "Applin™" is a trademark of Leonhard LLC.
+//! You may not use the trademark without written authorization from Leonhard LLC.
+//!
+//! Apple released their iOS UIKit library in 2008.
+//! Then in 2013, another group released a web framework also called "UIKit".
+//! Because the two libraries have the same name,
+//! search results contain info for both libraries.
+//! iOS developers searching for info must
+//! waste time reading pages about the web framework.
+//! This is a serious usability problem.
+//! I plan to use trademark law to prevent similar difficulties for Applin users.
+//!
+//! I intend to grant authorization to use the "Applin" name
+//! to high-quality compatible libraries and tools.
+//! For example, if you wish to write applin-go or applin-rails, please contact me.
+//!
 //! # Changelog
 //! - v0.1.0 - First published version
 //!
@@ -138,6 +158,7 @@
 //! - Session: When not in an RPC, when building and an error or panic occurs, disconnect.
 //! - Action to refresh an image
 //! - Server to push refresh an image
+//! - Fail build on key collision, for large projects.
 #![forbid(unsafe_code)]
 
 pub mod action;

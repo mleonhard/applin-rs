@@ -60,7 +60,7 @@ Functions  Expressions  Impls  Traits  Methods  Dependency
 0/0        7/7          0/0    0/0     0/0      ☢️  │   ├── itoa 1.0.1
 7/9        587/723      0/0    0/0     2/2      ☢️  │   ├── ryu 1.0.9
 0/0        5/5          0/0    0/0     0/0      ☢️  │   └── serde 1.0.136
-0/0        0/0          0/0    0/0     0/0      🔒  └── servlin 0.1.0
+0/0        0/0          0/0    0/0     0/0      🔒  └── servlin 0.1.1
 0/0        4/4          0/0    0/0     2/2      ☢️      ├── async-fs 1.5.0
 0/0        51/51        14/14  0/0     0/0      ☢️      │   ├── async-lock 2.5.0
 0/0        106/116      4/8    0/0     0/0      ☢️      │   │   └── event-listener 2.5.2
@@ -225,6 +225,9 @@ Functions  Expressions  Impls  Traits  Methods  Dependency
       [the request continues in the background](https://github.com/dart-lang/http/issues/424),
       wasting mobile device CPU & RAM, data transfer, battery, and server resources.
   </details>
+- [ZK](https://www.zkoss.org/)
+  - Define app UI and behavior with XML and server-side Java.
+  - Commercial product with free Community Edition.
 - [Jasonelle](https://jasonelle.com)
   - Define app UI with JSON and JavaScript.
   - Incomplete documentation
@@ -252,13 +255,14 @@ Apple released their iOS UIKit library in 2008.
 Then in 2013, another group released a web framework also called "UIKit".
 Because the two libraries have the same name,
 search results contain info for both libraries.
-iOS developers searching for info must 
+iOS developers searching for info must
 waste time reading pages about the web framework.
 This is a serious usability problem.
-I plan to use U.S. trademark law to prevent similar difficulties for Applin users.
+I plan to use trademark law to prevent similar difficulties for Applin users.
 
 I intend to grant authorization to use the "Applin" name
 to high-quality compatible libraries and tools.
+For example, if you wish to write applin-go or applin-rails, please contact me.
 
 # Changelog
 - v0.1.0 - First published version
@@ -271,5 +275,6 @@ to high-quality compatible libraries and tools.
 - Session: When not in an RPC, when building and an error or panic occurs, disconnect.
 - Action to refresh an image
 - Server to push refresh an image
+- Fail build on key collision, for large projects.
 
 License: MIT OR Apache-2.0
