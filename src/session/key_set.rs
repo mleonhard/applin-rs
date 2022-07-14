@@ -103,6 +103,7 @@ impl<T> KeySet<T> {
     pub fn add_static_page(&mut self, key: impl Into<String>, page: impl Into<Page>) -> PageKey {
         let key = key.into();
         let value = page.into();
+        // TODO: Warn if key already exists.
         self.key_to_value_fn.insert(
             key.clone(),
             Box::new(move |_rebuilder| Ok(value.to_value())),

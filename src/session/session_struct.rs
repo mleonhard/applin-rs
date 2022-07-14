@@ -190,6 +190,8 @@ impl<T: 'static + Send + Sync> Session<T> {
 
     #[allow(clippy::missing_panics_doc)]
     pub fn schedule_rebuild_value(self: &Arc<Self>, key: impl AsRef<str>, ctx: &Context<T>) {
+        // TODO: Check if there is a connection session.
+        //       If there isn't one, then add to rpc_updates.
         let key = key.as_ref().to_string();
         if &Context::Rpc(self.id()) == ctx {
             self.lock_inner()

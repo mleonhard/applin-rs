@@ -17,12 +17,12 @@ pub enum Widget {
     },
     #[serde(rename = "checkbox")]
     CheckBoxVariant {
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        actions: Vec<Action>,
         id: String,
         #[serde(rename = "initial-bool")]
         #[serde(default, skip_serializing_if = "std::ops::Not::not")]
         initial_bool: bool,
-        #[serde(default, skip_serializing_if = "Vec::is_empty")]
-        actions: Vec<Action>,
     },
     #[serde(rename = "column")]
     ColumnVariant {
@@ -44,19 +44,29 @@ pub enum Widget {
     },
     #[serde(rename = "form-button")]
     FormButtonVariant {
-        text: String,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        actions: Vec<Action>,
         #[serde(rename = "is-destructive")]
         #[serde(default, skip_serializing_if = "std::ops::Not::not")]
         is_destructive: bool,
-        #[serde(default, skip_serializing_if = "Vec::is_empty")]
-        actions: Vec<Action>,
+        text: String,
+    },
+    #[serde(rename = "form-checkbox")]
+    FormCheckboxVariant {
+        id: String,
+        #[serde(rename = "initial-bool")]
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        initial_bool: bool,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        rpc: Option<String>,
+        text: String,
     },
     #[serde(rename = "form-detail")]
     FormDetailVariant {
         text: String,
-        #[serde(rename = "sub-text", skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "sub-text", default, skip_serializing_if = "Option::is_none")]
         sub_text: Option<String>,
-        #[serde(rename = "photo-url", skip_serializing_if = "Option::is_none")]
+        #[serde(rename = "photo-url", default, skip_serializing_if = "Option::is_none")]
         photo_url: Option<String>,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         actions: Vec<Action>,

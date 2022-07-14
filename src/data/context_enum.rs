@@ -4,6 +4,7 @@ use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Weak};
 
 pub enum Context<T> {
+    // TODO: Remove Keys and Value variants.
     Keys(Weak<Session<T>>),
     Value(Weak<Session<T>>, String),
     Rpc(SessionId),

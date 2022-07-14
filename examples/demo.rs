@@ -10,8 +10,8 @@ use applin::action::{nothing, pop, push, rpc};
 use applin::data::{Context, Roster};
 use applin::session::{KeySet, PageKey, Session, SessionSet};
 use applin::widget::{
-    AlertModal, BackButton, Button, Column, DrawerModal, Empty, Form, FormButton, FormDetail,
-    FormError, FormSection, ModalButton, NavPage, PlainPage, Text,
+    AlertModal, BackButton, Button, Column, DrawerModal, Empty, Form, FormButton, FormCheckbox,
+    FormDetail, FormError, FormSection, ModalButton, NavPage, PlainPage, Text,
 };
 use core::fmt::Debug;
 use servlin::reexport::{safina_executor, safina_timer};
@@ -201,6 +201,30 @@ fn add_form_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 .with_action(push(&pressed)),
                 FormButton::new("Disabled"),
                 FormButton::new("Does Nothing").with_action(nothing()),
+            )),
+        ),
+    )
+}
+
+fn add_form_checkbox_page(keys: &mut KeySet<SessionState>) -> PageKey {
+    keys.add_static_page(
+        "/form-checkbox",
+        NavPage::new(
+            "Form Checkbox",
+            Form::new((
+                FormCheckbox::new("checkbox", "Checkbox"),
+                FormCheckbox::new("initial-checked", "Initially checked").with_initial(true),
+                FormCheckbox::new("with-rpc", "Does RPC on change")
+                    .with_rpc("/form-checkbox-update"),
+                FormCheckbox::new("checkbox", ""),
+                FormCheckbox::new(
+                    "checkbox",
+                    "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                ),
+                FormCheckbox::new(
+                    "checkbox",
+                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                ),
             )),
         ),
     )
@@ -497,6 +521,7 @@ fn key_set(
     let back_buttons_page = add_back_button_pages(&mut keys);
     let buttons_page = add_button_page(&mut keys);
     let form_button_page = add_form_button_page(&mut keys);
+    let form_checkbox_page = add_form_checkbox_page(&mut keys);
     let form_detail_page = add_form_detail_page(&mut keys);
     let form_error_page = add_form_error_page(&mut keys);
     let form_section_page = add_form_section_page(&mut keys);
@@ -520,8 +545,8 @@ fn key_set(
                     FormDetail::new("Back Button").with_action(push(&back_buttons_page)),
                     FormDetail::new("Button").with_action(push(&buttons_page)),
                     FormDetail::new("Form Button").with_action(push(&form_button_page)),
+                    FormDetail::new("Form Checkbox").with_action(push(&form_checkbox_page)),
                     FormDetail::new("Form Detail").with_action(push(&form_detail_page)),
-                    // FormDetail::new("Form Checkbox").with_action(push(&form_checkbox_page)),
                     FormDetail::new("Form Error").with_action(push(&form_error_page)),
                     FormDetail::new("Form Section").with_action(push(&form_section_page)),
                     FormDetail::new("Form Text").with_action(push(&form_text_page)),
