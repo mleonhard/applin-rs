@@ -11,7 +11,7 @@ use applin::data::{Context, Roster};
 use applin::session::{KeySet, PageKey, Session, SessionSet};
 use applin::widget::{
     AlertModal, BackButton, Button, Column, DrawerModal, Empty, Form, FormButton, FormDetail,
-    FormError, FormSection, ModalButton, NavPage, Text,
+    FormError, FormSection, ModalButton, NavPage, PlainPage, Text,
 };
 use core::fmt::Debug;
 use servlin::reexport::{safina_executor, safina_timer};
@@ -51,6 +51,32 @@ static RPC1_PATH: &str = "/rpc1";
 fn rpc1(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     let session = state.sessions.get(req)?;
     session.rpc_response()
+}
+
+fn add_alert_page(drawer: &PageKey, keys: &mut KeySet<SessionState>) -> PageKey {
+    const KEY: &str = "/alert";
+    let alert2 = keys.add_static_page("/alert2", AlertModal::new("Alert 2").with_ok());
+    keys.add_static_page(
+        KEY,
+        AlertModal::new("Alert Modal").with_widgets((
+            ModalButton::new("Alert 2").with_action(push(&alert2)),
+            ModalButton::new("Alert Modal").with_action(push(&PageKey::new(KEY))),
+            ModalButton::new("Drawer Modal").with_action(push(drawer)),
+            ModalButton::new("Destructive Button")
+                .with_is_destructive()
+                .with_action(nothing()),
+            ModalButton::cancel(),
+            ModalButton::new(
+                "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+            )
+            .with_action(nothing()),
+            ModalButton::new(
+                "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+            )
+            .with_action(nothing()),
+            ModalButton::new("Disabled Button"),
+        )),
+    )
 }
 
 fn add_back_button_pages(keys: &mut KeySet<SessionState>) -> PageKey {
@@ -113,62 +139,6 @@ fn add_back_button_pages(keys: &mut KeySet<SessionState>) -> PageKey {
     )
 }
 
-fn add_clock_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) -> PageKey {
-    let state_clone = state.clone();
-    keys.add_page_fn("/clock", move |ctx| {
-        Ok(NavPage::new(
-            "Clock",
-            Column::new((
-                Text::new(format!(
-                    "epoch seconds: {}",
-                    state_clone.clock_epoch_seconds.read(ctx)
-                )),
-                // Checkbox::new("clock-check0"),
-                // Text::new("Hello"),
-            )),
-        )
-        .with_stream())
-    })
-}
-
-fn add_drawer_modal_page(keys: &mut KeySet<SessionState>) -> PageKey {
-    keys.add_static_page(
-        "/drawer-modal",
-        DrawerModal::new("Drawer1").with_widgets((
-            ModalButton::cancel(),
-            ModalButton::new("Save")
-                .with_action(rpc("/example-method"))
-                .with_action(pop()),
-        )),
-    )
-}
-
-fn add_alert_page(drawer: &PageKey, keys: &mut KeySet<SessionState>) -> PageKey {
-    const KEY: &str = "/alert";
-    let alert2 = keys.add_static_page("/alert2", AlertModal::new("Alert 2").with_ok());
-    keys.add_static_page(
-        KEY,
-        AlertModal::new("Alert Modal").with_widgets((
-            ModalButton::new("Alert 2").with_action(push(&alert2)),
-            ModalButton::new("Alert Modal").with_action(push(&PageKey::new(KEY))),
-            ModalButton::new("Drawer Modal").with_action(push(drawer)),
-            ModalButton::new("Destructive Button")
-                .with_is_destructive()
-                .with_action(nothing()),
-            ModalButton::cancel(),
-            ModalButton::new(
-                "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
-            )
-            .with_action(nothing()),
-            ModalButton::new(
-                "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
-            )
-            .with_action(nothing()),
-            ModalButton::new("Disabled Button"),
-        )),
-    )
-}
-
 fn add_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
     let pressed = keys.add_static_page(
         "/button-pressed",
@@ -192,6 +162,45 @@ fn add_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 Button::new("").with_action(push(&pressed)),
                 Button::new("Disabled Button"),
                 Button::new("Does Nothing").with_action(nothing()),
+            )),
+        ),
+    )
+}
+
+fn add_drawer_modal_page(keys: &mut KeySet<SessionState>) -> PageKey {
+    keys.add_static_page(
+        "/drawer-modal",
+        DrawerModal::new("Drawer1").with_widgets((
+            ModalButton::cancel(),
+            ModalButton::new("Save")
+                .with_action(rpc("/example-method"))
+                .with_action(pop()),
+        )),
+    )
+}
+
+fn add_form_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
+    let pressed = keys.add_static_page(
+        "/form-button-pressed",
+        AlertModal::new("Form Button Pressed").with_ok(),
+    );
+    keys.add_static_page(
+        "/form-button",
+        NavPage::new(
+            "Form Button",
+            Form::new((
+                FormButton::new("Button1").with_action(push(&pressed)),
+                FormButton::new("").with_action(push(&pressed)),
+                FormButton::new(
+                    "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                )
+                .with_action(push(&pressed)),
+                FormButton::new(
+                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                )
+                .with_action(push(&pressed)),
+                FormButton::new("Disabled"),
+                FormButton::new("Does Nothing").with_action(nothing()),
             )),
         ),
     )
@@ -338,48 +347,6 @@ fn add_form_detail_page(keys: &mut KeySet<SessionState>) -> PageKey {
     )
 }
 
-fn add_form_text_page(keys: &mut KeySet<SessionState>) -> PageKey {
-    keys.add_static_page(
-        "/form-text",
-        NavPage::new(
-            "Form Text",
-            Form::new((
-                Text::new("Text"),
-                Text::new(""),
-                Text::new("MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM"),
-                Text::new("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"),
-            )),
-        ),
-    )
-}
-
-fn add_form_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
-    let pressed = keys.add_static_page(
-        "/form-button-pressed",
-        AlertModal::new("Form Button Pressed").with_ok(),
-    );
-    keys.add_static_page(
-        "/form-button",
-        NavPage::new(
-            "Form Button",
-            Form::new((
-                FormButton::new("Button1").with_action(push(&pressed)),
-                FormButton::new("").with_action(push(&pressed)),
-                FormButton::new(
-                    "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
-                )
-                .with_action(push(&pressed)),
-                FormButton::new(
-                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
-                )
-                .with_action(push(&pressed)),
-                FormButton::new("Disabled"),
-                FormButton::new("Does Nothing").with_action(nothing()),
-            )),
-        ),
-    )
-}
-
 fn add_form_error_page(keys: &mut KeySet<SessionState>) -> PageKey {
     keys.add_static_page(
         "/form-error",
@@ -425,37 +392,145 @@ fn add_form_section_page(keys: &mut KeySet<SessionState>) -> PageKey {
     )
 }
 
+fn add_form_text_page(keys: &mut KeySet<SessionState>) -> PageKey {
+    keys.add_static_page(
+        "/form-text",
+        NavPage::new(
+            "Form Text",
+            Form::new((
+                Text::new("Text"),
+                Text::new(""),
+                Text::new("MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM"),
+                Text::new("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"),
+            )),
+        ),
+    )
+}
+
+fn add_nav_page(keys: &mut KeySet<SessionState>) -> PageKey {
+    keys.add_static_page(
+        "/nav-page",
+        NavPage::new(
+            "Nav Page",
+            Form::new((
+                Text::new("Hello"), //
+                Text::new("Hello 2"),
+            )),
+        ),
+    )
+}
+
+fn add_plain_page(keys: &mut KeySet<SessionState>) -> PageKey {
+    keys.add_static_page(
+        "/plain-page",
+        PlainPage::new(
+            "Plain Page",
+            Form::new((
+                Text::new("Hello"), //
+                Button::new("Back").with_action(pop()),
+            )),
+        ),
+    )
+}
+
+fn add_inert_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) -> PageKey {
+    let state_clone = state.clone();
+    keys.add_page_fn("/inert", move |ctx| {
+        Ok(NavPage::new(
+            "Inert",
+            Text::new(format!(
+                "epoch seconds: {}",
+                state_clone.clock_epoch_seconds.read(ctx)
+            )),
+        ))
+    })
+}
+
+fn add_poll_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) -> PageKey {
+    let state_clone = state.clone();
+    keys.add_page_fn("/poll", move |ctx| {
+        Ok(NavPage::new(
+            "Poll Every 2 Seconds",
+            Column::new((
+                Text::new(format!(
+                    "epoch seconds: {}",
+                    state_clone.clock_epoch_seconds.read(ctx)
+                )),
+                // Checkbox::new("clock-check0"),
+                // Text::new("Hello"),
+            )),
+        )
+        .with_poll(2))
+    })
+}
+
+fn add_stream_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) -> PageKey {
+    let state_clone = state.clone();
+    keys.add_page_fn("/stream", move |ctx| {
+        Ok(NavPage::new(
+            "Stream",
+            Column::new((
+                Text::new(format!(
+                    "epoch seconds: {}",
+                    state_clone.clock_epoch_seconds.read(ctx)
+                )),
+                // Checkbox::new("clock-check0"),
+                // Text::new("Hello"),
+            )),
+        )
+        .with_stream())
+    })
+}
+
 #[allow(clippy::unnecessary_wraps)]
 fn key_set(
     state: &Arc<ServerState>,
     _ctx: &Context<SessionState>,
 ) -> Result<KeySet<SessionState>, Box<dyn Error>> {
     let mut keys = KeySet::new();
-    let clock_page = add_clock_page(state, &mut keys);
+    // Pages
     let drawer_modal = add_drawer_modal_page(&mut keys);
     let alert_modal = add_alert_page(&drawer_modal, &mut keys);
+    let nav_page = add_nav_page(&mut keys);
+    let plain_page = add_plain_page(&mut keys);
+    // Widgets
     let back_buttons_page = add_back_button_pages(&mut keys);
     let buttons_page = add_button_page(&mut keys);
+    let form_button_page = add_form_button_page(&mut keys);
     let form_detail_page = add_form_detail_page(&mut keys);
     let form_error_page = add_form_error_page(&mut keys);
-    let form_text_page = add_form_text_page(&mut keys);
-    let form_button_page = add_form_button_page(&mut keys);
     let form_section_page = add_form_section_page(&mut keys);
+    let form_text_page = add_form_text_page(&mut keys);
+    // Update Modes
+    let inert_page = add_inert_page(state, &mut keys);
+    let poll_page = add_poll_page(state, &mut keys);
+    let stream_page = add_stream_page(state, &mut keys);
     keys.add_static_page(
         "/",
         NavPage::new(
             "Applin Demo",
             Form::new((
-                FormDetail::new("Clock Page").with_action(push(&clock_page)),
-                FormDetail::new("Alert Modal").with_action(push(&alert_modal)),
-                FormDetail::new("Drawer Modal").with_action(push(&drawer_modal)),
-                FormDetail::new("Back Button").with_action(push(&back_buttons_page)),
-                FormDetail::new("Button").with_action(push(&buttons_page)),
-                FormDetail::new("Form Detail").with_action(push(&form_detail_page)),
-                FormDetail::new("Form Error").with_action(push(&form_error_page)),
-                FormDetail::new("Form Text").with_action(push(&form_text_page)),
-                FormDetail::new("Form Button").with_action(push(&form_button_page)),
-                FormDetail::new("Form Section").with_action(push(&form_section_page)),
+                FormSection::new().with_title("Pages").with_widgets((
+                    FormDetail::new("Alert Modal").with_action(push(&alert_modal)),
+                    FormDetail::new("Drawer Modal").with_action(push(&drawer_modal)),
+                    FormDetail::new("Nav Page").with_action(push(&nav_page)),
+                    FormDetail::new("Plain Page").with_action(push(&plain_page)),
+                )),
+                FormSection::new().with_title("Widgets").with_widgets((
+                    FormDetail::new("Back Button").with_action(push(&back_buttons_page)),
+                    FormDetail::new("Button").with_action(push(&buttons_page)),
+                    FormDetail::new("Form Button").with_action(push(&form_button_page)),
+                    FormDetail::new("Form Detail").with_action(push(&form_detail_page)),
+                    // FormDetail::new("Form Checkbox").with_action(push(&form_checkbox_page)),
+                    FormDetail::new("Form Error").with_action(push(&form_error_page)),
+                    FormDetail::new("Form Section").with_action(push(&form_section_page)),
+                    FormDetail::new("Form Text").with_action(push(&form_text_page)),
+                )),
+                FormSection::new().with_title("Update Modes").with_widgets((
+                    FormDetail::new("Static").with_action(push(&inert_page)),
+                    FormDetail::new("Poll").with_action(push(&poll_page)),
+                    FormDetail::new("Stream").with_action(push(&stream_page)),
+                )),
             )),
         )
         .with_poll(10),
