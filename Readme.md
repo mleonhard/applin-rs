@@ -251,8 +251,8 @@ Companies using server-driven UI for popular apps:
 "Applin™" is a trademark of Leonhard LLC.
 You may not use the trademark without written authorization from Leonhard LLC.
 
-Apple released their iOS UIKit library in 2008.
-Then in 2013, another group released a web framework also called "UIKit".
+Apple released their iOS `UIKit` library in 2008.
+Then in 2013, another group released a web framework also called `UIKit`.
 Because the two libraries have the same name,
 search results contain info for both libraries.
 iOS developers searching for info must

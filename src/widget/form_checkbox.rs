@@ -8,12 +8,14 @@ pub struct FormCheckbox {
     text: String,
 }
 impl FormCheckbox {
+    /// # Panics
+    /// Panics when `id` is empty.
     #[must_use]
     pub fn new(id: impl Into<String>, text: impl Into<String>) -> Self {
         let id = id.into();
         assert!(!id.is_empty());
         Self {
-            id: id,
+            id,
             initial: false,
             rpc: None,
             text: text.into(),

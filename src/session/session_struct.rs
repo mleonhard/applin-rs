@@ -191,7 +191,7 @@ impl<T: 'static + Send + Sync> Session<T> {
     pub fn rebuild_key_set(self: &Arc<Self>, ctx: &Context) {
         if &Context::Rpc(self.id()) == ctx {
             self.lock_inner().rpc_updates.insert(PendingUpdate::KeySet);
-            return; // TODO: Remove.
+            return;
         }
         let self_clone = self.clone();
         self.executor.schedule_blocking(move || {
@@ -201,14 +201,12 @@ impl<T: 'static + Send + Sync> Session<T> {
 
     #[allow(clippy::missing_panics_doc)]
     pub fn rebuild_value(self: &Arc<Self>, key: impl AsRef<str>, ctx: &Context) {
-        // TODO: Check if there is a connection session.
-        //       If there isn't one, then add to rpc_updates.
         let key = key.as_ref().to_string();
         if &Context::Rpc(self.id()) == ctx {
             self.lock_inner()
                 .rpc_updates
-                .insert(PendingUpdate::Key(key.clone()));
-            return; // TODO: Remove.
+                .insert(PendingUpdate::Key(key));
+            return;
         }
         let self_clone = self.clone();
         self.executor.schedule_blocking(move || {
@@ -254,7 +252,6 @@ impl<T: 'static + Send + Sync> Session<T> {
     pub fn poll(self: &Arc<Self>) -> Result<Response, Response> {
         // TODO: Send the client an opaque version ID
         //       and skip rebuilding all if it matches.
-        // TODO: Make RPC response include updates not made in this RPC.
         self.rebuild_key_set(&Context::Rpc(self.id()));
         let response = self.rpc_response()?;
         Ok(response.with_set_cookie(self.cookie.to_cookie()))
