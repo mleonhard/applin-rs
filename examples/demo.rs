@@ -19,7 +19,6 @@ use servlin::{
     print_log_response, socket_addr_all_interfaces, ContentType, HttpServerBuilder, Request,
     Response, ResponseBody,
 };
-use std::error::Error;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
 
@@ -459,12 +458,12 @@ fn add_plain_page(keys: &mut KeySet<SessionState>) -> PageKey {
 
 fn add_inert_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) -> PageKey {
     let state_clone = state.clone();
-    keys.add_page_fn("/inert", move |ctx| {
+    keys.add_page_fn("/inert", move |rebuilder| {
         Ok(NavPage::new(
             "Inert",
             Text::new(format!(
                 "epoch seconds: {}",
-                state_clone.clock_epoch_seconds.read(ctx)
+                state_clone.clock_epoch_seconds.read(rebuilder)
             )),
         ))
     })
@@ -472,13 +471,13 @@ fn add_inert_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) -> 
 
 fn add_poll_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) -> PageKey {
     let state_clone = state.clone();
-    keys.add_page_fn("/poll", move |ctx| {
+    keys.add_page_fn("/poll", move |rebuilder| {
         Ok(NavPage::new(
             "Poll Every 2 Seconds",
             Column::new((
                 Text::new(format!(
                     "epoch seconds: {}",
-                    state_clone.clock_epoch_seconds.read(ctx)
+                    state_clone.clock_epoch_seconds.read(rebuilder)
                 )),
                 // Checkbox::new("clock-check0"),
                 // Text::new("Hello"),
@@ -490,13 +489,13 @@ fn add_poll_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) -> P
 
 fn add_stream_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) -> PageKey {
     let state_clone = state.clone();
-    keys.add_page_fn("/stream", move |ctx| {
+    keys.add_page_fn("/stream", move |rebuilder| {
         Ok(NavPage::new(
             "Stream",
             Column::new((
                 Text::new(format!(
                     "epoch seconds: {}",
-                    state_clone.clock_epoch_seconds.read(ctx)
+                    state_clone.clock_epoch_seconds.read(rebuilder)
                 )),
                 // Checkbox::new("clock-check0"),
                 // Text::new("Hello"),
@@ -506,11 +505,7 @@ fn add_stream_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) ->
     })
 }
 
-#[allow(clippy::unnecessary_wraps)]
-fn key_set(
-    state: &Arc<ServerState>,
-    _ctx: &Context<SessionState>,
-) -> Result<KeySet<SessionState>, Box<dyn Error>> {
+fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
     let mut keys = KeySet::new();
     // Pages
     let drawer_modal = add_drawer_modal_page(&mut keys);
@@ -560,7 +555,7 @@ fn key_set(
         )
         .with_poll(10),
     );
-    Ok(keys)
+    keys
 }
 
 fn get_or_new_session(
@@ -570,7 +565,7 @@ fn get_or_new_session(
     let state_clone = state.clone();
     state.sessions.get_or_new(
         req,
-        move |ctx| key_set(&state_clone, ctx),
+        move |_rebuilder| Ok(key_set(&state_clone)),
         || SessionState {},
     )
 }

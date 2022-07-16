@@ -29,12 +29,11 @@
 #![forbid(unsafe_code)]
 
 use applin::action::rpc;
-use applin::data::{random_u64, Context, Roster};
+use applin::data::{random_u64, Rebuilder, Roster};
 use applin::session::{KeySet, Session, SessionSet};
 use applin::widget::{Button, Column, NavPage, Text};
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
-use std::error::Error;
 use std::fmt::{Debug, Formatter};
 use std::ops::AddAssign;
 use std::sync::Arc;
@@ -79,28 +78,26 @@ impl ServerState {
     }
 }
 
-#[allow(clippy::unnecessary_wraps)]
-fn key_set(
-    _state: &Arc<ServerState>,
-    _ctx: &Context<SessionState>,
-) -> Result<KeySet<SessionState>, Box<dyn Error>> {
+fn key_set(_state: &Arc<ServerState>) -> KeySet<SessionState> {
     let mut keys = KeySet::new();
-    keys.add_page_fn("/", move |ctx: &Context<SessionState>| {
+    keys.add_page_fn("/", move |rebuilder: Rebuilder<SessionState>| {
+        let session = rebuilder.session()?;
+        let session_state = session.state();
         Ok(NavPage::new(
             "Session State Example",
             Column::new((
                 Text::new(format!(
                     "Counter: {}",
                     // Get the counter value and subscribe to updates.
-                    // Whenever the value changes, the server rebuilds this key
-                    // and pushes it to the client.
-                    *ctx.session()?.state().count.read(ctx)
+                    // Whenever the value changes, Applin calls
+                    // this page function to rebuild the page.
+                    *session_state.count.read(rebuilder)
                 )),
                 Button::new("Increment").with_action(rpc("/increment")),
             )),
         ))
     });
-    Ok(keys)
+    keys
 }
 
 fn get_or_new_session(
@@ -110,7 +107,7 @@ fn get_or_new_session(
     let state_clone = state.clone();
     state.sessions.get_or_new(
         req,
-        move |ctx| key_set(&state_clone, ctx),
+        move |_rebuilder| Ok(key_set(&state_clone)),
         || SessionState::new(UserId::new_random()),
     )
 }

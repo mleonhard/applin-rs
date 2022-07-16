@@ -20,7 +20,7 @@
 //! ```
 #![forbid(unsafe_code)]
 
-use applin::data::Context;
+use applin::data::Rebuilder;
 use applin::session::{KeySet, SessionSet};
 use applin::widget::{PlainPage, Text};
 use servlin::reexport::{safina_executor, safina_timer};
@@ -32,7 +32,7 @@ pub fn main() {
     safina_timer::start_timer_thread();
     let executor = safina_executor::Executor::default();
     let sessions: Arc<SessionSet<()>> = Arc::new(SessionSet::new(&executor));
-    let key_set_fn = move |_ctx: &Context<()>| {
+    let key_set_fn = move |_rebuilder: Rebuilder<()>| {
         Ok(KeySet::new()
             .with_static_page("/", PlainPage::new("Minimal Example", Text::new("Hello"))))
     };

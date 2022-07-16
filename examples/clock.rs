@@ -48,14 +48,14 @@ impl ServerState {
 fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
     let mut keys = KeySet::new();
     let state_clone = state.clone();
-    keys.add_page_fn("/", move |ctx| {
+    keys.add_page_fn("/", move |rebuilder| {
         Ok(NavPage::new(
             "Clock Example",
             Text::new(
                 // Get the string and subscribe to updates.
                 // Whenever the value changes, the server rebuilds this key
                 // and pushes it to the client.
-                state_clone.displayed_string.read(ctx).to_string(),
+                state_clone.displayed_string.read(rebuilder).to_string(),
             ),
         )
         .with_stream())
@@ -70,7 +70,7 @@ fn get_or_new_session(
     let state_clone = state.clone();
     state.sessions.get_or_new(
         req,
-        move |_ctx| Ok(key_set(&state_clone)),
+        move |_rebuilder| Ok(key_set(&state_clone)),
         || SessionState {},
     )
 }

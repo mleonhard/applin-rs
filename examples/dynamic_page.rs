@@ -27,7 +27,7 @@
 #![forbid(unsafe_code)]
 
 use applin::action::push;
-use applin::data::{Context, Roster};
+use applin::data::{Context, Rebuilder, Roster};
 use applin::session::{KeySet, Session, SessionSet};
 use applin::widget::{Button, Column, Empty, NavPage, Text};
 use servlin::reexport::permit::Permit;
@@ -56,13 +56,13 @@ impl ServerState {
 #[allow(clippy::unnecessary_wraps)]
 fn key_set(
     state: &Arc<ServerState>,
-    ctx: &Context<SessionState>,
+    rebuilder: Rebuilder<SessionState>,
 ) -> Result<KeySet<SessionState>, Box<dyn Error>> {
     let mut keys = KeySet::new();
-    assert!(matches!(ctx, Context::Keys(_)));
-    // Read the value and subscribe to changes.
-    // Since `ctx` is `Context::Keys`, Applin will rebuild all keys next time the value changes.
-    let show_page_2 = *state.show_page_2.read(ctx);
+    // Read the `show_page_2` value and subscribe to changes.
+    // Whenever the value changes, Applin calls this function
+    // to rebuild the set of keys.
+    let show_page_2 = *state.show_page_2.read(rebuilder);
     let opt_page_2 = if show_page_2 {
         let page_2 = keys.add_static_page(
             "/page_2",
@@ -72,7 +72,7 @@ fn key_set(
     } else {
         None
     };
-    keys.add_page_fn("/", move |_ctx| {
+    keys.add_page_fn("/", move |_rebuilder| {
         Ok(NavPage::new(
             "Dynamic Page Example",
             Column::new((
@@ -96,7 +96,7 @@ fn get_or_new_session(
     let state_clone = state.clone();
     state.sessions.get_or_new(
         req,
-        move |ctx| key_set(&state_clone, ctx),
+        move |rebuilder| key_set(&state_clone, rebuilder),
         || SessionState {},
     )
 }

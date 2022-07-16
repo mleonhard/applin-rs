@@ -1,4 +1,4 @@
-use crate::data::Context;
+use crate::data::{Context, Rebuilder};
 use crate::error::server_error;
 use crate::session::{KeySet, SessionCookie, SessionId};
 use core::fmt::{Debug, Formatter};
@@ -45,7 +45,7 @@ pub struct Session<T> {
         dyn 'static
             + Send
             + Sync
-            + Fn(&Context<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
+            + Fn(Rebuilder<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
     >,
     pub scheduled_updates: Mutex<HashSet<PendingUpdate>>,
     pub state: Mutex<T>,
@@ -54,7 +54,10 @@ pub struct Session<T> {
 impl<T: 'static + Send + Sync> Session<T> {
     pub fn new<F>(executor: &Arc<Executor>, key_set_fn: F, state: T) -> Arc<Self>
     where
-        F: 'static + Send + Sync + Fn(&Context<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
+        F: 'static
+            + Send
+            + Sync
+            + Fn(Rebuilder<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
     {
         Arc::new(Self {
             executor: executor.clone(),
@@ -74,7 +77,7 @@ impl<T: 'static + Send + Sync> Session<T> {
         self.cookie.id()
     }
 
-    pub fn rpc_context(&self) -> Context<T> {
+    pub fn rpc_context(&self) -> Context {
         Context::Rpc(self.id())
     }
 
@@ -104,7 +107,7 @@ impl<T: 'static + Send + Sync> Session<T> {
         drop(inner_guard);
         // TODO: Send the client an opaque version ID
         //       and skip rebuilding all if it matches.
-        self.schedule_rebuild_key_set(&Context::Empty);
+        self.rebuild_key_set(&Context::Empty);
         Ok(response
             .with_set_cookie(self.cookie.to_cookie())
             .with_no_store())
@@ -115,8 +118,10 @@ impl<T: 'static + Send + Sync> Session<T> {
     pub fn build_key_set(
         self: &Arc<Self>,
     ) -> Result<HashMap<String, Value>, Box<dyn std::error::Error>> {
+        let rebuilder = Rebuilder::Keys(Arc::downgrade(self));
         let mut inner_guard = self.lock_inner();
-        let mut new_key_set = (*self.key_set_fn)(&Context::Keys(Arc::downgrade(self)))?;
+        let result = (*self.key_set_fn)(rebuilder);
+        let mut new_key_set = result?;
         let mut diff = HashMap::new();
         // Removed keys.
         for key in inner_guard.key_set.key_to_value_fn.keys() {
@@ -127,8 +132,8 @@ impl<T: 'static + Send + Sync> Session<T> {
         // Added keys.
         for (key, value_fn) in &new_key_set.key_to_value_fn {
             if !inner_guard.key_set.key_to_value_fn.contains_key(key) {
-                let ctx = Context::Value(Arc::downgrade(self), key.to_string());
-                let value = (*value_fn)(&ctx)?;
+                let rebuilder = Rebuilder::Value(Arc::downgrade(self), key.to_string());
+                let value = (*value_fn)(rebuilder)?;
                 diff.insert(key.to_string(), value);
             }
         }
@@ -151,14 +156,14 @@ impl<T: 'static + Send + Sync> Session<T> {
     /// # Errors
     /// Returns an error when we build the value for the key.
     pub fn build_value(self: &Arc<Self>, key: &str) -> Result<Value, Box<dyn std::error::Error>> {
+        let rebuilder = Rebuilder::Value(Arc::downgrade(self), key.to_string());
         let inner_guard = self.lock_inner();
         let value_fn = inner_guard
             .key_set
             .key_to_value_fn
             .get(key)
             .ok_or_else(|| format!("key {:?} not found", key))?;
-        let ctx = Context::Value(Arc::downgrade(self), key.to_string());
-        (*value_fn)(&ctx)
+        (*value_fn)(rebuilder)
     }
 
     /// # Errors
@@ -171,33 +176,39 @@ impl<T: 'static + Send + Sync> Session<T> {
         let json_obj = json!({"pages": { key: value }});
         let json_string = json_obj.to_string();
         //dbg!(&json_string);
-        self.lock_inner().sender.send(Event::Message(json_string));
+        let mut inner = self.lock_inner();
+        if inner.sender.is_connected() {
+            inner.sender.send(Event::Message(json_string));
+        } else {
+            inner
+                .rpc_updates
+                .insert(PendingUpdate::Key(key.to_string()));
+        }
         Ok(())
     }
 
     #[allow(clippy::missing_panics_doc)]
-    pub fn schedule_rebuild_key_set(self: &Arc<Self>, ctx: &Context<T>) {
+    pub fn rebuild_key_set(self: &Arc<Self>, ctx: &Context) {
         if &Context::Rpc(self.id()) == ctx {
             self.lock_inner().rpc_updates.insert(PendingUpdate::KeySet);
-            return;
+            return; // TODO: Remove.
         }
         let self_clone = self.clone();
         self.executor.schedule_blocking(move || {
             self_clone.build_key_set_and_send().unwrap();
-            // self_clone.lock_inner().sender.disconnect();
         });
     }
 
     #[allow(clippy::missing_panics_doc)]
-    pub fn schedule_rebuild_value(self: &Arc<Self>, key: impl AsRef<str>, ctx: &Context<T>) {
+    pub fn rebuild_value(self: &Arc<Self>, key: impl AsRef<str>, ctx: &Context) {
         // TODO: Check if there is a connection session.
         //       If there isn't one, then add to rpc_updates.
         let key = key.as_ref().to_string();
         if &Context::Rpc(self.id()) == ctx {
             self.lock_inner()
                 .rpc_updates
-                .insert(PendingUpdate::Key(key));
-            return;
+                .insert(PendingUpdate::Key(key.clone()));
+            return; // TODO: Remove.
         }
         let self_clone = self.clone();
         self.executor.schedule_blocking(move || {
@@ -243,7 +254,8 @@ impl<T: 'static + Send + Sync> Session<T> {
     pub fn poll(self: &Arc<Self>) -> Result<Response, Response> {
         // TODO: Send the client an opaque version ID
         //       and skip rebuilding all if it matches.
-        self.schedule_rebuild_key_set(&Context::Rpc(self.id()));
+        // TODO: Make RPC response include updates not made in this RPC.
+        self.rebuild_key_set(&Context::Rpc(self.id()));
         let response = self.rpc_response()?;
         Ok(response.with_set_cookie(self.cookie.to_cookie()))
     }

@@ -1,4 +1,4 @@
-use crate::data::Context;
+use crate::data::Rebuilder;
 use crate::internal::Page;
 use crate::session::PageKey;
 use core::fmt::{Debug, Formatter};
@@ -7,7 +7,7 @@ use std::collections::HashMap;
 
 #[allow(clippy::module_name_repetitions)]
 pub type KeySetFn<T> =
-    dyn 'static + Send + Sync + Fn(&Context<T>) -> Result<Value, Box<dyn std::error::Error>>;
+    dyn 'static + Send + Sync + Fn(Rebuilder<T>) -> Result<Value, Box<dyn std::error::Error>>;
 
 /// A set of key strings and functions to generate their values.
 pub struct KeySet<T> {
@@ -25,11 +25,11 @@ impl<T> KeySet<T> {
     #[allow(clippy::needless_pass_by_value)]
     pub fn with_page_fn<F, P: Into<Page>>(mut self, key: impl Into<String>, page_fn: F) -> Self
     where
-        F: 'static + Send + Sync + Fn(&Context<T>) -> Result<P, Box<dyn std::error::Error>>,
+        F: 'static + Send + Sync + Fn(Rebuilder<T>) -> Result<P, Box<dyn std::error::Error>>,
     {
         self.key_to_value_fn.insert(
             key.into(),
-            Box::new(move |ctx| page_fn(ctx).map(Into::into).map(Into::into)),
+            Box::new(move |rebuilder| page_fn(rebuilder).map(Into::into).map(Into::into)),
         );
         self
     }
@@ -38,11 +38,11 @@ impl<T> KeySet<T> {
     #[allow(clippy::needless_pass_by_value)]
     pub fn with_value_fn<F, V: Into<Value>>(mut self, key: impl Into<String>, value_fn: F) -> Self
     where
-        F: 'static + Send + Sync + Fn(&Context<T>) -> Result<V, Box<dyn std::error::Error>>,
+        F: 'static + Send + Sync + Fn(Rebuilder<T>) -> Result<V, Box<dyn std::error::Error>>,
     {
         self.key_to_value_fn.insert(
             key.into(),
-            Box::new(move |ctx| value_fn(ctx).map(Into::into)),
+            Box::new(move |rebuilder| value_fn(rebuilder).map(Into::into)),
         );
         self
     }
@@ -68,13 +68,13 @@ impl<T> KeySet<T> {
     #[allow(clippy::needless_pass_by_value)]
     pub fn add_page_fn<F, P: Into<Page>>(&mut self, key: impl Into<String>, page_fn: F) -> PageKey
     where
-        F: 'static + Send + Sync + Fn(&Context<T>) -> Result<P, Box<dyn std::error::Error>>,
+        F: 'static + Send + Sync + Fn(Rebuilder<T>) -> Result<P, Box<dyn std::error::Error>>,
     {
         let key = key.into();
         self.key_to_value_fn.insert(
             key.clone(),
-            Box::new(move |ctx| {
-                page_fn(ctx)
+            Box::new(move |rebuilder| {
+                page_fn(rebuilder)
                     .map(Into::into)
                     .map(|page: Page| page.to_value())
             }),
@@ -89,12 +89,12 @@ impl<T> KeySet<T> {
         value_fn: F,
     ) -> PageKey
     where
-        F: 'static + Send + Sync + Fn(&Context<T>) -> Result<V, Box<dyn std::error::Error>>,
+        F: 'static + Send + Sync + Fn(Rebuilder<T>) -> Result<V, Box<dyn std::error::Error>>,
     {
         let key = key.into();
         self.key_to_value_fn.insert(
             key.clone(),
-            Box::new(move |ctx| value_fn(ctx).map(Into::into)),
+            Box::new(move |rebuilder| value_fn(rebuilder).map(Into::into)),
         );
         PageKey::new(key)
     }
@@ -124,7 +124,7 @@ impl<T> Debug for KeySet<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), core::fmt::Error> {
         let mut keys: Vec<&String> = self.key_to_value_fn.keys().collect();
         keys.sort();
-        write!(f, "Keys<{}>({:?})", core::any::type_name::<T>(), keys)
+        write!(f, "Keys({:?})", keys)
     }
 }
 impl<T> Default for KeySet<T> {

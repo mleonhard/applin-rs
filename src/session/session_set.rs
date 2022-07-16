@@ -1,4 +1,4 @@
-use crate::data::Context;
+use crate::data::Rebuilder;
 use crate::session::{KeySet, Session, SessionCookie, SessionId};
 use servlin::reexport::safina_executor::Executor;
 use servlin::{Request, Response};
@@ -65,7 +65,10 @@ impl<T: 'static + Send + Sync> SessionSet<T> {
 
     pub fn new_session<F>(&self, key_set_fn: F, value: T) -> Arc<Session<T>>
     where
-        F: 'static + Send + Sync + Fn(&Context<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
+        F: 'static
+            + Send
+            + Sync
+            + Fn(Rebuilder<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
     {
         let session = Session::new(&self.executor, key_set_fn, value);
         self.write_lock()
@@ -82,7 +85,10 @@ impl<T: 'static + Send + Sync> SessionSet<T> {
         session_state_fn: impl FnOnce() -> T,
     ) -> Result<Arc<Session<T>>, Response>
     where
-        F: 'static + Send + Sync + Fn(&Context<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
+        F: 'static
+            + Send
+            + Sync
+            + Fn(Rebuilder<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
     {
         if let Some(session) = self.get_opt(req)? {
             Ok(session)

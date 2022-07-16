@@ -1,4 +1,4 @@
-use crate::data::{Context, ContextSet};
+use crate::data::{Context, Rebuilder, RebuilderSet};
 use core::fmt::{Debug, Formatter};
 use core::ops::{Deref, DerefMut};
 use servlin::reexport::safina_executor::Executor;
@@ -7,8 +7,8 @@ use std::sync::{Arc, PoisonError, RwLock, RwLockReadGuard, RwLockWriteGuard};
 #[allow(clippy::module_name_repetitions)]
 pub struct RosterWriteGuard<'x, V, T: 'static + Send + Sync>(
     Option<RwLockWriteGuard<'x, V>>,
-    &'x ContextSet<T>,
-    &'x Context<T>,
+    &'x RebuilderSet<T>,
+    &'x Context,
 );
 impl<'x, V, T: 'static + Send + Sync> Deref for RosterWriteGuard<'x, V, T> {
     type Target = V;
@@ -31,13 +31,13 @@ impl<'x, V, T: 'static + Send + Sync> Drop for RosterWriteGuard<'x, V, T> {
 
 /// A single value of type `V` and a set of subscribers.
 pub struct Roster<V, T: 'static + Send + Sync> {
-    pub context_set: ContextSet<T>,
+    pub context_set: RebuilderSet<T>,
     value: RwLock<V>,
 }
 impl<V, T: 'static + Send + Sync> Roster<V, T> {
     pub fn new(value: V) -> Self {
         Self {
-            context_set: ContextSet::new(),
+            context_set: RebuilderSet::new(),
             value: RwLock::new(value),
         }
     }
@@ -53,12 +53,12 @@ impl<V, T: 'static + Send + Sync> Roster<V, T> {
         self.context_set.start_cleanup_task(executor);
     }
 
-    pub fn subscribe(&self, ctx: &Context<T>) {
-        self.context_set.insert(ctx);
+    pub fn subscribe(&self, rebuilder: Rebuilder<T>) {
+        self.context_set.insert(rebuilder);
     }
 
-    pub fn unsubscribe(&self, ctx: &Context<T>) {
-        self.context_set.remove(ctx);
+    pub fn unsubscribe(&self, rebuilder: &Rebuilder<T>) {
+        self.context_set.remove(rebuilder);
     }
 
     fn value_read_lock(&self) -> RwLockReadGuard<V> {
@@ -70,8 +70,8 @@ impl<V, T: 'static + Send + Sync> Roster<V, T> {
     }
 
     /// Read the value and subscribe to changes.
-    pub fn read(&self, ctx: &Context<T>) -> RwLockReadGuard<'_, V> {
-        self.context_set.insert(ctx);
+    pub fn read(&self, rebuilder: Rebuilder<T>) -> RwLockReadGuard<'_, V> {
+        self.context_set.insert(rebuilder);
         self.value_read_lock()
     }
 
@@ -82,7 +82,7 @@ impl<V, T: 'static + Send + Sync> Roster<V, T> {
 
     /// Get a write lock on the value.
     /// When the returned guard drops, it rebuilds all subscribed contexts.
-    pub fn write<'x>(&'x self, ctx: &'x Context<T>) -> RosterWriteGuard<'x, V, T> {
+    pub fn write<'x>(&'x self, ctx: &'x Context) -> RosterWriteGuard<'x, V, T> {
         RosterWriteGuard(Some(self.value_write_lock()), &self.context_set, ctx)
     }
 

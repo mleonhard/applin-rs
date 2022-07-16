@@ -71,7 +71,7 @@ impl ServerState {
 fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
     let mut keys = KeySet::new();
     let state_clone = state.clone();
-    keys.add_page_fn("/", move |ctx| {
+    keys.add_page_fn("/", move |rebuilder| {
         Ok(NavPage::new(
             "Server State Example",
             Column::new((
@@ -80,7 +80,7 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
                     // Get the counter value and subscribe to updates.
                     // Whenever the value changes, the server rebuilds this key
                     // and pushes it to the client.
-                    *state_clone.counter.read(ctx)
+                    *state_clone.counter.read(rebuilder)
                 )),
                 Button::new("Increment").with_action(rpc("/increment")),
             )),
@@ -97,7 +97,7 @@ fn get_or_new_session(
     let state_clone = state.clone();
     state.sessions.get_or_new(
         req,
-        move |_ctx| Ok(key_set(&state_clone)),
+        move |_rebuilder| Ok(key_set(&state_clone)),
         || SessionState {},
     )
 }

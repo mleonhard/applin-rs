@@ -1,4 +1,4 @@
-use crate::data::Context;
+use crate::data::{Context, Rebuilder};
 use core::sync::atomic::{AtomicBool, Ordering};
 use core::time::Duration;
 use servlin::reexport::safina_executor::Executor;
@@ -6,11 +6,11 @@ use servlin::reexport::safina_timer;
 use std::collections::HashSet;
 use std::sync::{Arc, PoisonError, RwLock, RwLockReadGuard, RwLockWriteGuard};
 
-pub struct ContextSet<T> {
+pub struct RebuilderSet<T> {
     pub cleanup_task_started: AtomicBool,
-    pub set: Arc<RwLock<HashSet<Context<T>>>>,
+    pub set: Arc<RwLock<HashSet<Rebuilder<T>>>>,
 }
-impl<T: 'static + Send + Sync> ContextSet<T> {
+impl<T: 'static + Send + Sync> RebuilderSet<T> {
     #[must_use]
     pub fn new() -> Self {
         Self {
@@ -37,7 +37,7 @@ impl<T: 'static + Send + Sync> ContextSet<T> {
                     if let Some(set) = weak_set.upgrade() {
                         set.write()
                             .unwrap_or_else(PoisonError::into_inner)
-                            .retain(Context::session_exists);
+                            .retain(Rebuilder::session_exists);
                     } else {
                         return;
                     }
@@ -46,17 +46,17 @@ impl<T: 'static + Send + Sync> ContextSet<T> {
         }
     }
 
-    fn read(&self) -> RwLockReadGuard<HashSet<Context<T>>> {
+    fn read(&self) -> RwLockReadGuard<HashSet<Rebuilder<T>>> {
         self.set.read().unwrap_or_else(PoisonError::into_inner)
     }
 
-    fn write(&self) -> RwLockWriteGuard<HashSet<Context<T>>> {
+    fn write(&self) -> RwLockWriteGuard<HashSet<Rebuilder<T>>> {
         self.set.write().unwrap_or_else(PoisonError::into_inner)
     }
 
-    /// Remove `Context` structs whose sessions no longer exist.
+    /// Remove rebuilders whose sessions no longer exist.
     pub fn clean(&self) {
-        self.write().retain(Context::session_exists);
+        self.write().retain(Rebuilder::session_exists);
     }
 
     pub fn clean_if_cleanup_task_not_started(&self) {
@@ -65,28 +65,27 @@ impl<T: 'static + Send + Sync> ContextSet<T> {
         }
     }
 
-    pub fn insert(&self, ctx: &Context<T>) {
+    pub fn insert(&self, rebuilder: Rebuilder<T>) {
         self.clean_if_cleanup_task_not_started();
-        if !self.read().contains(ctx) {
-            let ctx_clone = (*ctx).clone();
-            self.write().insert(ctx_clone);
+        if !self.read().contains(&rebuilder) {
+            self.write().insert(rebuilder);
         }
     }
 
-    pub fn remove(&self, ctx: &Context<T>) -> bool {
+    pub fn remove(&self, rebuilder: &Rebuilder<T>) -> bool {
         self.clean_if_cleanup_task_not_started();
-        self.write().remove(ctx)
+        self.write().remove(rebuilder)
     }
 
-    pub fn rebuild_all(&self, ctx: &Context<T>) {
+    pub fn rebuild_all(&self, ctx: &Context) {
         //dbg!(&session_id);
         self.clean_if_cleanup_task_not_started();
-        for target_ctx in self.read().iter() {
-            target_ctx.rebuild(ctx);
+        for rebuilder in self.read().iter() {
+            rebuilder.rebuild(ctx);
         }
     }
 }
-impl<T: 'static + Send + Sync> Default for ContextSet<T> {
+impl<T: 'static + Send + Sync> Default for RebuilderSet<T> {
     fn default() -> Self {
         Self::new()
     }
