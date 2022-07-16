@@ -461,9 +461,12 @@ fn add_inert_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) -> 
     keys.add_page_fn("/inert", move |rebuilder| {
         Ok(NavPage::new(
             "Inert",
-            Text::new(format!(
-                "epoch seconds: {}",
-                state_clone.clock_epoch_seconds.read(rebuilder)
+            Column::new((
+                Text::new(format!(
+                    "epoch seconds: {}",
+                    state_clone.clock_epoch_seconds.read(rebuilder)
+                )),
+                Text::new("The home page has poll=10, so you will see this page update when the app polls."),
             )),
         ))
     })
@@ -547,7 +550,7 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
                     FormDetail::new("Form Text").with_action(push(&form_text_page)),
                 )),
                 FormSection::new().with_title("Update Modes").with_widgets((
-                    FormDetail::new("Static").with_action(push(&inert_page)),
+                    FormDetail::new("Inert").with_action(push(&inert_page)),
                     FormDetail::new("Poll").with_action(push(&poll_page)),
                     FormDetail::new("Stream").with_action(push(&stream_page)),
                 )),
