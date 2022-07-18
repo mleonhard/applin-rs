@@ -23,7 +23,7 @@ Use an Applin client to access the app:
 - New, not proven in production.
 
 # Examples
-Complete examples: [`examples/`](examples/).
+Complete examples: [`examples/`](https://github.com/mleonhard/applin-rs/tree/main/examples).
 
 Simple example:
 ```rust
