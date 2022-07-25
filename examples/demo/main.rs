@@ -111,6 +111,9 @@ fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Respo
         ("GET", "/stream") => get_or_new_session(state, req)?.stream(),
         ("POST", path) if path == pages::SAVE_RPC_PATH => pages::save_rpc(state, req),
         ("POST", path) if path == widgets::BACK_RPC_PATH => widgets::back_rpc(state, req),
+        ("POST", path) if path == widgets::FORM_CHECKBOX_RPC_PATH => {
+            widgets::form_checkbox_rpc(state, req)
+        }
         ("GET", "/placeholder-200x200.png") => Ok(Response::new(200)
             .with_type(ContentType::Png)
             .with_max_age_seconds(365 * 24 * 60 * 60)

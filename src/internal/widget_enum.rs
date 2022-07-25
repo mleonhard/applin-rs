@@ -53,7 +53,7 @@ pub enum Widget {
     },
     #[serde(rename = "form-checkbox")]
     FormCheckboxVariant {
-        id: String,
+        var: String,
         #[serde(rename = "initial-bool")]
         #[serde(default, skip_serializing_if = "std::ops::Not::not")]
         initial_bool: bool,

@@ -8,9 +8,16 @@ use applin::widget::{
 use servlin::{Request, Response};
 use std::sync::Arc;
 
+// TODO: Move these to different files.
 pub static BACK_RPC_PATH: &str = "/widgets/back";
+pub static FORM_CHECKBOX_RPC_PATH: &str = "/widgets/checkbox";
 
 pub fn back_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
+    let session = state.sessions.get(req)?;
+    session.rpc_response()
+}
+
+pub fn form_checkbox_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     let session = state.sessions.get(req)?;
     session.rpc_response()
 }
@@ -139,14 +146,17 @@ pub fn add_form_checkbox_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 FormCheckbox::new("checkbox", "Checkbox"),
                 FormCheckbox::new("initial-checked", "Initially checked").with_initial(true),
                 FormCheckbox::new("with-rpc", "Does RPC on change")
-                    .with_rpc("/form-checkbox-update"),
-                FormCheckbox::new("checkbox", ""),
+                    .with_rpc(FORM_CHECKBOX_RPC_PATH),
+                FormCheckbox::new("with-bad-rpc", "Does RPC on change, but it fails")
+                    .with_rpc("/nonexistent-form-checkbox-rpc")
+                    .with_initial(true),
+                FormCheckbox::new("empty-checkbox", ""),
                 FormCheckbox::new(
-                    "checkbox",
+                    "mmmm-mmmm-checkbox",
                     "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
                 ),
                 FormCheckbox::new(
-                    "checkbox",
+                    "mmmmmmmm-checkbox",
                     "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
                 ),
             )),
