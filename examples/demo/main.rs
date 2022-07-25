@@ -6,6 +6,7 @@
 //! Then connect to it with an Applin client.
 #![forbid(unsafe_code)]
 
+mod form_widgets;
 mod pages;
 mod updates;
 mod widgets;
@@ -49,12 +50,12 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
     // Widgets
     let back_buttons_page = widgets::add_back_button_pages(&mut keys);
     let buttons_page = widgets::add_button_page(&mut keys);
-    let form_button_page = widgets::add_form_button_page(&mut keys);
-    let form_checkbox_page = widgets::add_form_checkbox_page(&mut keys);
-    let form_detail_page = widgets::add_form_detail_page(&mut keys);
-    let form_error_page = widgets::add_form_error_page(&mut keys);
-    let form_section_page = widgets::add_form_section_page(&mut keys);
-    let form_text_page = widgets::add_form_text_page(&mut keys);
+    let form_button_page = form_widgets::add_form_button_page(&mut keys);
+    let form_checkbox_page = form_widgets::add_form_checkbox_page(&mut keys);
+    let form_detail_page = form_widgets::add_form_detail_page(&mut keys);
+    let form_error_page = form_widgets::add_form_error_page(&mut keys);
+    let form_section_page = form_widgets::add_form_section_page(&mut keys);
+    let form_text_page = form_widgets::add_form_text_page(&mut keys);
     // Update Modes
     let inert_page = updates::add_inert_page(state, &mut keys);
     let poll_page = updates::add_poll_page(state, &mut keys);
@@ -111,8 +112,8 @@ fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Respo
         ("GET", "/stream") => get_or_new_session(state, req)?.stream(),
         ("POST", path) if path == pages::SAVE_RPC_PATH => pages::save_rpc(state, req),
         ("POST", path) if path == widgets::BACK_RPC_PATH => widgets::back_rpc(state, req),
-        ("POST", path) if path == widgets::FORM_CHECKBOX_RPC_PATH => {
-            widgets::form_checkbox_rpc(state, req)
+        ("POST", path) if path == form_widgets::FORM_CHECKBOX_RPC_PATH => {
+            form_widgets::form_checkbox_rpc(state, req)
         }
         ("GET", "/placeholder-200x200.png") => Ok(Response::new(200)
             .with_type(ContentType::Png)
