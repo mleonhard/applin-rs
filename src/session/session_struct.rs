@@ -2,6 +2,7 @@ use crate::data::{Context, Rebuilder};
 use crate::error::server_error;
 use crate::session::{KeySet, SessionCookie, SessionId};
 use core::fmt::{Debug, Formatter};
+use serde_json::Value::Null;
 use serde_json::{json, Value};
 use servlin::reexport::safina_executor::Executor;
 use servlin::{Event, EventSender, Response};
@@ -218,6 +219,16 @@ impl<T: 'static + Send + Sync> Session<T> {
     /// Returns an error when we fail to build the new key set or fail to build the value for a key.
     #[allow(clippy::missing_panics_doc)]
     pub fn rpc_response(self: &Arc<Self>) -> Result<Response, Response> {
+        self.rpc_response_with_vars(Null)
+    }
+
+    /// # Errors
+    /// Returns an error when we fail to build the new key set or fail to build the value for a key.
+    #[allow(clippy::missing_panics_doc)]
+    pub fn rpc_response_with_vars<V: serde::Serialize>(
+        self: &Arc<Self>,
+        vars: V,
+    ) -> Result<Response, Response> {
         let mut pending_updates = HashSet::new();
         std::mem::swap(&mut self.lock_inner().rpc_updates, &mut pending_updates);
         //dbg!(&pending_updates);
@@ -242,7 +253,7 @@ impl<T: 'static + Send + Sync> Session<T> {
             diff.insert(key, value);
         }
         //dbg!(&diff);
-        Ok(Response::json(200, json!({ "pages": diff }))
+        Ok(Response::json(200, json!({ "pages": diff, "vars": vars }))
             .unwrap()
             .with_no_store())
     }

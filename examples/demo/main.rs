@@ -9,6 +9,7 @@
 mod form_widgets;
 mod pages;
 mod updates;
+mod vars;
 mod widgets;
 
 use applin::action::push;
@@ -60,6 +61,8 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
     let inert_page = updates::add_inert_page(state, &mut keys);
     let poll_page = updates::add_poll_page(state, &mut keys);
     let stream_page = updates::add_stream_page(state, &mut keys);
+    // Vars
+    let check_vars_page = vars::add_check_vars_page(&mut keys);
     keys.add_static_page(
         "/",
         NavPage::new(
@@ -85,6 +88,9 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
                     FormDetail::new("Inert").with_action(push(&inert_page)),
                     FormDetail::new("Poll").with_action(push(&poll_page)),
                     FormDetail::new("Stream").with_action(push(&stream_page)),
+                )),
+                FormSection::new().with_title("Vars").with_widgets((
+                    FormDetail::new("Check Vars").with_action(push(&check_vars_page)),
                 )),
             )),
         )
@@ -115,6 +121,7 @@ fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Respo
         ("POST", path) if path == form_widgets::FORM_CHECKBOX_RPC_PATH => {
             form_widgets::form_checkbox_rpc(state, req)
         }
+        ("POST", path) if path == vars::CHECK_VARS_RPC_PATH => vars::check_vars_rpc(state, req),
         ("GET", "/placeholder-200x200.png") => Ok(Response::new(200)
             .with_type(ContentType::Png)
             .with_max_age_seconds(365 * 24 * 60 * 60)

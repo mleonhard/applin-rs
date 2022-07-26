@@ -6,6 +6,7 @@ pub struct FormSection {
     widgets: Vec<Widget>,
 }
 impl FormSection {
+    // TODO: Make `new` take title.  And add a `new_without_title` constructor.
     /// Makes a `form-section` widget.
     #[must_use]
     #[allow(clippy::new_without_default)]
