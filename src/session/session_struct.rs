@@ -9,6 +9,7 @@ use servlin::{Event, EventSender, Response};
 use std::collections::{HashMap, HashSet};
 use std::ops::{Deref, DerefMut};
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
+use std::time::Instant;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum PendingUpdate {
@@ -33,6 +34,7 @@ impl<'x, T> DerefMut for SessionStateGuard<'x, T> {
 
 #[allow(clippy::module_name_repetitions)]
 pub struct InnerSession<T> {
+    pub last_contact: Instant,
     pub key_set: KeySet<T>,
     pub rpc_updates: HashSet<PendingUpdate>,
     pub sender: EventSender,
@@ -67,6 +69,7 @@ impl<T: 'static + Send + Sync> Session<T> {
             scheduled_updates: Mutex::new(HashSet::new()),
             state: Mutex::new(state),
             inner: Mutex::new(InnerSession {
+                last_contact: Instant::now(),
                 key_set: KeySet::new(),
                 rpc_updates: HashSet::new(),
                 sender: EventSender::unconnected(),
@@ -103,6 +106,7 @@ impl<T: 'static + Send + Sync> Session<T> {
         self.lock_scheduled_updates().clear();
         let mut inner_guard = self.lock_inner();
         inner_guard.key_set = KeySet::new();
+        inner_guard.last_contact = Instant::now();
         let (sender, response) = Response::event_stream();
         inner_guard.sender = sender;
         drop(inner_guard);
@@ -230,7 +234,11 @@ impl<T: 'static + Send + Sync> Session<T> {
         vars: V,
     ) -> Result<Response, Response> {
         let mut pending_updates = HashSet::new();
-        std::mem::swap(&mut self.lock_inner().rpc_updates, &mut pending_updates);
+        {
+            let mut inner_guard = self.lock_inner();
+            inner_guard.last_contact = Instant::now();
+            std::mem::swap(&mut inner_guard.rpc_updates, &mut pending_updates);
+        }
         //dbg!(&pending_updates);
         let mut diff = if pending_updates.remove(&PendingUpdate::KeySet) {
             self.build_key_set()

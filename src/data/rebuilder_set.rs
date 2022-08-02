@@ -37,7 +37,7 @@ impl<T: 'static + Send + Sync> RebuilderSet<T> {
                     if let Some(set) = weak_set.upgrade() {
                         set.write()
                             .unwrap_or_else(PoisonError::into_inner)
-                            .retain(Rebuilder::session_exists);
+                            .retain(Rebuilder::session_fresh);
                     } else {
                         return;
                     }
@@ -56,7 +56,7 @@ impl<T: 'static + Send + Sync> RebuilderSet<T> {
 
     /// Remove rebuilders whose sessions no longer exist.
     pub fn clean(&self) {
-        self.write().retain(Rebuilder::session_exists);
+        self.write().retain(Rebuilder::session_fresh);
     }
 
     pub fn clean_if_cleanup_task_not_started(&self) {

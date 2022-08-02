@@ -3,6 +3,7 @@ use crate::session::Session;
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Weak};
+use std::time::{Duration, Instant};
 
 pub enum Rebuilder<T> {
     Keys(Weak<Session<T>>),
@@ -21,11 +22,6 @@ impl<T> Rebuilder<T> {
     /// This happens when the connection is closed and the session was cleaned up.
     pub fn session(&self) -> Result<Arc<Session<T>>, &'static str> {
         self.weak_session().upgrade().ok_or("session not found")
-    }
-
-    #[must_use]
-    pub fn session_exists(&self) -> bool {
-        self.weak_session().strong_count() > 0
     }
 
     fn order_num(&self) -> u8 {
@@ -48,6 +44,19 @@ impl<T: 'static + Send + Sync> Rebuilder<T> {
                     session.rebuild_value(key, rebuilder);
                 }
             }
+        }
+    }
+
+    #[must_use]
+    pub fn session_fresh(&self) -> bool {
+        if let Some(session) = self.weak_session().upgrade() {
+            session
+                .lock_inner()
+                .last_contact
+                .saturating_duration_since(Instant::now())
+                < Duration::from_secs(120)
+        } else {
+            false
         }
     }
 }
