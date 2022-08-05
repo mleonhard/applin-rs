@@ -2,13 +2,12 @@ use crate::data::{Context, Rebuilder};
 use crate::error::server_error;
 use crate::session::{KeySet, SessionCookie, SessionId};
 use core::fmt::{Debug, Formatter};
-use serde_json::Value::Null;
 use serde_json::{json, Value};
 use servlin::reexport::safina_executor::Executor;
 use servlin::{Event, EventSender, Response};
 use std::collections::{HashMap, HashSet};
 use std::ops::{Deref, DerefMut};
-use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
+use std::sync::{Arc, Mutex, MutexGuard, PoisonError, Weak};
 use std::time::Instant;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -41,7 +40,7 @@ pub struct InnerSession<T> {
 }
 
 pub struct Session<T> {
-    pub executor: Arc<Executor>,
+    pub executor: Weak<Executor>,
     pub cookie: SessionCookie,
     #[allow(clippy::type_complexity)]
     pub key_set_fn: Box<
@@ -55,7 +54,7 @@ pub struct Session<T> {
     pub inner: Mutex<InnerSession<T>>,
 }
 impl<T: 'static + Send + Sync> Session<T> {
-    pub fn new<F>(executor: &Arc<Executor>, key_set_fn: F, state: T) -> Arc<Self>
+    pub fn new<F>(executor: Weak<Executor>, key_set_fn: F, state: T) -> Arc<Self>
     where
         F: 'static
             + Send
@@ -63,7 +62,7 @@ impl<T: 'static + Send + Sync> Session<T> {
             + Fn(Rebuilder<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
     {
         Arc::new(Self {
-            executor: executor.clone(),
+            executor,
             key_set_fn: Box::new(key_set_fn),
             cookie: SessionCookie::new_random(),
             scheduled_updates: Mutex::new(HashSet::new()),
@@ -199,9 +198,11 @@ impl<T: 'static + Send + Sync> Session<T> {
             return;
         }
         let self_clone = self.clone();
-        self.executor.schedule_blocking(move || {
-            self_clone.build_key_set_and_send().unwrap();
-        });
+        if let Some(executor) = self.executor.upgrade() {
+            executor.schedule_blocking(move || {
+                self_clone.build_key_set_and_send().unwrap();
+            });
+        }
     }
 
     #[allow(clippy::missing_panics_doc)]
@@ -214,16 +215,18 @@ impl<T: 'static + Send + Sync> Session<T> {
             return;
         }
         let self_clone = self.clone();
-        self.executor.schedule_blocking(move || {
-            self_clone.build_value_and_send(&key).unwrap();
-        });
+        if let Some(executor) = self.executor.upgrade() {
+            executor.schedule_blocking(move || {
+                self_clone.build_value_and_send(&key).unwrap();
+            });
+        }
     }
 
     /// # Errors
     /// Returns an error when we fail to build the new key set or fail to build the value for a key.
     #[allow(clippy::missing_panics_doc)]
     pub fn rpc_response(self: &Arc<Self>) -> Result<Response, Response> {
-        self.rpc_response_with_vars(Null)
+        self.rpc_response_with_vars(Value::Null)
     }
 
     /// # Errors

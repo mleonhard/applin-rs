@@ -3,7 +3,7 @@ use crate::session::{KeySet, Session, SessionCookie, SessionId};
 use servlin::reexport::safina_executor::Executor;
 use servlin::{Request, Response};
 use std::collections::HashMap;
-use std::sync::{Arc, PoisonError, RwLock, RwLockReadGuard, RwLockWriteGuard};
+use std::sync::{Arc, PoisonError, RwLock, RwLockReadGuard, RwLockWriteGuard, Weak};
 
 #[must_use]
 pub fn session_not_found() -> Response {
@@ -11,14 +11,14 @@ pub fn session_not_found() -> Response {
 }
 
 pub struct SessionSet<T> {
-    pub executor: Arc<Executor>,
+    pub executor: Weak<Executor>,
     pub set: Arc<RwLock<HashMap<SessionId, Arc<Session<T>>>>>,
 }
 impl<T: 'static + Send + Sync> SessionSet<T> {
     #[must_use]
     pub fn new(executor: &Arc<Executor>) -> Self {
         Self {
-            executor: executor.clone(),
+            executor: Arc::downgrade(executor),
             set: Arc::new(RwLock::new(HashMap::new())),
         }
     }
@@ -70,7 +70,7 @@ impl<T: 'static + Send + Sync> SessionSet<T> {
             + Sync
             + Fn(Rebuilder<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
     {
-        let session = Session::new(&self.executor, key_set_fn, value);
+        let session = Session::new(self.executor.clone(), key_set_fn, value);
         self.write_lock()
             .insert(session.cookie.id(), session.clone());
         session
