@@ -69,12 +69,12 @@ impl UreqError {
 }
 
 pub trait UreqJsonHelper {
-    fn get_json(&self, path: &str) -> Result<Value, UreqError>;
-    fn post_json(&self, path: &str, data: impl Serialize) -> Result<Value, UreqError>;
+    fn get_json(&self, path: impl ToString) -> Result<Value, UreqError>;
+    fn post_json(&self, path: impl ToString, data: impl Serialize) -> Result<Value, UreqError>;
 }
 impl UreqJsonHelper for ureq::Agent {
-    fn get_json(&self, path: &str) -> Result<Value, UreqError> {
-        self.get(path)
+    fn get_json(&self, path: impl ToString) -> Result<Value, UreqError> {
+        self.get(&path.to_string())
             .call()
             .map_err(|e| match e {
                 ureq::Error::Status(n, _) => UreqError::Status(n),
@@ -84,8 +84,8 @@ impl UreqJsonHelper for ureq::Agent {
             .map_err(|e| UreqError::Other(e.to_string()))
     }
 
-    fn post_json(&self, path: &str, data: impl Serialize) -> Result<Value, UreqError> {
-        self.post(path)
+    fn post_json(&self, path: impl ToString, data: impl Serialize) -> Result<Value, UreqError> {
+        self.post(&path.to_string())
             .send_json(data)
             .map_err(|e| match e {
                 ureq::Error::Status(400, response) => UreqError::Other(format!(

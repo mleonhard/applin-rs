@@ -56,40 +56,31 @@ pub fn page_updates() {
         _ => Ok(Response::not_found_404()),
     };
     let (url, _receiver) = start_for_test(&executor, req_handler);
-    let agent1 = new_agent();
-    assert_eq!(
-        json!({
-            "pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "count: 3"}}},
-            "vars": null,
-        }),
-        agent1.get_json(&url).unwrap()
-    );
-    assert_eq!(
-        json!({"pages": {}, "vars": null}),
-        agent1.get_json(&url).unwrap()
-    );
-    // Test polling
+    let poller1 = new_agent();
+    // Check check intial page.
+    let update3 = json!({"pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "count: 3"}}}});
+    assert_eq!(update3, poller1.get_json(&url).unwrap());
+    let empty_update = json!({});
+    assert_eq!(empty_update, poller1.get_json(&url).unwrap());
+    // Background thread updates state.
     *server_state.counter.write(&Context::Empty) = 5;
+    let update5 = json!({"pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "count: 5"}}}});
+    assert_eq!(update5, new_agent().get_json(&url).unwrap());
+    assert_eq!(update5, poller1.get_json(&url).unwrap());
+    assert_eq!(empty_update, poller1.get_json(&url).unwrap());
+    // RPC updates state.
+    let poller2 = new_agent();
+    poller2.get_json(&url).unwrap();
+    let streamer = new_agent();
+    streamer.get_json(&url).unwrap();
+    // let messages = streamer.stream().unwrap();
+    let update6 = json!({"pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "count: 6"}}}});
     assert_eq!(
-        json!({
-            "pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "count: 5"}}},
-            "vars": null,
-        }),
-        agent1.get_json(&url).unwrap()
-    );
-    // Test RPC
-    let agent2 = new_agent();
-    agent2.get_json(&url).unwrap();
-    let expected6 = json!({
-        "pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "count: 6"}}},
-        "vars": null,
-    });
-    assert_eq!(
-        &expected6,
-        &agent1
-            .post_json(&(url.clone() + "/increment"), json!({}))
+        &update6,
+        &poller1
+            .post_json(url.clone() + "/increment", json!({}))
             .unwrap()
     );
-    assert_eq!(&expected6, &agent2.get_json(&url).unwrap());
-    // TODO(mleonhard) Test streaming.
+    assert_eq!(&update6, &poller2.get_json(&url).unwrap());
+    // Test streaming.
 }

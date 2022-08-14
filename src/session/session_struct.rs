@@ -5,7 +5,7 @@ use core::fmt::{Debug, Formatter};
 use serde_json::{json, Value};
 use servlin::reexport::safina_executor::Executor;
 use servlin::{Event, EventSender, Response};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::ops::{Deref, DerefMut};
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError, Weak};
 use std::time::Instant;
@@ -121,12 +121,12 @@ impl<T: 'static + Send + Sync> Session<T> {
     /// Returns an error when we fail to build the new key set or fail to build the value for a key.
     pub fn build_key_set(
         self: &Arc<Self>,
-    ) -> Result<HashMap<String, Value>, Box<dyn std::error::Error>> {
+    ) -> Result<serde_json::Map<String, Value>, Box<dyn std::error::Error>> {
         let rebuilder = Rebuilder::Keys(Arc::downgrade(self));
         let mut inner_guard = self.lock_inner();
         let result = (*self.key_set_fn)(rebuilder);
         let mut new_key_set = result?;
-        let mut diff = HashMap::new();
+        let mut diff = serde_json::Map::new();
         // Removed keys.
         for key in inner_guard.key_set.key_to_value_fn.keys() {
             if !new_key_set.key_to_value_fn.contains_key(key) {
@@ -247,7 +247,7 @@ impl<T: 'static + Send + Sync> Session<T> {
             self.build_key_set()
                 .map_err(|e| server_error(format!("error building keys: {}", e)))?
         } else {
-            HashMap::new()
+            serde_json::Map::new()
         };
         for pending_update in pending_updates {
             let key = match pending_update {
@@ -264,7 +264,15 @@ impl<T: 'static + Send + Sync> Session<T> {
             diff.insert(key, value);
         }
         //dbg!(&diff);
-        Ok(Response::json(200, json!({ "pages": diff, "vars": vars }))
+        let mut obj = serde_json::Map::new();
+        if !diff.is_empty() {
+            obj.insert("pages".to_string(), diff.into());
+        }
+        let vars = serde_json::value::to_value(vars).unwrap();
+        if vars != Value::Null {
+            obj.insert("vars".to_string(), vars);
+        }
+        Ok(Response::json(200, Value::Object(obj))
             .unwrap()
             .with_no_store())
     }

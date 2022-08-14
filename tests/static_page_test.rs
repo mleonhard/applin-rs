@@ -22,21 +22,18 @@ pub fn static_page() {
     };
     let (url, _receiver) = start_for_test(&executor, req_handler);
     assert_eq!(
-        json!({
-            "pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello1"}}},
-            "vars": null,
-        }),
+        json!({"pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello1"}}}}),
         new_agent().get_json(&url).unwrap()
     );
     assert_eq!(
         Err(UreqError::Status(404)),
-        new_agent().get_json(&(url.clone() + "/nonexistent"))
+        new_agent().get_json(url.clone() + "/nonexistent")
     );
     // TODO: Uncomment test and fix bug.
     // assert_eq!(
     //     404,
     //     new_agent()
-    //         .get(&(url.clone() + "//nonexistent"))
+    //         .get(url.clone() + "//nonexistent")
     //         .call()
     //         .unwrap_err()
     //         .unwrap_status()
@@ -76,23 +73,14 @@ pub fn user_specific_static_page() {
     let agent1 = new_agent();
     let agent2 = new_agent();
     assert_eq!(
-        json!({
-            "pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello 3"}}},
-            "vars": null,
-        }),
+        json!({"pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello 3"}}}}),
         agent1.get_json(&url).unwrap()
     );
     assert_eq!(
-        json!({
-            "pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello 4"}}},
-            "vars": null,
-        }),
+        json!({"pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello 4"}}}}),
         agent2.get_json(&url).unwrap()
     );
-    assert_eq!(
-        json!({"pages": {}, "vars": null}),
-        agent1.get_json(&url).unwrap()
-    );
+    assert_eq!(json!({}), agent1.get_json(&url).unwrap());
 }
 
 #[test]
@@ -129,29 +117,12 @@ pub fn user_specific_key_set() {
     let agent1 = new_agent();
     let agent2 = new_agent();
     assert_eq!(
-        json!({
-            "pages": {"/user3": {
-                "typ": "nav-page",
-                "title": "t1",
-                "widget": {"typ":"text", "text": "hello 3"},
-            }},
-            "vars": null,
-        }),
+        json!({"pages": {"/user3": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello 3"}}}}),
         agent1.get_json(&url).unwrap()
     );
     assert_eq!(
-        json!({
-            "pages": {"/user4": {
-                "typ": "nav-page",
-                "title": "t1",
-                "widget": {"typ":"text", "text": "hello 4"},
-            }},
-            "vars": null,
-        }),
+        json!({"pages": {"/user4": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello 4"}}}}),
         agent2.get_json(&url).unwrap()
     );
-    assert_eq!(
-        json!({"pages": {}, "vars": null}),
-        agent1.get_json(&url).unwrap()
-    );
+    assert_eq!(json!({}), agent1.get_json(&url).unwrap());
 }
