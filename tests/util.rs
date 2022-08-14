@@ -1,3 +1,4 @@
+use serde::Serialize;
 use serde_json::Value;
 use servlin::reexport::safina_executor::Executor;
 use servlin::reexport::safina_sync::Receiver;
@@ -7,7 +8,7 @@ use std::fmt::Debug;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
-use ureq::{Agent, Error};
+use ureq::Agent;
 
 pub fn new_agent() -> Agent {
     ureq::AgentBuilder::new()
@@ -69,14 +70,32 @@ impl UreqError {
 
 pub trait UreqJsonHelper {
     fn get_json(&self, path: &str) -> Result<Value, UreqError>;
+    fn post_json(&self, path: &str, data: impl Serialize) -> Result<Value, UreqError>;
 }
 impl UreqJsonHelper for ureq::Agent {
     fn get_json(&self, path: &str) -> Result<Value, UreqError> {
         self.get(path)
             .call()
             .map_err(|e| match e {
-                Error::Status(n, _) => UreqError::Status(n),
-                Error::Transport(e) => UreqError::Other(e.to_string()),
+                ureq::Error::Status(n, _) => UreqError::Status(n),
+                ureq::Error::Transport(e) => UreqError::Other(e.to_string()),
+            })?
+            .into_json::<Value>()
+            .map_err(|e| UreqError::Other(e.to_string()))
+    }
+
+    fn post_json(&self, path: &str, data: impl Serialize) -> Result<Value, UreqError> {
+        self.post(path)
+            .send_json(data)
+            .map_err(|e| match e {
+                ureq::Error::Status(400, response) => UreqError::Other(format!(
+                    "400 {:?}",
+                    response
+                        .into_string()
+                        .unwrap_or_else(|e| format!("error decoding request body: {}", e))
+                )),
+                ureq::Error::Status(n, _) => UreqError::Status(n),
+                ureq::Error::Transport(e) => UreqError::Other(e.to_string()),
             })?
             .into_json::<Value>()
             .map_err(|e| UreqError::Other(e.to_string()))

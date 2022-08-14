@@ -23,11 +23,7 @@ pub fn static_page() {
     let (url, _receiver) = start_for_test(&executor, req_handler);
     assert_eq!(
         json!({
-            "pages": {"/": {
-                "typ": "nav-page",
-                "title": "t1",
-                "widget": {"typ":"text", "text": "hello1"},
-            }},
+            "pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello1"}}},
             "vars": null,
         }),
         new_agent().get_json(&url).unwrap()
@@ -81,31 +77,20 @@ pub fn user_specific_static_page() {
     let agent2 = new_agent();
     assert_eq!(
         json!({
-            "pages": {"/": {
-                "typ": "nav-page",
-                "title": "t1",
-                "widget": {"typ":"text", "text": "hello 3"},
-            }},
+            "pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello 3"}}},
             "vars": null,
         }),
         agent1.get_json(&url).unwrap()
     );
     assert_eq!(
         json!({
-            "pages": {"/": {
-                "typ": "nav-page",
-                "title": "t1",
-                "widget": {"typ":"text", "text": "hello 4"},
-            }},
+            "pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello 4"}}},
             "vars": null,
         }),
         agent2.get_json(&url).unwrap()
     );
     assert_eq!(
-        json!({
-            "pages": {},
-            "vars": null,
-        }),
+        json!({"pages": {}, "vars": null}),
         agent1.get_json(&url).unwrap()
     );
 }
@@ -166,10 +151,7 @@ pub fn user_specific_key_set() {
         agent2.get_json(&url).unwrap()
     );
     assert_eq!(
-        json!({
-            "pages": {},
-            "vars": null,
-        }),
+        json!({"pages": {}, "vars": null}),
         agent1.get_json(&url).unwrap()
     );
 }
