@@ -1,8 +1,8 @@
 mod util;
 
-use crate::util::{new_agent, start_for_test, UreqError, UreqJsonHelper};
 use applin::data::Rebuilder;
 use applin::session::{KeySet, SessionSet};
+use applin::testing::{start_for_test, TestClient};
 use applin::widget::{NavPage, Text};
 use serde_json::json;
 use servlin::reexport::safina_executor::Executor;
@@ -23,11 +23,11 @@ pub fn static_page() {
     let (url, _receiver) = start_for_test(&executor, req_handler);
     assert_eq!(
         json!({"pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello1"}}}}),
-        new_agent().get_json(&url).unwrap()
+        TestClient::new(&url).poll().unwrap()
     );
     assert_eq!(
-        Err(UreqError::Status(404)),
-        new_agent().get_json(url.clone() + "/nonexistent")
+        Err((404, "Not Found".to_string())),
+        TestClient::new(&url).get_json("/nonexistent")
     );
     // TODO: Uncomment test and fix bug.
     // assert_eq!(
@@ -70,17 +70,17 @@ pub fn user_specific_static_page() {
         _ => Ok(Response::not_found_404()),
     };
     let (url, _receiver) = start_for_test(&executor, req_handler);
-    let agent1 = new_agent();
-    let agent2 = new_agent();
+    let client1 = TestClient::new(&url);
+    let client2 = TestClient::new(&url);
     assert_eq!(
         json!({"pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello 3"}}}}),
-        agent1.get_json(&url).unwrap()
+        client1.poll().unwrap()
     );
     assert_eq!(
         json!({"pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello 4"}}}}),
-        agent2.get_json(&url).unwrap()
+        client2.poll().unwrap()
     );
-    assert_eq!(json!({}), agent1.get_json(&url).unwrap());
+    assert_eq!(json!({}), client1.poll().unwrap());
 }
 
 #[test]
@@ -114,15 +114,15 @@ pub fn user_specific_key_set() {
         _ => Ok(Response::not_found_404()),
     };
     let (url, _receiver) = start_for_test(&executor, req_handler);
-    let agent1 = new_agent();
-    let agent2 = new_agent();
+    let client1 = TestClient::new(&url);
+    let client2 = TestClient::new(&url);
     assert_eq!(
         json!({"pages": {"/user3": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello 3"}}}}),
-        agent1.get_json(&url).unwrap()
+        client1.poll().unwrap()
     );
     assert_eq!(
         json!({"pages": {"/user4": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "hello 4"}}}}),
-        agent2.get_json(&url).unwrap()
+        client2.poll().unwrap()
     );
-    assert_eq!(json!({}), agent1.get_json(&url).unwrap());
+    assert_eq!(json!({}), client1.poll().unwrap());
 }

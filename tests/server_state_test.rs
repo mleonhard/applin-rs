@@ -1,8 +1,8 @@
 mod util;
 
-use crate::util::{new_agent, start_for_test, UreqJsonHelper};
 use applin::data::{Context, Roster};
 use applin::session::{KeySet, SessionSet};
+use applin::testing::{start_for_test, TestClient};
 use applin::widget::{NavPage, Text};
 use serde_json::json;
 use servlin::reexport::safina_executor::Executor;
@@ -10,6 +10,7 @@ use servlin::reexport::safina_timer;
 use servlin::{Request, Response};
 use std::ops::AddAssign;
 use std::sync::Arc;
+use std::time::Duration;
 
 struct ServerState {
     counter: Roster<u32, ()>,
@@ -45,6 +46,10 @@ pub fn page_updates() {
             .sessions
             .get_or_new(&req, key_set_fn, || ())?
             .poll(),
+        ("GET", "/stream") => server_state4
+            .sessions
+            .get_or_new(&req, key_set_fn, || ())?
+            .stream(),
         ("POST", "/increment") => {
             let session = server_state4.sessions.get(&req)?;
             server_state4
@@ -56,31 +61,28 @@ pub fn page_updates() {
         _ => Ok(Response::not_found_404()),
     };
     let (url, _receiver) = start_for_test(&executor, req_handler);
-    let poller1 = new_agent();
-    // Check check intial page.
+    let poller1 = TestClient::new(&url);
     let update3 = json!({"pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "count: 3"}}}});
-    assert_eq!(update3, poller1.get_json(&url).unwrap());
+    assert_eq!(update3, poller1.poll().unwrap());
     let empty_update = json!({});
-    assert_eq!(empty_update, poller1.get_json(&url).unwrap());
+    assert_eq!(empty_update, poller1.poll().unwrap());
     // Background thread updates state.
     *server_state.counter.write(&Context::Empty) = 5;
     let update5 = json!({"pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "count: 5"}}}});
-    assert_eq!(update5, new_agent().get_json(&url).unwrap());
-    assert_eq!(update5, poller1.get_json(&url).unwrap());
-    assert_eq!(empty_update, poller1.get_json(&url).unwrap());
+    assert_eq!(update5, TestClient::new(&url).poll().unwrap());
+    assert_eq!(update5, poller1.poll().unwrap());
+    assert_eq!(empty_update, poller1.poll().unwrap());
     // RPC updates state.
-    let poller2 = new_agent();
-    poller2.get_json(&url).unwrap();
-    let streamer = new_agent();
-    streamer.get_json(&url).unwrap();
-    // let messages = streamer.stream().unwrap();
+    let poller2 = TestClient::new(&url);
+    poller2.poll().unwrap();
+    let streamer = TestClient::new(&url);
+    let messages = streamer.stream().unwrap();
     let update6 = json!({"pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "count: 6"}}}});
     assert_eq!(
         &update6,
-        &poller1
-            .post_json(url.clone() + "/increment", json!({}))
-            .unwrap()
+        &poller1.post_json("/increment", json!({})).unwrap()
     );
-    assert_eq!(&update6, &poller2.get_json(&url).unwrap());
-    // Test streaming.
+    assert_eq!(&update6, &poller2.poll().unwrap());
+    std::thread::sleep(Duration::from_millis(100));
+    assert_eq!(&[update5, update6], messages.pop_all().as_slice());
 }

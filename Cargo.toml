@@ -15,6 +15,10 @@ nanorand = { version = "^0.7.0", features = ["alloc", "chacha", "std"] }
 once_cell = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1" }
+ureq = { version = "^2.5", features = ["cookies", "json"], optional = true }
+
+[features]
+default = []
+testing = ["dep:ureq"]
 
 [dev-dependencies]
-ureq = { version = "^2.5", features = ["cookies", "json"] }
