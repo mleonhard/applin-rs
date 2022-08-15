@@ -47,7 +47,7 @@
 use applin::action::rpc;
 use applin::data::Roster;
 use applin::session::{KeySet, Session, SessionSet};
-use applin::widget::{Button, Column, NavPage, Text};
+use applin::widget::{Form, FormButton, NavPage, Text};
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
 use std::ops::AddAssign;
@@ -74,7 +74,7 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
     keys.add_page_fn("/", move |rebuilder| {
         Ok(NavPage::new(
             "Server State Example",
-            Column::new((
+            Form::new((
                 Text::new(format!(
                     "Counter: {}",
                     // Get the counter value and subscribe to updates.
@@ -82,7 +82,7 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
                     // and pushes it to the client.
                     *state_clone.counter.read(rebuilder)
                 )),
-                Button::new("Increment").with_action(rpc("/increment")),
+                FormButton::new("Increment").with_action(rpc("/increment")),
             )),
         )
         .with_stream())

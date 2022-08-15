@@ -22,7 +22,7 @@
 
 use applin::data::Rebuilder;
 use applin::session::{KeySet, SessionSet};
-use applin::widget::{PlainPage, Text};
+use applin::widget::{NavPage, Text};
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{socket_addr_127_0_0_1, HttpServerBuilder, Request};
 use std::sync::Arc;
@@ -33,8 +33,10 @@ pub fn main() {
     let executor = safina_executor::Executor::default();
     let sessions: Arc<SessionSet<()>> = Arc::new(SessionSet::new(&executor));
     let key_set_fn = move |_rebuilder: Rebuilder<()>| {
-        Ok(KeySet::new()
-            .with_static_page("/", PlainPage::new("Minimal Example", Text::new("Hello"))))
+        Ok(KeySet::new().with_static_page(
+            "/",
+            NavPage::new("Minimal Example", Text::new("Hello")).with_poll(10),
+        ))
     };
     let session_state_fn = move || ();
     let req_handler =
