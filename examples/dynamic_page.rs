@@ -28,8 +28,8 @@
 
 use applin::action::push;
 use applin::data::{Context, Rebuilder, Roster};
-use applin::session::{KeySet, Session, SessionSet};
-use applin::widget::{Button, Column, Empty, NavPage, Text};
+use applin::session::{KeySet, PageKey, Session, SessionSet};
+use applin::widget::{Empty, Form, FormButton, NavPage, Text};
 use servlin::reexport::permit::Permit;
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
@@ -63,22 +63,21 @@ fn key_set(
     // Whenever the value changes, Applin calls this function
     // to rebuild the set of keys.
     let show_page_2 = *state.show_page_2.read(rebuilder);
-    let opt_page_2 = if show_page_2 {
-        let page_2 = keys.add_static_page(
-            "/page_2",
-            NavPage::new("Page 2", Text::new("This is page 2.")),
-        );
-        Some(page_2)
-    } else {
-        None
-    };
-    keys.add_page_fn("/", move |_rebuilder| {
+    const PAGE_2: &str = "/page_2";
+    if show_page_2 {
+        keys.add_static_page(PAGE_2, NavPage::new("Page 2", Text::new("This is page 2.")));
+    }
+    let state_clone = Arc::clone(state);
+    keys.add_page_fn("/", move |rebuilder| {
+        let show_page_2 = *state_clone.show_page_2.read(rebuilder);
         Ok(NavPage::new(
             "Dynamic Page Example",
-            Column::new((
+            Form::new((
                 Text::new("The page below appears and disappears every 5 seconds:"),
-                if let Some(page_2) = &opt_page_2 {
-                    Button::new("Page 2").with_action(push(page_2)).to_widget()
+                if show_page_2 {
+                    FormButton::new("Page 2")
+                        .with_action(push(&PageKey::new(PAGE_2)))
+                        .to_widget()
                 } else {
                     Empty::new().to_widget()
                 },
