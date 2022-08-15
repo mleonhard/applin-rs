@@ -3,7 +3,6 @@ use crate::session::Session;
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Weak};
-use std::time::{Duration, Instant};
 
 pub enum Rebuilder<T> {
     Keys(Weak<Session<T>>),
@@ -50,11 +49,7 @@ impl<T: 'static + Send + Sync> Rebuilder<T> {
     #[must_use]
     pub fn session_fresh(&self) -> bool {
         if let Some(session) = self.weak_session().upgrade() {
-            session
-                .lock_inner()
-                .last_contact
-                .saturating_duration_since(Instant::now())
-                < Duration::from_secs(120)
+            session.is_fresh()
         } else {
             false
         }

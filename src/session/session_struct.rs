@@ -7,8 +7,17 @@ use servlin::reexport::safina_executor::Executor;
 use servlin::{Event, EventSender, Response};
 use std::collections::HashSet;
 use std::ops::{Deref, DerefMut};
+use std::sync::atomic::AtomicU64;
+use std::sync::atomic::Ordering::{Acquire, Release};
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError, Weak};
-use std::time::Instant;
+use std::time::SystemTime;
+
+fn epoch_seconds() -> u64 {
+    SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+}
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum PendingUpdate {
@@ -33,7 +42,6 @@ impl<'x, T> DerefMut for SessionStateGuard<'x, T> {
 
 #[allow(clippy::module_name_repetitions)]
 pub struct InnerSession<T> {
-    pub last_contact: Instant,
     pub key_set: KeySet<T>,
     pub rpc_updates: HashSet<PendingUpdate>,
     pub sender: EventSender,
@@ -49,6 +57,7 @@ pub struct Session<T> {
             + Sync
             + Fn(Rebuilder<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
     >,
+    pub last_contact_epoch_seconds: AtomicU64,
     pub scheduled_updates: Mutex<HashSet<PendingUpdate>>,
     pub state: Mutex<T>,
     pub inner: Mutex<InnerSession<T>>,
@@ -63,12 +72,12 @@ impl<T: 'static + Send + Sync> Session<T> {
     {
         Arc::new(Self {
             executor,
-            key_set_fn: Box::new(key_set_fn),
             cookie: SessionCookie::new_random(),
+            key_set_fn: Box::new(key_set_fn),
+            last_contact_epoch_seconds: AtomicU64::new(epoch_seconds()),
             scheduled_updates: Mutex::new(HashSet::new()),
             state: Mutex::new(state),
             inner: Mutex::new(InnerSession {
-                last_contact: Instant::now(),
                 key_set: KeySet::new(),
                 rpc_updates: HashSet::new(),
                 sender: EventSender::unconnected(),
@@ -78,6 +87,10 @@ impl<T: 'static + Send + Sync> Session<T> {
 
     pub fn id(&self) -> SessionId {
         self.cookie.id()
+    }
+
+    pub fn is_fresh(&self) -> bool {
+        epoch_seconds() - self.last_contact_epoch_seconds.load(Acquire) < 120
     }
 
     pub fn rpc_context(&self) -> Context {
@@ -103,12 +116,14 @@ impl<T: 'static + Send + Sync> Session<T> {
     /// Returns an error when it cannot start the stream.
     pub fn stream(self: &Arc<Self>) -> Result<Response, Response> {
         self.lock_scheduled_updates().clear();
-        let mut inner_guard = self.lock_inner();
-        inner_guard.key_set = KeySet::new();
-        inner_guard.last_contact = Instant::now();
+        self.last_contact_epoch_seconds
+            .store(epoch_seconds(), Release);
         let (sender, response) = Response::event_stream();
-        inner_guard.sender = sender;
-        drop(inner_guard);
+        {
+            let mut inner_guard = self.lock_inner();
+            inner_guard.key_set = KeySet::new();
+            inner_guard.sender = sender;
+        }
         // TODO: Send the client an opaque version ID
         //       and skip rebuilding all if it matches.
         self.rebuild_key_set(&Context::Empty);
@@ -238,9 +253,9 @@ impl<T: 'static + Send + Sync> Session<T> {
     ) -> Result<Response, Response> {
         let mut pending_updates = HashSet::new();
         {
-            let mut inner_guard = self.lock_inner();
-            inner_guard.last_contact = Instant::now();
-            std::mem::swap(&mut inner_guard.rpc_updates, &mut pending_updates);
+            self.last_contact_epoch_seconds
+                .store(epoch_seconds(), Release);
+            std::mem::swap(&mut self.lock_inner().rpc_updates, &mut pending_updates);
         }
         //dbg!(&pending_updates);
         let mut diff = if pending_updates.remove(&PendingUpdate::KeySet) {
