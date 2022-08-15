@@ -19,6 +19,6 @@ ureq = { version = "^2.5", features = ["cookies", "json"], optional = true }
 
 [features]
 default = []
-testing = ["dep:ureq"]
+testing = ["ureq"]
 
 [dev-dependencies]
