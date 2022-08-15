@@ -57,6 +57,8 @@
 //!     )
 //!     .unwrap();
 //! ```
+//! ![Screenshot of minimal.rs](examples/minimal-screenshot.png "Screenshot of minimal.rs")
+//!
 //! # Cargo Geiger Safety Report
 //! # Alternatives
 //!
