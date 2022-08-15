@@ -208,15 +208,15 @@ impl<T: 'static + Send + Sync> Session<T> {
 
     #[allow(clippy::missing_panics_doc)]
     pub fn rebuild_key_set(self: &Arc<Self>, ctx: &Context) {
-        if &Context::Rpc(self.id()) == ctx {
+        if &Context::Rpc(self.id()) == ctx || !self.lock_inner().sender.is_connected() {
             self.lock_inner().rpc_updates.insert(PendingUpdate::KeySet);
-            return;
-        }
-        let self_clone = self.clone();
-        if let Some(executor) = self.executor.upgrade() {
-            executor.schedule_blocking(move || {
-                self_clone.build_key_set_and_send().unwrap();
-            });
+        } else {
+            let self_clone = self.clone();
+            if let Some(executor) = self.executor.upgrade() {
+                executor.schedule_blocking(move || {
+                    self_clone.build_key_set_and_send().unwrap();
+                });
+            }
         }
     }
 
