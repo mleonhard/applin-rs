@@ -5,6 +5,43 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Serialize, Ord, PartialEq, PartialOrd)]
+pub enum FormTextfieldAllow {
+    #[serde(rename = "all")]
+    All,
+    #[serde(rename = "ascii")]
+    Ascii,
+    #[serde(rename = "email")]
+    Email,
+    #[serde(rename = "numbers")]
+    Numbers,
+    #[serde(rename = "tel")]
+    Tel,
+}
+impl Default for FormTextfieldAllow {
+    fn default() -> Self {
+        Self::All
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Serialize, Ord, PartialEq, PartialOrd)]
+pub enum FormTextfieldAutoCapitalize {
+    #[serde(rename = "names")]
+    Names,
+    #[serde(rename = "sentences")]
+    Sentences,
+}
+impl Default for FormTextfieldAutoCapitalize {
+    fn default() -> Self {
+        Self::Sentences
+    }
+}
+
+#[must_use]
+fn is_u32_max(n: &u32) -> bool {
+    *n == u32::MAX
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Serialize, Ord, PartialEq, PartialOrd)]
 #[serde(tag = "typ")]
 pub enum Widget {
     #[serde(rename = "back-button")]
@@ -79,6 +116,31 @@ pub enum Widget {
         title: Option<String>,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         widgets: Vec<Widget>,
+    },
+    #[serde(rename = "form-textfield")]
+    FormTextfieldVariant {
+        #[serde(default, skip_serializing_if = "is_default")]
+        allow: FormTextfieldAllow,
+        #[serde(rename = "auto-capitalize")]
+        #[serde(default, skip_serializing_if = "is_default")]
+        auto_capitalize: FormTextfieldAutoCapitalize,
+        #[serde(rename = "check-rpc")]
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        check_rpc: Option<String>,
+        #[serde(rename = "initial-string")]
+        #[serde(default, skip_serializing_if = "String::is_empty")]
+        initial_string: String,
+        label: String,
+        #[serde(rename = "max-chars")]
+        #[serde(default, skip_serializing_if = "is_u32_max")]
+        max_chars: u32,
+        #[serde(rename = "max-lines")]
+        #[serde(default, skip_serializing_if = "is_u32_max")]
+        max_lines: u32,
+        #[serde(rename = "min-chars")]
+        #[serde(default, skip_serializing_if = "is_default")]
+        min_chars: u32,
+        var: String,
     },
     #[serde(rename = "modal-button")]
     ModalButtonVariant {

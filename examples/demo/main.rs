@@ -57,6 +57,7 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
     let form_error_page = form_widgets::add_form_error_page(&mut keys);
     let form_section_page = form_widgets::add_form_section_page(&mut keys);
     let form_text_page = form_widgets::add_form_text_page(&mut keys);
+    let form_textfield_page = form_widgets::add_form_text_field_page(&mut keys);
     // Update Modes
     let inert_page = updates::add_inert_page(state, &mut keys);
     let poll_page = updates::add_poll_page(state, &mut keys);
@@ -83,6 +84,7 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
                     FormDetail::new("Form Error").with_action(push(&form_error_page)),
                     FormDetail::new("Form Section").with_action(push(&form_section_page)),
                     FormDetail::new("Form Text").with_action(push(&form_text_page)),
+                    FormDetail::new("Form Textfield").with_action(push(&form_textfield_page)),
                 )),
                 FormSection::new().with_title("Update Modes").with_widgets((
                     FormDetail::new("Inert").with_action(push(&inert_page)),
@@ -120,6 +122,9 @@ fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Respo
         ("POST", path) if path == widgets::BACK_RPC_PATH => widgets::back_rpc(state, req),
         ("POST", path) if path == form_widgets::FORM_CHECKBOX_RPC_PATH => {
             form_widgets::form_checkbox_rpc(state, req)
+        }
+        ("POST", path) if path == form_widgets::FORM_TEXTFIELD_CHECK_RPC_PATH => {
+            form_widgets::form_textfield_check_rpc(state, req)
         }
         ("POST", path) if path == vars::CHECK_VARS_RPC_PATH => vars::check_vars_rpc(state, req),
         ("GET", "/placeholder-200x200.png") => Ok(Response::new(200)

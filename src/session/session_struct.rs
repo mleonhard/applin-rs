@@ -183,6 +183,7 @@ impl<T: 'static + Send + Sync> Session<T> {
             .get(key)
             .ok_or_else(|| format!("key {:?} not found", key))?;
         (*value_fn)(rebuilder)
+        // TODO: Warn if page has multiple widgets using the same var name.
     }
 
     /// # Errors
