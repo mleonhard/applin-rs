@@ -370,5 +370,6 @@ For example, if you wish to write applin-go or applin-rails, please contact me.
 - Action to refresh an image
 - Server to push refresh an image
 - Fail build on key collision, for large projects.
+- Study the design of htmx, https://htmx.org/docs/ .
 
 License: MIT OR Apache-2.0
