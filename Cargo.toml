@@ -4,7 +4,9 @@ description = "Graphical application server with iOS and Android clients"
 categories = ["gui", "network-programming"]
 edition = "2021"
 keywords = ["mobile", "ui", "reactnative", "flutter"]
-license = "MIT OR Apache-2.0"
+# https://doc.rust-lang.org/cargo/reference/manifest.html#the-license-and-license-file-fields
+# TODO(mleonhard) Uncomment once Brandeis-2023 is in the SPDX library.
+#license = "Brandeis-2023"
 name = "applin"
 repository = "https://github.com/mleonhard/applin"
 version = "0.1.0"
