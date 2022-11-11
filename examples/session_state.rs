@@ -95,7 +95,8 @@ fn key_set(_state: &Arc<ServerState>) -> KeySet<SessionState> {
                 )),
                 FormButton::new("Increment").with_action(rpc("/increment")),
             )),
-        ))
+        )
+        .with_poll(10))
     });
     keys
 }

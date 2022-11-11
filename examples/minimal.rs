@@ -24,7 +24,7 @@ use applin::data::Rebuilder;
 use applin::session::{KeySet, SessionSet};
 use applin::widget::{NavPage, Text};
 use servlin::reexport::{safina_executor, safina_timer};
-use servlin::{socket_addr_127_0_0_1, HttpServerBuilder, Request};
+use servlin::{socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
 use std::sync::Arc;
 
 pub fn main() {
@@ -39,16 +39,22 @@ pub fn main() {
         ))
     };
     let session_state_fn = move || ();
-    let req_handler =
-        move |req: Request| match sessions.get_or_new(&req, key_set_fn, session_state_fn) {
-            Ok(session) => session.poll().unwrap_or_else(|response| response),
-            Err(response) => response,
-        };
+    let req_handler = move |req: Request| match (req.method(), req.url().path()) {
+        ("GET", "/") => sessions
+            .get_or_new(&req, key_set_fn, session_state_fn)?
+            .poll(),
+        ("GET", "/stream") => sessions
+            .get_or_new(&req, key_set_fn, session_state_fn)?
+            .stream(),
+        _ => Ok(Response::text(404, "Not found")),
+    };
     executor
         .block_on(
             HttpServerBuilder::new()
                 .listen_addr(socket_addr_127_0_0_1(8000))
-                .spawn_and_join(req_handler),
+                .spawn_and_join(move |req: Request| {
+                    req_handler(req).unwrap_or_else(|response| response)
+                }),
         )
         .unwrap();
 }
