@@ -29,7 +29,7 @@
 use applin::action::push;
 use applin::data::{Context, Rebuilder, Roster};
 use applin::session::{KeySet, PageKey, Session, SessionSet};
-use applin::widget::{Empty, Form, FormButton, NavPage, Text};
+use applin::widget::{Column, Empty, FormButton, NavPage, Text};
 use servlin::reexport::permit::Permit;
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
@@ -72,7 +72,7 @@ fn key_set(
         let show_page_2 = *state_clone.show_page_2.read(rebuilder);
         Ok(NavPage::new(
             "Dynamic Page Example",
-            Form::new((
+            Column::new((
                 Text::new("The page below appears and disappears every 5 seconds:"),
                 if show_page_2 {
                     FormButton::new("Page 2")

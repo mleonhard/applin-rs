@@ -3,8 +3,8 @@ use applin::action::{nothing, push};
 use applin::error::user_error;
 use applin::session::{KeySet, PageKey};
 use applin::widget::{
-    AlertModal, Empty, Form, FormButton, FormCheckbox, FormDetail, FormError, FormSection,
-    FormTextfield, NavPage, Text,
+    AlertModal, Empty, Form, FormButton, FormCheckbox, FormError, FormSection, FormTextfield,
+    NavPage, Scroll, Text,
 };
 use serde::Deserialize;
 use servlin::{Request, Response};
@@ -45,7 +45,7 @@ pub fn add_form_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
         "/form-button",
         NavPage::new(
             "Form Button",
-            Form::new((
+            Scroll::new(Form::new((
                 FormButton::new("Button1").with_action(push(&pressed)),
                 FormButton::new("").with_action(push(&pressed)),
                 FormButton::new(
@@ -58,7 +58,7 @@ pub fn add_form_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 .with_action(push(&pressed)),
                 FormButton::new("Disabled"),
                 FormButton::new("Does Nothing").with_action(nothing()),
-            )),
+            ))),
         ),
     )
 }
@@ -68,7 +68,7 @@ pub fn add_form_checkbox_page(keys: &mut KeySet<SessionState>) -> PageKey {
         "/form-checkbox",
         NavPage::new(
             "Form Checkbox",
-            Form::new((
+            Scroll::new(Form::new((
                 FormCheckbox::new("checkbox", "Checkbox"),
                 FormCheckbox::new("initial-checked", "Initially checked").with_initial(true),
                 FormCheckbox::new("with-rpc", "Does RPC on change")
@@ -85,148 +85,7 @@ pub fn add_form_checkbox_page(keys: &mut KeySet<SessionState>) -> PageKey {
                     "mmmmmmmm-checkbox",
                     "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
                 ),
-            )),
-        ),
-    )
-}
-
-#[allow(clippy::too_many_lines)]
-pub fn add_form_detail_page(keys: &mut KeySet<SessionState>) -> PageKey {
-    let pressed = keys.add_static_page(
-        "/form-detail-pressed",
-        NavPage::new("Form Detail Pressed", Empty::new()),
-    );
-    // NOTE: If rust-fmt refuses to format this, try making all lines shorter, under the limit.
-    keys.add_static_page(
-        "/form-detail",
-        NavPage::new(
-            "Form Detail",
-            Form::new((
-                FormSection::new().with_title("Text").with_widgets((
-                    FormDetail::new("Text").with_action(push(&pressed)),
-                    FormDetail::new("Disabled"),
-                    FormDetail::new("Does Nothing").with_action(nothing()),
-                    FormDetail::new("").with_action(push(&pressed)),
-                    FormDetail::new(
-                        "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
-                    )
-                    .with_action(push(&pressed)),
-                    FormDetail::new(
-                        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
-                    )
-                    .with_action(push(&pressed)),
-                )),
-                FormSection::new()
-                    .with_title("Text + Sub-text")
-                    .with_widgets((
-                    FormDetail::new("Text")
-                        .with_sub_text("Sub-text")
-                        .with_action(push(&pressed)),
-                    FormDetail::new("Disabled").with_sub_text("Sub-text"),
-                    FormDetail::new(
-                        "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
-                    )
-                    .with_sub_text("Sub-text")
-                    .with_action(push(&pressed)),
-                    FormDetail::new(
-                        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
-                    )
-                    .with_sub_text("Sub-text")
-                    .with_action(push(&pressed)),
-                    FormDetail::new("Text")
-                        .with_sub_text(
-                            "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
-                        )
-                        .with_action(push(&pressed)),
-                    FormDetail::new("Text")
-                        .with_sub_text(
-                            "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
-                        )
-                        .with_action(push(&pressed)),
-                    FormDetail::new("")
-                        .with_sub_text("")
-                        .with_action(push(&pressed)),
-                    FormDetail::new("Sub-text is empty")
-                        .with_sub_text("")
-                        .with_action(push(&pressed)),
-                    FormDetail::new("")
-                        .with_sub_text("Text is empty")
-                        .with_action(push(&pressed)),
-                )),
-                FormSection::new().with_title("Image + Text").with_widgets((
-                    FormDetail::new("Text")
-                        .with_photo_url("/placeholder-200x200.png")
-                        .with_action(push(&pressed)),
-                    FormDetail::new("Disabled").with_photo_url("/placeholder-200x200.png"),
-                    FormDetail::new(
-                        "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
-                    )
-                    .with_photo_url("/placeholder-200x200.png")
-                    .with_action(push(&pressed)),
-                    FormDetail::new(
-                        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
-                    )
-                    .with_photo_url("/placeholder-200x200.png")
-                    .with_action(push(&pressed)),
-                    FormDetail::new("")
-                        .with_photo_url("/placeholder-200x200.png")
-                        .with_action(push(&pressed)),
-                    FormDetail::new("Image not found")
-                        .with_photo_url("/nonexistent")
-                        .with_action(push(&pressed)),
-                    FormDetail::new("Not an image")
-                        .with_photo_url("/health")
-                        .with_action(push(&pressed)),
-                    // TODO: Use a URL that never returns a result.
-                )),
-                FormSection::new()
-                    .with_title("Image + Text + Sub-text")
-                    .with_widgets((
-                    FormDetail::new("Text")
-                        .with_sub_text("Sub-text")
-                        .with_photo_url("/placeholder-200x200.png")
-                        .with_action(push(&pressed)),
-                    FormDetail::new("Disabled")
-                        .with_sub_text("Sub-text")
-                        .with_photo_url("/placeholder-200x200.png"),
-                    FormDetail::new(
-                        "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
-                    )
-                    .with_sub_text("Sub-text")
-                    .with_photo_url("/placeholder-200x200.png")
-                    .with_action(push(&pressed)),
-                    FormDetail::new(
-                        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
-                    )
-                    .with_sub_text("Sub-text")
-                    .with_photo_url("/placeholder-200x200.png")
-                    .with_action(push(&pressed)),
-                    FormDetail::new("Text")
-                        .with_sub_text(
-                            "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
-                        )
-                        .with_photo_url("/placeholder-200x200.png")
-                        .with_action(push(&pressed)),
-                    FormDetail::new("Text")
-                        .with_sub_text(
-                            "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
-                        )
-                        .with_photo_url("/placeholder-200x200.png")
-                        .with_action(push(&pressed)),
-                    FormDetail::new("")
-                        .with_sub_text("")
-                        .with_photo_url("/placeholder-200x200.png")
-                        .with_action(push(&pressed)),
-                    FormDetail::new("Sub-text is empty")
-                        .with_sub_text("")
-                        .with_photo_url("/placeholder-200x200.png")
-                        .with_action(push(&pressed)),
-                    FormDetail::new("")
-                        .with_sub_text("Text is empty")
-                        .with_photo_url("/placeholder-200x200.png")
-                        .with_action(push(&pressed)),
-                )),
-            )),
+            ))),
         ),
     )
 }
@@ -236,7 +95,7 @@ pub fn add_form_error_page(keys: &mut KeySet<SessionState>) -> PageKey {
         "/form-error",
         NavPage::new(
             "Form Error",
-            Form::new((
+            Scroll::new(Form::new((
                 FormError::new("Error Message"),
                 FormError::new(""),
                 FormError::new(
@@ -245,7 +104,7 @@ pub fn add_form_error_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 FormError::new(
                     "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
                 ),
-            )),
+            ))),
         ),
     )
 }
@@ -255,7 +114,7 @@ pub fn add_form_section_page(keys: &mut KeySet<SessionState>) -> PageKey {
         "/form-section",
         NavPage::new(
             "Form Section",
-            Form::new((
+            Scroll::new(Form::new((
                 FormSection::new()
                     .with_title("Section A")
                     .with_widgets((Text::new("aaa"), Text::new("aaaa"))),
@@ -271,7 +130,7 @@ pub fn add_form_section_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 FormSection::new()
                     .with_title("Section C")
                     .with_widgets((Text::new("ccc"), Text::new("cccc"))),
-            )),
+            ))),
         ),
     )
 }
@@ -281,12 +140,12 @@ pub fn add_form_text_page(keys: &mut KeySet<SessionState>) -> PageKey {
         "/form-text",
         NavPage::new(
             "Form Text",
-            Form::new((
+            Scroll::new(Form::new((
                 Text::new("Text"),
                 Text::new(""),
                 Text::new("MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM"),
                 Text::new("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"),
-            )),
+            ))),
         ),
     )
 }
@@ -296,7 +155,7 @@ pub fn add_form_text_field_page(keys: &mut KeySet<SessionState>) -> PageKey {
         "/form-text-field",
         NavPage::new(
             "Form Text Field",
-            Form::new((
+            Scroll::new(Form::new((
                 FormTextfield::new("text1", "Enter some text"),
                 FormTextfield::new("prefilled1", "Pre-filled").with_initial("initial content"),
                 FormTextfield::new("rpc_checked1", "Checked via RPC (rejects the word 'bad')")
@@ -318,7 +177,7 @@ pub fn add_form_text_field_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 FormTextfield::new("mmmmm", "Pre-filled with a long word").with_initial(
                     "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
                 ),
-            )),
+            ))),
         ),
     )
 }

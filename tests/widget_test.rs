@@ -177,36 +177,36 @@ fn widget_empty_deserialize() {
 }
 
 #[test]
-fn widget_form_detail_serialize() {
+fn widget_nav_button_serialize() {
     assert_eq!(
-        serde_json::to_string(&Widget::FormDetailVariant {
+        serde_json::to_string(&Widget::NavButtonVariant {
             actions: Vec::new(),
             photo_url: None,
             sub_text: None,
             text: "".to_string(),
         })
         .unwrap(),
-        r#"{"typ":"form-detail","text":""}"#
+        r#"{"typ":"nav-button","text":""}"#
     );
     assert_eq!(
-        serde_json::to_string(&Widget::FormDetailVariant {
+        serde_json::to_string(&Widget::NavButtonVariant {
             actions: vec![Action::Pop, Action::Logout],
             photo_url: Some("/p1".to_string()),
             sub_text: Some("s1".to_string()),
             text: "t1".to_string(),
         })
         .unwrap(),
-        r#"{"typ":"form-detail","text":"t1","sub-text":"s1","photo-url":"/p1","actions":["pop","logout"]}"#
+        r#"{"typ":"nav-button","text":"t1","sub-text":"s1","photo-url":"/p1","actions":["pop","logout"]}"#
     );
 }
 
 #[test]
-fn widget_form_detail_deserialize() {
-    serde_json::from_str::<Widget>(r#"{"typ":"form-detail"}"#)
-        .expect_err("form-detail requires `text`");
+fn widget_nav_button_deserialize() {
+    serde_json::from_str::<Widget>(r#"{"typ":"nav-button"}"#)
+        .expect_err("nav-button requires `text`");
     assert_eq!(
-        serde_json::from_str::<Widget>(r#"{"typ":"form-detail","text":""}"#).unwrap(),
-        Widget::FormDetailVariant {
+        serde_json::from_str::<Widget>(r#"{"typ":"nav-button","text":""}"#).unwrap(),
+        Widget::NavButtonVariant {
             actions: Vec::new(),
             photo_url: None,
             sub_text: None,
@@ -215,10 +215,10 @@ fn widget_form_detail_deserialize() {
     );
     assert_eq!(
         serde_json::from_str::<Widget>(
-            r#"{"typ":"form-detail","actions":["pop","logout"],"photo-url":"/p1","sub-text":"s1","text":"t1"}"#
+            r#"{"typ":"nav-button","actions":["pop","logout"],"photo-url":"/p1","sub-text":"s1","text":"t1"}"#
         )
         .unwrap(),
-        Widget::FormDetailVariant {
+        Widget::NavButtonVariant {
             actions: vec![Action::Pop, Action::Logout],
             photo_url: Some("/p1".to_string()),
             sub_text: Some("s1".to_string()),

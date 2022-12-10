@@ -15,7 +15,7 @@ mod widgets;
 use applin::action::push;
 use applin::data::Roster;
 use applin::session::{KeySet, Session, SessionSet};
-use applin::widget::{Form, FormDetail, FormSection, NavPage};
+use applin::widget::{Form, FormSection, NavButton, NavPage, Scroll};
 use core::fmt::Debug;
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{
@@ -51,9 +51,9 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
     // Widgets
     let back_buttons_page = widgets::add_back_button_pages(&mut keys);
     let buttons_page = widgets::add_button_page(&mut keys);
+    let nav_button_page = widgets::add_nav_button_page(&mut keys);
     let form_button_page = form_widgets::add_form_button_page(&mut keys);
     let form_checkbox_page = form_widgets::add_form_checkbox_page(&mut keys);
-    let form_detail_page = form_widgets::add_form_detail_page(&mut keys);
     let form_error_page = form_widgets::add_form_error_page(&mut keys);
     let form_section_page = form_widgets::add_form_section_page(&mut keys);
     let form_text_page = form_widgets::add_form_text_page(&mut keys);
@@ -68,33 +68,33 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
         "/",
         NavPage::new(
             "Applin Demo",
-            Form::new((
+            Scroll::new(Form::new((
                 FormSection::new().with_title("Pages").with_widgets((
-                    FormDetail::new("Alert Modal").with_action(push(&alert_modal)),
-                    FormDetail::new("Drawer Modal").with_action(push(&drawer_modal)),
-                    FormDetail::new("Nav Page").with_action(push(&nav_page)),
-                    FormDetail::new("Plain Page").with_action(push(&plain_page)),
+                    NavButton::new("Alert Modal").with_action(push(&alert_modal)),
+                    NavButton::new("Drawer Modal").with_action(push(&drawer_modal)),
+                    NavButton::new("Nav Page").with_action(push(&nav_page)),
+                    NavButton::new("Plain Page").with_action(push(&plain_page)),
                 )),
                 FormSection::new().with_title("Widgets").with_widgets((
-                    FormDetail::new("Back Button").with_action(push(&back_buttons_page)),
-                    FormDetail::new("Button").with_action(push(&buttons_page)),
-                    FormDetail::new("Form Button").with_action(push(&form_button_page)),
-                    FormDetail::new("Form Checkbox").with_action(push(&form_checkbox_page)),
-                    FormDetail::new("Form Detail").with_action(push(&form_detail_page)),
-                    FormDetail::new("Form Error").with_action(push(&form_error_page)),
-                    FormDetail::new("Form Section").with_action(push(&form_section_page)),
-                    FormDetail::new("Form Text").with_action(push(&form_text_page)),
-                    FormDetail::new("Form Textfield").with_action(push(&form_textfield_page)),
+                    NavButton::new("Back Button").with_action(push(&back_buttons_page)),
+                    NavButton::new("Button").with_action(push(&buttons_page)),
+                    NavButton::new("Nav Button").with_action(push(&nav_button_page)),
+                    NavButton::new("Form Button").with_action(push(&form_button_page)),
+                    NavButton::new("Form Checkbox").with_action(push(&form_checkbox_page)),
+                    NavButton::new("Form Error").with_action(push(&form_error_page)),
+                    NavButton::new("Form Section").with_action(push(&form_section_page)),
+                    NavButton::new("Form Text").with_action(push(&form_text_page)),
+                    NavButton::new("Form Textfield").with_action(push(&form_textfield_page)),
                 )),
                 FormSection::new().with_title("Update Modes").with_widgets((
-                    FormDetail::new("Inert").with_action(push(&inert_page)),
-                    FormDetail::new("Poll").with_action(push(&poll_page)),
-                    FormDetail::new("Stream").with_action(push(&stream_page)),
+                    NavButton::new("Inert").with_action(push(&inert_page)),
+                    NavButton::new("Poll").with_action(push(&poll_page)),
+                    NavButton::new("Stream").with_action(push(&stream_page)),
                 )),
                 FormSection::new().with_title("Vars").with_widgets((
-                    FormDetail::new("Check Vars").with_action(push(&check_vars_page)),
+                    NavButton::new("Check Vars").with_action(push(&check_vars_page)),
                 )),
-            )),
+            ))),
         )
         .with_poll(10),
     );

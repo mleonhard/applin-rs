@@ -98,16 +98,6 @@ pub enum Widget {
         rpc: Option<String>,
         text: String,
     },
-    #[serde(rename = "form-detail")]
-    FormDetailVariant {
-        text: String,
-        #[serde(rename = "sub-text", default, skip_serializing_if = "Option::is_none")]
-        sub_text: Option<String>,
-        #[serde(rename = "photo-url", default, skip_serializing_if = "Option::is_none")]
-        photo_url: Option<String>,
-        #[serde(default, skip_serializing_if = "Vec::is_empty")]
-        actions: Vec<Action>,
-    },
     #[serde(rename = "form-error")]
     FormErrorVariant { text: String },
     #[serde(rename = "form-section")]
@@ -154,6 +144,16 @@ pub enum Widget {
         #[serde(rename = "is-destructive")]
         #[serde(default, skip_serializing_if = "std::ops::Not::not")]
         is_destructive: bool,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        actions: Vec<Action>,
+    },
+    #[serde(rename = "nav-button")]
+    NavButtonVariant {
+        text: String,
+        #[serde(rename = "sub-text", default, skip_serializing_if = "Option::is_none")]
+        sub_text: Option<String>,
+        #[serde(rename = "photo-url", default, skip_serializing_if = "Option::is_none")]
+        photo_url: Option<String>,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         actions: Vec<Action>,
     },

@@ -1,13 +1,13 @@
 use crate::internal::{Action, Widget};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct FormDetail {
+pub struct NavButton {
     actions: Vec<Action>,
     photo_url: Option<String>,
     sub_text: Option<String>,
     text: String,
 }
-impl FormDetail {
+impl NavButton {
     #[must_use]
     pub fn new(text: impl Into<String>) -> Self {
         Self {
@@ -46,7 +46,7 @@ impl FormDetail {
 
     #[must_use]
     pub fn to_widget(self) -> Widget {
-        Widget::FormDetailVariant {
+        Widget::NavButtonVariant {
             actions: self.actions,
             photo_url: self.photo_url,
             sub_text: self.sub_text,
@@ -54,8 +54,8 @@ impl FormDetail {
         }
     }
 }
-impl From<FormDetail> for Widget {
-    fn from(src: FormDetail) -> Self {
+impl From<NavButton> for Widget {
+    fn from(src: NavButton) -> Self {
         src.to_widget()
     }
 }

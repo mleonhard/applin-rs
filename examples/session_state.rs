@@ -31,7 +31,7 @@
 use applin::action::rpc;
 use applin::data::{random_u64, Rebuilder, Roster};
 use applin::session::{KeySet, Session, SessionSet};
-use applin::widget::{Form, FormButton, NavPage, Text};
+use applin::widget::{Button, Column, NavPage, Text};
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
 use std::fmt::{Debug, Formatter};
@@ -85,7 +85,7 @@ fn key_set(_state: &Arc<ServerState>) -> KeySet<SessionState> {
         let session_state = session.state();
         Ok(NavPage::new(
             "Session State Example",
-            Form::new((
+            Column::new((
                 Text::new(format!(
                     "Counter: {}",
                     // Get the counter value and subscribe to updates.
@@ -93,7 +93,7 @@ fn key_set(_state: &Arc<ServerState>) -> KeySet<SessionState> {
                     // this page function to rebuild the page.
                     *session_state.count.read(rebuilder)
                 )),
-                FormButton::new("Increment").with_action(rpc("/increment")),
+                Button::new("Increment").with_action(rpc("/increment")),
             )),
         )
         .with_poll(10))

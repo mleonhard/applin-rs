@@ -2,7 +2,8 @@ use crate::{ServerState, SessionState};
 use applin::action::{nothing, pop, push, rpc};
 use applin::session::{KeySet, PageKey};
 use applin::widget::{
-    AlertModal, BackButton, Button, Column, Empty, Form, FormDetail, NavPage, Text,
+    AlertModal, BackButton, Button, Column, Empty, Form, FormSection, NavButton, NavPage, Scroll,
+    Text,
 };
 use servlin::{Request, Response};
 use std::sync::Arc;
@@ -64,13 +65,13 @@ pub fn add_back_button_pages(keys: &mut KeySet<SessionState>) -> PageKey {
         "/back-button",
         NavPage::new(
             "Back Button",
-            Form::new((
-                FormDetail::new("Default").with_action(push(&default)),
-                FormDetail::new("Disabled").with_action(push(&disabled)),
-                FormDetail::new("Missing").with_action(push(&missing)),
-                FormDetail::new("RPC").with_action(push(&rpc_ok)),
-                FormDetail::new("RPC Error").with_action(push(&rpc_err)),
-            )),
+            Scroll::new(Form::new((
+                NavButton::new("Default").with_action(push(&default)),
+                NavButton::new("Disabled").with_action(push(&disabled)),
+                NavButton::new("Missing").with_action(push(&missing)),
+                NavButton::new("RPC").with_action(push(&rpc_ok)),
+                NavButton::new("RPC Error").with_action(push(&rpc_err)),
+            ))),
         ),
     )
 }
@@ -84,7 +85,7 @@ pub fn add_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
         "/button",
         NavPage::new(
             "Button",
-            Form::new((
+            Scroll::new(Form::new((
                 Button::new("Button").with_action(push(&pressed)),
                 Button::new(
                     "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
@@ -98,7 +99,148 @@ pub fn add_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 Button::new("").with_action(push(&pressed)),
                 Button::new("Disabled Button"),
                 Button::new("Does Nothing").with_action(nothing()),
-            )),
+            ))),
+        ),
+    )
+}
+
+#[allow(clippy::too_many_lines)]
+pub fn add_nav_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
+    let pressed = keys.add_static_page(
+        "/nav-button-pressed",
+        NavPage::new("Nav Button Pressed", Empty::new()),
+    );
+    // NOTE: If rust-fmt refuses to format this, try making all lines shorter, under the limit.
+    keys.add_static_page(
+        "/nav-button",
+        NavPage::new(
+            "Nav Button",
+            Scroll::new(Form::new((
+                FormSection::new().with_title("Text").with_widgets((
+                    NavButton::new("Text").with_action(push(&pressed)),
+                    NavButton::new("Disabled"),
+                    NavButton::new("Does Nothing").with_action(nothing()),
+                    NavButton::new("").with_action(push(&pressed)),
+                    NavButton::new(
+                        "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                    )
+                    .with_action(push(&pressed)),
+                    NavButton::new(
+                        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                    )
+                    .with_action(push(&pressed)),
+                )),
+                FormSection::new()
+                    .with_title("Text + Sub-text")
+                    .with_widgets((
+                    NavButton::new("Text")
+                        .with_sub_text("Sub-text")
+                        .with_action(push(&pressed)),
+                    NavButton::new("Disabled").with_sub_text("Sub-text"),
+                    NavButton::new(
+                        "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                    )
+                    .with_sub_text("Sub-text")
+                    .with_action(push(&pressed)),
+                    NavButton::new(
+                        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                    )
+                    .with_sub_text("Sub-text")
+                    .with_action(push(&pressed)),
+                    NavButton::new("Text")
+                        .with_sub_text(
+                            "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                        )
+                        .with_action(push(&pressed)),
+                    NavButton::new("Text")
+                        .with_sub_text(
+                            "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                        )
+                        .with_action(push(&pressed)),
+                    NavButton::new("")
+                        .with_sub_text("")
+                        .with_action(push(&pressed)),
+                    NavButton::new("Sub-text is empty")
+                        .with_sub_text("")
+                        .with_action(push(&pressed)),
+                    NavButton::new("")
+                        .with_sub_text("Text is empty")
+                        .with_action(push(&pressed)),
+                )),
+                FormSection::new().with_title("Image + Text").with_widgets((
+                    NavButton::new("Text")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                    NavButton::new("Disabled").with_photo_url("/placeholder-200x200.png"),
+                    NavButton::new(
+                        "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                    )
+                    .with_photo_url("/placeholder-200x200.png")
+                    .with_action(push(&pressed)),
+                    NavButton::new(
+                        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                    )
+                    .with_photo_url("/placeholder-200x200.png")
+                    .with_action(push(&pressed)),
+                    NavButton::new("")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                    NavButton::new("Image not found")
+                        .with_photo_url("/nonexistent")
+                        .with_action(push(&pressed)),
+                    NavButton::new("Not an image")
+                        .with_photo_url("/health")
+                        .with_action(push(&pressed)),
+                    // TODO: Use a URL that never returns a result.
+                )),
+                FormSection::new()
+                    .with_title("Image + Text + Sub-text")
+                    .with_widgets((
+                    NavButton::new("Text")
+                        .with_sub_text("Sub-text")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                    NavButton::new("Disabled")
+                        .with_sub_text("Sub-text")
+                        .with_photo_url("/placeholder-200x200.png"),
+                    NavButton::new(
+                        "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                    )
+                    .with_sub_text("Sub-text")
+                    .with_photo_url("/placeholder-200x200.png")
+                    .with_action(push(&pressed)),
+                    NavButton::new(
+                        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                    )
+                    .with_sub_text("Sub-text")
+                    .with_photo_url("/placeholder-200x200.png")
+                    .with_action(push(&pressed)),
+                    NavButton::new("Text")
+                        .with_sub_text(
+                            "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                        )
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                    NavButton::new("Text")
+                        .with_sub_text(
+                            "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                        )
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                    NavButton::new("")
+                        .with_sub_text("")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                    NavButton::new("Sub-text is empty")
+                        .with_sub_text("")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                    NavButton::new("")
+                        .with_sub_text("Text is empty")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed)),
+                )),
+            ))),
         ),
     )
 }
