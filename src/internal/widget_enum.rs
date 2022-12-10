@@ -52,15 +52,6 @@ pub enum Widget {
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         actions: Vec<Action>,
     },
-    #[serde(rename = "checkbox")]
-    CheckBoxVariant {
-        #[serde(default, skip_serializing_if = "Vec::is_empty")]
-        actions: Vec<Action>,
-        id: String,
-        #[serde(rename = "initial-bool")]
-        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-        initial_bool: bool,
-    },
     #[serde(rename = "column")]
     ColumnVariant {
         #[serde(default, rename = "h-alignment")]

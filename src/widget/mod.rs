@@ -1,7 +1,6 @@
 mod alert_modal;
 mod back_button;
 mod button;
-mod checkbox;
 mod column;
 mod drawer_modal;
 mod empty;
@@ -24,7 +23,6 @@ mod v_alignment;
 pub use alert_modal::*;
 pub use back_button::*;
 pub use button::*;
-pub use checkbox::*;
 pub use column::*;
 pub use drawer_modal::*;
 pub use empty::*;
