@@ -1,4 +1,4 @@
-use crate::{SessionState, OK_RPC_PATH};
+use crate::{SessionState, ERROR_RPC_PATH, OK_RPC_PATH};
 use applin::action::{pop, push, rpc};
 use applin::session::{KeySet, PageKey};
 use applin::widget::{
@@ -8,7 +8,7 @@ use applin::widget::{
 pub fn add_alert_page(drawer: &PageKey, keys: &mut KeySet<SessionState>) -> PageKey {
     const KEY: &str = "/pages/alert";
     let button_pressed_modal = keys.add_static_page(
-        "/pages/button-pressed",
+        "/pages/alert-button-pressed",
         AlertModal::new("Button Pressed").with_ok(),
     );
     keys.add_static_page(
@@ -34,13 +34,22 @@ pub fn add_alert_page(drawer: &PageKey, keys: &mut KeySet<SessionState>) -> Page
 }
 
 pub fn add_drawer_modal_page(keys: &mut KeySet<SessionState>) -> PageKey {
+    let button_pressed_modal = keys.add_static_page(
+        "/pages/drawer-button-pressed",
+        AlertModal::new("Button Pressed").with_ok(),
+    );
     keys.add_static_page(
         "/pages/drawer-modal",
         DrawerModal::new("Drawer1").with_widgets((
-            ModalButton::cancel(),
-            ModalButton::new("Save")
+            ModalButton::new("Button").with_action(push(&button_pressed_modal)),
+            ModalButton::new("Button with RPC")
                 .with_action(rpc(OK_RPC_PATH))
                 .with_action(pop()),
+            ModalButton::new("Button with RPC that fails")
+                .with_action(rpc(ERROR_RPC_PATH))
+                .with_action(pop()),
+            // TODO(mleonhard) Add "Show Alert Modal" button.
+            ModalButton::cancel(),
         )),
     )
 }
