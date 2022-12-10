@@ -1,40 +1,9 @@
-use crate::{ServerState, SessionState};
+use crate::{SessionState, TEXTFIELD_CHECK_RPC_PATH};
 use applin::action::{nothing, push};
-use applin::error::user_error;
 use applin::session::{KeySet, PageKey};
 use applin::widget::{
-    AlertModal, Empty, Form, FormButton, FormCheckbox, FormError, FormSection, FormTextfield,
-    NavPage, Scroll, Text,
+    AlertModal, Form, FormButton, FormError, FormSection, FormTextfield, NavPage, Scroll, Text,
 };
-use serde::Deserialize;
-use servlin::{Request, Response};
-use std::sync::Arc;
-
-pub static FORM_CHECKBOX_RPC_PATH: &str = "/widgets/checkbox";
-
-pub fn form_checkbox_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
-    let session = state.sessions.get(req)?;
-    session.rpc_response()
-}
-
-pub static FORM_TEXTFIELD_CHECK_RPC_PATH: &str = "/widgets/form-textfield-check";
-
-pub fn form_textfield_check_rpc(
-    state: &Arc<ServerState>,
-    req: &Request,
-) -> Result<Response, Response> {
-    #[derive(Deserialize)]
-    struct Vars {
-        rpc_checked1: String,
-    }
-    let _session = state.sessions.get(req)?;
-    let vars: Vars = req.json()?;
-    if vars.rpc_checked1.contains("bad") {
-        Err(user_error("Please remove 'bad' from the box."))
-    } else {
-        Ok(Response::new(200))
-    }
-}
 
 pub fn add_form_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
     let pressed = keys.add_static_page(
@@ -58,33 +27,6 @@ pub fn add_form_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 .with_action(push(&pressed)),
                 FormButton::new("Disabled"),
                 FormButton::new("Does Nothing").with_action(nothing()),
-            ))),
-        ),
-    )
-}
-
-pub fn add_form_checkbox_page(keys: &mut KeySet<SessionState>) -> PageKey {
-    keys.add_static_page(
-        "/form-checkbox",
-        NavPage::new(
-            "Form Checkbox",
-            Scroll::new(Form::new((
-                FormCheckbox::new("checkbox", "Checkbox"),
-                FormCheckbox::new("initial-checked", "Initially checked").with_initial(true),
-                FormCheckbox::new("with-rpc", "Does RPC on change")
-                    .with_rpc(FORM_CHECKBOX_RPC_PATH),
-                FormCheckbox::new("with-bad-rpc", "Does RPC on change, but it fails")
-                    .with_rpc("/nonexistent-form-checkbox-rpc")
-                    .with_initial(true),
-                FormCheckbox::new("empty-checkbox", ""),
-                FormCheckbox::new(
-                    "mmmm-mmmm-checkbox",
-                    "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
-                ),
-                FormCheckbox::new(
-                    "mmmmmmmm-checkbox",
-                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
-                ),
             ))),
         ),
     )
@@ -159,7 +101,7 @@ pub fn add_form_text_field_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 FormTextfield::new("text1", "Enter some text"),
                 FormTextfield::new("prefilled1", "Pre-filled").with_initial("initial content"),
                 FormTextfield::new("rpc_checked1", "Checked via RPC (rejects the word 'bad')")
-                    .with_check_rpc(FORM_TEXTFIELD_CHECK_RPC_PATH),
+                    .with_check_rpc(TEXTFIELD_CHECK_RPC_PATH),
                 FormTextfield::new("nums1", "Numbers only").with_allow_numbers(),
                 FormTextfield::new("ascii1", "ASCII only").with_allow_ascii(),
                 FormTextfield::new("tel1", "Tel").with_allow_tel(),

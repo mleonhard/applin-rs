@@ -1,13 +1,9 @@
-use crate::{ServerState, SessionState};
+use crate::{ServerState, SessionState, CHECK_VARS_RPC_PATH};
 use applin::session::{KeySet, PageKey};
-use applin::widget::{Form, FormCheckbox, NavPage};
+use applin::widget::{Checkbox, Form, NavPage};
 use serde::{Deserialize, Serialize};
 use servlin::{Request, Response};
 use std::sync::Arc;
-
-pub static CHECK_VARS_RPC_PATH: &str = "/vars/check-vars-rpc";
-pub static OPTION_A_NAME: &str = "vars_option_a";
-pub static OPTION_B_NAME: &str = "vars_option_b";
 
 pub fn check_vars_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     #[derive(Default, Deserialize, Serialize)]
@@ -33,8 +29,8 @@ pub fn add_check_vars_page(keys: &mut KeySet<SessionState>) -> PageKey {
         NavPage::new(
             "Check Vars",
             Form::new((
-                FormCheckbox::new(OPTION_A_NAME, "Option A").with_rpc(CHECK_VARS_RPC_PATH),
-                FormCheckbox::new(OPTION_B_NAME, "Option B (requires Option A)")
+                Checkbox::new("vars_option_a", "Option A").with_rpc(CHECK_VARS_RPC_PATH),
+                Checkbox::new("vars_option_b", "Option B (requires Option A)")
                     .with_rpc(CHECK_VARS_RPC_PATH),
             )),
         ),

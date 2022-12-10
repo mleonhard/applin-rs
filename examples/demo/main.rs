@@ -14,15 +14,22 @@ mod widgets;
 
 use applin::action::push;
 use applin::data::Roster;
+use applin::error::user_error;
 use applin::session::{KeySet, Session, SessionSet};
 use applin::widget::{Form, FormSection, NavButton, NavPage, Scroll};
 use core::fmt::Debug;
+use serde::Deserialize;
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{
     print_log_response, socket_addr_all_interfaces, ContentType, HttpServerBuilder, Request,
     Response, ResponseBody,
 };
 use std::sync::Arc;
+
+pub const CHECK_VARS_RPC_PATH: &str = "/check-vars-rpc";
+pub const ERROR_RPC_PATH: &str = "/error";
+pub const OK_RPC_PATH: &str = "/ok";
+pub const TEXTFIELD_CHECK_RPC_PATH: &str = "/widgets/form-textfield-check";
 
 #[derive(Debug)]
 pub struct SessionState {}
@@ -51,9 +58,9 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
     // Widgets
     let back_buttons_page = widgets::add_back_button_pages(&mut keys);
     let buttons_page = widgets::add_button_page(&mut keys);
+    let checkbox_page = widgets::add_checkbox_page(&mut keys);
     let nav_button_page = widgets::add_nav_button_page(&mut keys);
     let form_button_page = form_widgets::add_form_button_page(&mut keys);
-    let form_checkbox_page = form_widgets::add_form_checkbox_page(&mut keys);
     let form_error_page = form_widgets::add_form_error_page(&mut keys);
     let form_section_page = form_widgets::add_form_section_page(&mut keys);
     let form_text_page = form_widgets::add_form_text_page(&mut keys);
@@ -78,9 +85,9 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
                 FormSection::new().with_title("Widgets").with_widgets((
                     NavButton::new("Back Button").with_action(push(&back_buttons_page)),
                     NavButton::new("Button").with_action(push(&buttons_page)),
+                    NavButton::new("Checkbox").with_action(push(&checkbox_page)),
                     NavButton::new("Nav Button").with_action(push(&nav_button_page)),
                     NavButton::new("Form Button").with_action(push(&form_button_page)),
-                    NavButton::new("Form Checkbox").with_action(push(&form_checkbox_page)),
                     NavButton::new("Form Error").with_action(push(&form_error_page)),
                     NavButton::new("Form Section").with_action(push(&form_section_page)),
                     NavButton::new("Form Text").with_action(push(&form_text_page)),
@@ -113,20 +120,34 @@ fn get_or_new_session(
     )
 }
 
+pub fn ok_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
+    let session = state.sessions.get(req)?;
+    session.rpc_response()
+}
+
+pub fn textfield_check_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
+    #[derive(Deserialize)]
+    struct Vars {
+        rpc_checked1: String,
+    }
+    let _session = state.sessions.get(req)?;
+    let vars: Vars = req.json()?;
+    if vars.rpc_checked1.contains("bad") {
+        Err(user_error("Please remove 'bad' from the box."))
+    } else {
+        Ok(Response::new(200))
+    }
+}
+
 fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     match (req.method(), req.url().path()) {
         ("GET", "/health") => Ok(Response::text(200, "ok")),
         ("GET", "/") => get_or_new_session(state, req)?.poll(),
         ("GET", "/stream") => get_or_new_session(state, req)?.stream(),
-        ("POST", path) if path == pages::SAVE_RPC_PATH => pages::save_rpc(state, req),
-        ("POST", path) if path == widgets::BACK_RPC_PATH => widgets::back_rpc(state, req),
-        ("POST", path) if path == form_widgets::FORM_CHECKBOX_RPC_PATH => {
-            form_widgets::form_checkbox_rpc(state, req)
-        }
-        ("POST", path) if path == form_widgets::FORM_TEXTFIELD_CHECK_RPC_PATH => {
-            form_widgets::form_textfield_check_rpc(state, req)
-        }
-        ("POST", path) if path == vars::CHECK_VARS_RPC_PATH => vars::check_vars_rpc(state, req),
+        ("POST", ERROR_RPC_PATH) => Err(Response::text(500, "error1")),
+        ("POST", OK_RPC_PATH) => ok_rpc(state, req),
+        ("POST", TEXTFIELD_CHECK_RPC_PATH) => textfield_check_rpc(state, req),
+        ("POST", CHECK_VARS_RPC_PATH) => vars::check_vars_rpc(state, req),
         ("GET", "/placeholder-200x200.png") => Ok(Response::new(200)
             .with_type(ContentType::Png)
             .with_max_age_seconds(365 * 24 * 60 * 60)

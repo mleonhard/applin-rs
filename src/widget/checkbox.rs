@@ -1,13 +1,13 @@
 use crate::internal::Widget;
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct FormCheckbox {
+pub struct Checkbox {
     var: String,
     initial: bool,
     rpc: Option<String>,
     text: String,
 }
-impl FormCheckbox {
+impl Checkbox {
     /// # Panics
     /// Panics when `id` is empty.
     #[must_use]
@@ -36,7 +36,7 @@ impl FormCheckbox {
 
     #[must_use]
     pub fn to_widget(self) -> Widget {
-        Widget::FormCheckboxVariant {
+        Widget::CheckboxVariant {
             var: self.var,
             initial_bool: self.initial,
             rpc: self.rpc,
@@ -44,8 +44,8 @@ impl FormCheckbox {
         }
     }
 }
-impl From<FormCheckbox> for Widget {
-    fn from(src: FormCheckbox) -> Self {
+impl From<Checkbox> for Widget {
+    fn from(src: Checkbox) -> Self {
         src.to_widget()
     }
 }

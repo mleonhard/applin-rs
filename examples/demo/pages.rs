@@ -1,18 +1,9 @@
-use crate::{ServerState, SessionState};
+use crate::{SessionState, OK_RPC_PATH};
 use applin::action::{nothing, pop, push, rpc};
 use applin::session::{KeySet, PageKey};
 use applin::widget::{
     AlertModal, Button, DrawerModal, Form, ModalButton, NavPage, PlainPage, Text,
 };
-use servlin::{Request, Response};
-use std::sync::Arc;
-
-pub static SAVE_RPC_PATH: &str = "/pages/rpc1";
-
-pub fn save_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
-    let session = state.sessions.get(req)?;
-    session.rpc_response()
-}
 
 pub fn add_alert_page(drawer: &PageKey, keys: &mut KeySet<SessionState>) -> PageKey {
     const KEY: &str = "/pages/alert";
@@ -46,7 +37,7 @@ pub fn add_drawer_modal_page(keys: &mut KeySet<SessionState>) -> PageKey {
         DrawerModal::new("Drawer1").with_widgets((
             ModalButton::cancel(),
             ModalButton::new("Save")
-                .with_action(rpc(SAVE_RPC_PATH))
+                .with_action(rpc(OK_RPC_PATH))
                 .with_action(pop()),
         )),
     )

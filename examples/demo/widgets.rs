@@ -1,20 +1,10 @@
-use crate::{ServerState, SessionState};
+use crate::{SessionState, ERROR_RPC_PATH, OK_RPC_PATH};
 use applin::action::{nothing, pop, push, rpc};
 use applin::session::{KeySet, PageKey};
 use applin::widget::{
-    AlertModal, BackButton, Button, Column, Empty, Form, FormSection, NavButton, NavPage, Scroll,
-    Text,
+    AlertModal, BackButton, Button, Checkbox, Column, Empty, Form, FormSection, NavButton, NavPage,
+    Scroll, Text,
 };
-use servlin::{Request, Response};
-use std::sync::Arc;
-
-// TODO: Move these to different files.
-pub static BACK_RPC_PATH: &str = "/widgets/back";
-
-pub fn back_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
-    let session = state.sessions.get(req)?;
-    session.rpc_response()
-}
 
 pub fn add_back_button_pages(keys: &mut KeySet<SessionState>) -> PageKey {
     let default = keys.add_static_page(
@@ -45,7 +35,7 @@ pub fn add_back_button_pages(keys: &mut KeySet<SessionState>) -> PageKey {
         )
         .with_start(
             BackButton::new()
-                .with_action(rpc(BACK_RPC_PATH))
+                .with_action(rpc(OK_RPC_PATH))
                 .with_action(pop()),
         ),
     );
@@ -57,7 +47,7 @@ pub fn add_back_button_pages(keys: &mut KeySet<SessionState>) -> PageKey {
         )
         .with_start(
             BackButton::new()
-                .with_action(rpc("/nonexistent-method"))
+                .with_action(rpc(ERROR_RPC_PATH))
                 .with_action(pop()),
         ),
     );
@@ -99,6 +89,32 @@ pub fn add_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 Button::new("").with_action(push(&pressed)),
                 Button::new("Disabled Button"),
                 Button::new("Does Nothing").with_action(nothing()),
+            ))),
+        ),
+    )
+}
+
+pub fn add_checkbox_page(keys: &mut KeySet<SessionState>) -> PageKey {
+    keys.add_static_page(
+        "/checkbox",
+        NavPage::new(
+            "Checkbox",
+            Scroll::new(Form::new((
+                Checkbox::new("checkbox", "Checkbox"),
+                Checkbox::new("initial-checked", "Initially checked").with_initial(true),
+                Checkbox::new("with-rpc", "Does RPC on change").with_rpc(OK_RPC_PATH),
+                Checkbox::new("with-bad-rpc", "Does RPC on change, but it fails")
+                    .with_rpc(ERROR_RPC_PATH)
+                    .with_initial(true),
+                Checkbox::new("empty-checkbox", ""),
+                Checkbox::new(
+                    "mmmm-mmmm-checkbox",
+                    "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                ),
+                Checkbox::new(
+                    "mmmmmmmm-checkbox",
+                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                ),
             ))),
         ),
     )

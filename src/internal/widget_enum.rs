@@ -52,6 +52,16 @@ pub enum Widget {
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         actions: Vec<Action>,
     },
+    #[serde(rename = "checkbox")]
+    CheckboxVariant {
+        var: String,
+        #[serde(rename = "initial-bool")]
+        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+        initial_bool: bool,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        rpc: Option<String>,
+        text: String,
+    },
     #[serde(rename = "column")]
     ColumnVariant {
         #[serde(default, rename = "h-alignment")]
@@ -77,16 +87,6 @@ pub enum Widget {
         #[serde(rename = "is-destructive")]
         #[serde(default, skip_serializing_if = "std::ops::Not::not")]
         is_destructive: bool,
-        text: String,
-    },
-    #[serde(rename = "form-checkbox")]
-    FormCheckboxVariant {
-        var: String,
-        #[serde(rename = "initial-bool")]
-        #[serde(default, skip_serializing_if = "std::ops::Not::not")]
-        initial_bool: bool,
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        rpc: Option<String>,
         text: String,
     },
     #[serde(rename = "form-error")]
