@@ -1,5 +1,5 @@
 use crate::{SessionState, OK_RPC_PATH};
-use applin::action::{nothing, pop, push, rpc};
+use applin::action::{pop, push, rpc};
 use applin::session::{KeySet, PageKey};
 use applin::widget::{
     AlertModal, Button, DrawerModal, Form, ModalButton, NavPage, PlainPage, Text,
@@ -7,26 +7,28 @@ use applin::widget::{
 
 pub fn add_alert_page(drawer: &PageKey, keys: &mut KeySet<SessionState>) -> PageKey {
     const KEY: &str = "/pages/alert";
-    let alert2 = keys.add_static_page("/pages/alert2", AlertModal::new("Alert 2").with_ok());
+    let button_pressed_modal = keys.add_static_page(
+        "/pages/button-pressed",
+        AlertModal::new("Button Pressed").with_ok(),
+    );
     keys.add_static_page(
         KEY,
         AlertModal::new("Alert Modal").with_widgets((
-            ModalButton::new("Alert 2").with_action(push(&alert2)),
-            ModalButton::new("Alert Modal").with_action(push(&PageKey::new(KEY))),
-            ModalButton::new("Drawer Modal").with_action(push(drawer)),
-            ModalButton::new("Destructive Button")
-                .with_is_destructive()
-                .with_action(nothing()),
-            ModalButton::cancel(),
+            ModalButton::new("Button").with_action(push(&button_pressed_modal)),
             ModalButton::new(
                 "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
             )
-            .with_action(nothing()),
+            .with_action(push(&button_pressed_modal)),
             ModalButton::new(
                 "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
             )
-            .with_action(nothing()),
+            .with_action(push(&button_pressed_modal)),
+            ModalButton::new("Destructive Button")
+                .with_is_destructive()
+                .with_action(push(&button_pressed_modal)),
             ModalButton::new("Disabled Button"),
+            ModalButton::new("Show Drawer Modal").with_action(push(drawer)),
+            ModalButton::cancel(),
         )),
     )
 }
