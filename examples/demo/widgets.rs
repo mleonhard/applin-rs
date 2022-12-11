@@ -2,8 +2,8 @@ use crate::{SessionState, ERROR_RPC_PATH, OK_RPC_PATH};
 use applin::action::{nothing, pop, push, rpc};
 use applin::session::{KeySet, PageKey};
 use applin::widget::{
-    AlertModal, BackButton, Button, Checkbox, Column, Empty, Form, FormSection, NavButton, NavPage,
-    Scroll,
+    AlertModal, BackButton, Button, Checkbox, Column, Empty, ErrorText, Form, FormSection,
+    NavButton, NavPage, Scroll,
 };
 
 pub fn add_back_button_pages(keys: &mut KeySet<SessionState>) -> PageKey {
@@ -112,6 +112,25 @@ pub fn add_checkbox_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 ),
                 Checkbox::new(
                     "mmmmmmmm-checkbox",
+                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                ),
+            ))),
+        ),
+    )
+}
+
+pub fn add_error_text_page(keys: &mut KeySet<SessionState>) -> PageKey {
+    keys.add_static_page(
+        "/error-text",
+        NavPage::new(
+            "ErrorText",
+            Scroll::new(Form::new((
+                ErrorText::new("Error Message"),
+                ErrorText::new(""),
+                ErrorText::new(
+                    "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                ),
+                ErrorText::new(
                     "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
                 ),
             ))),

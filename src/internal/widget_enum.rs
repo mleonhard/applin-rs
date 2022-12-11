@@ -75,6 +75,8 @@ pub enum Widget {
     EmptyVariant,
     #[serde(rename = "error-details")]
     ErrorDetailsVariant,
+    #[serde(rename = "error-text")]
+    ErrorTextVariant { text: String },
     #[serde(rename = "form")]
     FormVariant {
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -89,8 +91,6 @@ pub enum Widget {
         is_destructive: bool,
         text: String,
     },
-    #[serde(rename = "form-error")]
-    FormErrorVariant { text: String },
     #[serde(rename = "form-section")]
     FormSectionVariant {
         #[serde(default, skip_serializing_if = "Option::is_none")]

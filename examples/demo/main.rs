@@ -59,9 +59,9 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
     let back_buttons_page = widgets::add_back_button_pages(&mut keys);
     let buttons_page = widgets::add_button_page(&mut keys);
     let checkbox_page = widgets::add_checkbox_page(&mut keys);
+    let error_text_page = widgets::add_error_text_page(&mut keys);
     let nav_button_page = widgets::add_nav_button_page(&mut keys);
     let form_button_page = form_widgets::add_form_button_page(&mut keys);
-    let form_error_page = form_widgets::add_form_error_page(&mut keys);
     let form_section_page = form_widgets::add_form_section_page(&mut keys);
     let form_text_page = form_widgets::add_form_text_page(&mut keys);
     let form_textfield_page = form_widgets::add_form_text_field_page(&mut keys);
@@ -86,9 +86,9 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
                     NavButton::new("Back Button").with_action(push(&back_buttons_page)),
                     NavButton::new("Button").with_action(push(&buttons_page)),
                     NavButton::new("Checkbox").with_action(push(&checkbox_page)),
+                    NavButton::new("Error Text").with_action(push(&error_text_page)),
                     NavButton::new("Nav Button").with_action(push(&nav_button_page)),
                     NavButton::new("Form Button").with_action(push(&form_button_page)),
-                    NavButton::new("Form Error").with_action(push(&form_error_page)),
                     NavButton::new("Form Section").with_action(push(&form_section_page)),
                     NavButton::new("Form Text").with_action(push(&form_text_page)),
                     NavButton::new("Form Textfield").with_action(push(&form_textfield_page)),

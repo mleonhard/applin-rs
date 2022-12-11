@@ -2,7 +2,7 @@ use crate::{SessionState, TEXTFIELD_CHECK_RPC_PATH};
 use applin::action::{nothing, push};
 use applin::session::{KeySet, PageKey};
 use applin::widget::{
-    AlertModal, Form, FormButton, FormError, FormSection, FormTextfield, NavPage, Scroll, Text,
+    AlertModal, Form, FormButton, FormSection, FormTextfield, NavPage, Scroll, Text,
 };
 
 pub fn add_form_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
@@ -27,25 +27,6 @@ pub fn add_form_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 .with_action(push(&pressed)),
                 FormButton::new("Disabled"),
                 FormButton::new("Does Nothing").with_action(nothing()),
-            ))),
-        ),
-    )
-}
-
-pub fn add_form_error_page(keys: &mut KeySet<SessionState>) -> PageKey {
-    keys.add_static_page(
-        "/form-error",
-        NavPage::new(
-            "Form Error",
-            Scroll::new(Form::new((
-                FormError::new("Error Message"),
-                FormError::new(""),
-                FormError::new(
-                    "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
-                ),
-                FormError::new(
-                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
-                ),
             ))),
         ),
     )
