@@ -2,7 +2,7 @@ use crate::{SessionState, ERROR_RPC_PATH, OK_RPC_PATH};
 use applin::action::{pop, push, rpc};
 use applin::session::{KeySet, PageKey};
 use applin::widget::{
-    AlertModal, Button, DrawerModal, Form, ModalButton, NavPage, PlainPage, Text,
+    AlertModal, DrawerModal, Form, FormButton, ModalButton, NavPage, PlainPage, Text,
 };
 
 pub fn add_alert_page(drawer: &PageKey, keys: &mut KeySet<SessionState>) -> PageKey {
@@ -73,8 +73,9 @@ pub fn add_plain_page(keys: &mut KeySet<SessionState>) -> PageKey {
         PlainPage::new(
             "Plain Page",
             Form::new((
-                Text::new("Hello"), //
-                Button::new("Back").with_action(pop()),
+                Text::new("Hello"),
+                Text::new("Hello 2"),
+                FormButton::new("Back").with_action(pop()),
             )),
         ),
     )

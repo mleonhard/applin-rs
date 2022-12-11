@@ -3,7 +3,7 @@ use applin::action::{nothing, pop, push, rpc};
 use applin::session::{KeySet, PageKey};
 use applin::widget::{
     AlertModal, BackButton, Button, Checkbox, Column, Empty, Form, FormSection, NavButton, NavPage,
-    Scroll, Text,
+    Scroll,
 };
 
 pub fn add_back_button_pages(keys: &mut KeySet<SessionState>) -> PageKey {
@@ -85,7 +85,6 @@ pub fn add_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
                     "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
                 )
                 .with_action(push(&pressed)),
-                Text::new("Button with empty label:"),
                 Button::new("").with_action(push(&pressed)),
                 Button::new("Disabled Button"),
                 Button::new("Does Nothing").with_action(nothing()),
@@ -134,9 +133,6 @@ pub fn add_nav_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
             Scroll::new(Form::new((
                 FormSection::new().with_title("Text").with_widgets((
                     NavButton::new("Text").with_action(push(&pressed)),
-                    NavButton::new("Disabled"),
-                    NavButton::new("Does Nothing").with_action(nothing()),
-                    NavButton::new("").with_action(push(&pressed)),
                     NavButton::new(
                         "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
                     )
@@ -145,6 +141,9 @@ pub fn add_nav_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
                         "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
                     )
                     .with_action(push(&pressed)),
+                    NavButton::new("").with_action(push(&pressed)),
+                    NavButton::new("Disabled"),
+                    NavButton::new("Does Nothing").with_action(nothing()),
                 )),
                 FormSection::new()
                     .with_title("Text + Sub-text")
