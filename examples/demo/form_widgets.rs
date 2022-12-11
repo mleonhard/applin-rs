@@ -58,21 +58,6 @@ pub fn add_form_section_page(keys: &mut KeySet<SessionState>) -> PageKey {
     )
 }
 
-pub fn add_form_text_page(keys: &mut KeySet<SessionState>) -> PageKey {
-    keys.add_static_page(
-        "/form-text",
-        NavPage::new(
-            "Form Text",
-            Scroll::new(Form::new((
-                Text::new("Text"),
-                Text::new(""),
-                Text::new("MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM"),
-                Text::new("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"),
-            ))),
-        ),
-    )
-}
-
 pub fn add_form_text_field_page(keys: &mut KeySet<SessionState>) -> PageKey {
     keys.add_static_page(
         "/form-text-field",

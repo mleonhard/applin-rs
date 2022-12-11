@@ -3,7 +3,7 @@ use applin::action::{nothing, pop, push, rpc};
 use applin::session::{KeySet, PageKey};
 use applin::widget::{
     AlertModal, BackButton, Button, Checkbox, Column, Empty, ErrorText, Form, FormSection,
-    NavButton, NavPage, Scroll,
+    NavButton, NavPage, Scroll, Text,
 };
 
 pub fn add_back_button_pages(keys: &mut KeySet<SessionState>) -> PageKey {
@@ -274,6 +274,21 @@ pub fn add_nav_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
                         .with_photo_url("/placeholder-200x200.png")
                         .with_action(push(&pressed)),
                 )),
+            ))),
+        ),
+    )
+}
+
+pub fn add_text_page(keys: &mut KeySet<SessionState>) -> PageKey {
+    keys.add_static_page(
+        "/text",
+        NavPage::new(
+            "Text",
+            Scroll::new(Form::new((
+                Text::new("Text"),
+                Text::new(""),
+                Text::new("MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM"),
+                Text::new("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"),
             ))),
         ),
     )
