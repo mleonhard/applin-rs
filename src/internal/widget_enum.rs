@@ -1,6 +1,6 @@
 use crate::internal::Action;
 use crate::is_default;
-use crate::widget::HAlignment;
+use crate::widget::{HAlignment, Real32};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -122,6 +122,12 @@ pub enum Widget {
         #[serde(default, skip_serializing_if = "is_default")]
         min_chars: u32,
         var: String,
+    },
+    #[serde(rename = "image")]
+    ImageVariant {
+        #[serde(rename = "aspect-ratio")]
+        aspect_ratio: Real32,
+        url: String,
     },
     #[serde(rename = "modal-button")]
     ModalButtonVariant {

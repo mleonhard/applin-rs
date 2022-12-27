@@ -24,7 +24,7 @@
 
 use applin::data::{Context, Roster};
 use applin::session::{KeySet, Session, SessionSet};
-use applin::widget::{NavPage, Text};
+use applin::widget::{NavPage, Scroll, Text};
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
 use std::sync::Arc;
@@ -51,12 +51,13 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
     keys.add_page_fn("/", move |rebuilder| {
         Ok(NavPage::new(
             "Clock Example",
-            Text::new(
+            Scroll::new(Text::new(
                 // Get the string and subscribe to updates.
                 // Whenever the value changes, the server rebuilds this key
                 // and pushes it to the client.
-                state_clone.displayed_string.read(rebuilder).to_string(),
-            ),
+                state_clone.displayed_string.read(rebuilder).to_string()
+                    + "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+            )),
         )
         .with_stream())
     });
@@ -95,7 +96,7 @@ pub fn main() {
         let elapsed = Instant::now() - start;
         let new_string = format!("elapsed: {}", elapsed.as_secs());
         *state_clone.displayed_string.write(&Context::Empty) = new_string;
-        let nanos_to_sleep = 1_000_000_000 - elapsed.as_nanos() % 1_000_000_000;
+        let nanos_to_sleep = 5_000_000_000 - elapsed.as_nanos() % 1_000_000_000;
         std::thread::sleep(Duration::from_nanos(u64::try_from(nanos_to_sleep).unwrap()));
     });
     let request_handler = move |req: Request| print_log_response(&req, handle_req(&state, &req));

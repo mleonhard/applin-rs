@@ -2,7 +2,7 @@ use crate::{SessionState, ERROR_RPC_PATH, OK_RPC_PATH};
 use applin::action::{nothing, pop, push, rpc};
 use applin::session::{KeySet, PageKey};
 use applin::widget::{
-    AlertModal, BackButton, Button, Checkbox, Column, Empty, ErrorText, Form, FormSection,
+    AlertModal, BackButton, Button, Checkbox, Column, Empty, ErrorText, Form, FormSection, Image,
     NavButton, NavPage, Scroll, Text,
 };
 
@@ -133,6 +133,19 @@ pub fn add_error_text_page(keys: &mut KeySet<SessionState>) -> PageKey {
                 ErrorText::new(
                     "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
                 ),
+            ))),
+        ),
+    )
+}
+
+pub fn add_image_page(keys: &mut KeySet<SessionState>) -> PageKey {
+    keys.add_static_page(
+        "/image",
+        NavPage::new(
+            "Image",
+            Scroll::new(Form::new((
+                Image::new(0.5, "/placeholder-200x200.png"),
+                Image::new(0.5, "/nonexistent.png"),
             ))),
         ),
     )

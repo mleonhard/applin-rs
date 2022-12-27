@@ -64,6 +64,7 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
     let form_button_page = form_widgets::add_form_button_page(&mut keys);
     let form_section_page = form_widgets::add_form_section_page(&mut keys);
     let form_textfield_page = form_widgets::add_form_text_field_page(&mut keys);
+    let image_page = widgets::add_image_page(&mut keys);
     let text_page = widgets::add_text_page(&mut keys);
     // Update Modes
     let inert_page = updates::add_inert_page(state, &mut keys);
@@ -91,6 +92,7 @@ fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
                     NavButton::new("Form Button").with_action(push(&form_button_page)),
                     NavButton::new("Form Section").with_action(push(&form_section_page)),
                     NavButton::new("Form Textfield").with_action(push(&form_textfield_page)),
+                    NavButton::new("Image").with_action(push(&image_page)),
                     NavButton::new("Text").with_action(push(&text_page)),
                 )),
                 FormSection::new().with_title("Update Modes").with_widgets((
