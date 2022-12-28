@@ -1,5 +1,6 @@
 use crate::{SessionState, ERROR_RPC_PATH, OK_RPC_PATH};
 use applin::action::{nothing, pop, push, rpc};
+use applin::internal::ImageDisposition;
 use applin::session::{KeySet, PageKey};
 use applin::widget::{
     AlertModal, BackButton, Button, Checkbox, Column, Empty, ErrorText, Form, FormSection, Image,
@@ -144,8 +145,16 @@ pub fn add_image_page(keys: &mut KeySet<SessionState>) -> PageKey {
         NavPage::new(
             "Image",
             Scroll::new(Form::new((
+                Text::new("Fit"),
                 Image::new(0.5, "/placeholder-200x200.png"),
-                Image::new(0.5, "/nonexistent.png"),
+                Text::new("Cover"),
+                Image::new(0.5, "/placeholder-200x200.png")
+                    .with_disposition(ImageDisposition::Cover),
+                Text::new("Stretch"),
+                Image::new(0.5, "/placeholder-200x200.png")
+                    .with_disposition(ImageDisposition::Stretch),
+                Text::new("Not found"),
+                Image::new(0.25, "/nonexistent.png"),
             ))),
         ),
     )

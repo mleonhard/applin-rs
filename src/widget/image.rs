@@ -1,13 +1,14 @@
-use crate::internal::Widget;
+use crate::internal::{ImageDisposition, Widget};
 use crate::widget::Real32;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Image {
     aspect_ratio: Real32,
+    disposition: ImageDisposition,
     url: String,
 }
 impl Image {
-    /// Creates an image.
+    /// Creates an image with `Fit` disposition.
     ///
     /// # Panics
     /// Panics when `aspect_ratio` is infinite, zero, negative, or NaN.
@@ -15,13 +16,24 @@ impl Image {
     pub fn new(aspect_ratio: f32, url: impl Into<String>) -> Self {
         let aspect_ratio = Real32::new(aspect_ratio);
         let url = url.into();
-        Self { aspect_ratio, url }
+        Self {
+            aspect_ratio,
+            disposition: ImageDisposition::Fit,
+            url,
+        }
+    }
+
+    #[must_use]
+    pub fn with_disposition(mut self, disposition: ImageDisposition) -> Self {
+        self.disposition = disposition;
+        self
     }
 
     #[must_use]
     pub fn to_widget(self) -> Widget {
         Widget::ImageVariant {
             aspect_ratio: self.aspect_ratio,
+            disposition: self.disposition,
             url: self.url,
         }
     }

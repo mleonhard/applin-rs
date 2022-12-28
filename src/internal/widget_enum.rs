@@ -36,6 +36,19 @@ impl Default for FormTextfieldAutoCapitalize {
     }
 }
 
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Serialize, Ord, PartialEq, PartialOrd)]
+pub enum ImageDisposition {
+    /// Size the image to fill the space, preserving aspect ratio.
+    #[serde(rename = "cover")]
+    Cover,
+    /// Size the image to just fit inside the space, preserving aspect ratio.
+    #[serde(rename = "fit")]
+    Fit,
+    /// Stretch the image to fill the space.
+    #[serde(rename = "stretch")]
+    Stretch,
+}
+
 #[must_use]
 fn is_u32_max(n: &u32) -> bool {
     *n == u32::MAX
@@ -127,6 +140,7 @@ pub enum Widget {
     ImageVariant {
         #[serde(rename = "aspect-ratio")]
         aspect_ratio: Real32,
+        disposition: ImageDisposition,
         url: String,
     },
     #[serde(rename = "modal-button")]
