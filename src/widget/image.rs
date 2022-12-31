@@ -13,8 +13,8 @@ impl Image {
     /// # Panics
     /// Panics when `aspect_ratio` is infinite, zero, negative, or NaN.
     #[must_use]
-    pub fn new(aspect_ratio: f32, url: impl Into<String>) -> Self {
-        let aspect_ratio = Real32::new(aspect_ratio);
+    pub fn new(aspect_ratio_width_over_height: f32, url: impl Into<String>) -> Self {
+        let aspect_ratio = Real32::new(aspect_ratio_width_over_height);
         let url = url.into();
         Self {
             aspect_ratio,

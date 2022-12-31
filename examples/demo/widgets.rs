@@ -146,15 +146,15 @@ pub fn add_image_page(keys: &mut KeySet<SessionState>) -> PageKey {
             "Image",
             Scroll::new(Form::new((
                 Text::new("Fit"),
-                Image::new(0.5, "/placeholder-200x200.png"),
+                Image::new(2.0, "/placeholder-200x200.png"),
                 Text::new("Cover"),
-                Image::new(0.5, "/placeholder-200x200.png")
+                Image::new(2.0, "/placeholder-200x200.png")
                     .with_disposition(ImageDisposition::Cover),
                 Text::new("Stretch"),
-                Image::new(0.5, "/placeholder-200x200.png")
+                Image::new(2.0, "/placeholder-200x200.png")
                     .with_disposition(ImageDisposition::Stretch),
                 Text::new("Not found"),
-                Image::new(0.25, "/nonexistent.png"),
+                Image::new(4.0, "/nonexistent.png"),
             ))),
         ),
     )
