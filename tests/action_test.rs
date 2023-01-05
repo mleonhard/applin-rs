@@ -15,7 +15,7 @@ fn value_from_action() {
 #[test]
 fn action_serialize() {
     assert_eq!(
-        serde_json::to_string(&Action::CopyToClipboard("".to_string())).unwrap(),
+        serde_json::to_string(&Action::CopyToClipboard(String::new())).unwrap(),
         "\"copy-to-clipboard:\""
     );
     assert_eq!(
@@ -23,7 +23,7 @@ fn action_serialize() {
         "\"copy-to-clipboard:abc\""
     );
     assert_eq!(
-        serde_json::to_string(&Action::LaunchUrl("".to_string())).unwrap(),
+        serde_json::to_string(&Action::LaunchUrl(String::new())).unwrap(),
         "\"launch-url:\""
     );
     assert_eq!(
@@ -40,7 +40,7 @@ fn action_serialize() {
     );
     assert_eq!(serde_json::to_string(&Action::Pop).unwrap(), "\"pop\"");
     assert_eq!(
-        serde_json::to_string(&Action::Push("".to_string())).unwrap(),
+        serde_json::to_string(&Action::Push(String::new())).unwrap(),
         "\"push:\""
     );
     assert_eq!(
@@ -48,7 +48,7 @@ fn action_serialize() {
         "\"push:/page1\""
     );
     assert_eq!(
-        serde_json::to_string(&Action::Rpc("".to_string())).unwrap(),
+        serde_json::to_string(&Action::Rpc(String::new())).unwrap(),
         "\"rpc:\""
     );
     assert_eq!(
@@ -65,7 +65,7 @@ fn action_deserialize() {
     );
     assert_eq!(
         serde_json::from_str::<Action>("\"copy-to-clipboard:\"").unwrap(),
-        Action::CopyToClipboard("".to_string())
+        Action::CopyToClipboard(String::new())
     );
     serde_json::from_str::<Action>("\"launch-url:\"").unwrap_err();
     assert_eq!(

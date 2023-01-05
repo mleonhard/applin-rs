@@ -122,11 +122,13 @@ fn get_or_new_session(
     )
 }
 
+#[allow(clippy::missing_errors_doc)]
 pub fn ok_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     let session = state.sessions.get(req)?;
     session.rpc_response()
 }
 
+#[allow(clippy::missing_errors_doc)]
 pub fn textfield_check_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     #[derive(Deserialize)]
     struct Vars {

@@ -58,12 +58,12 @@ fn page_map(
     state: &Arc<ServerState>,
     rebuilder: Rebuilder<SessionState>,
 ) -> Result<PageMap<SessionState>, Box<dyn Error>> {
+    const PAGE_2: &str = "/page_2";
     let mut keys = PageMap::new();
     // Read the `show_page_2` value and subscribe to changes.
     // Whenever the value changes, Applin calls this function
     // to rebuild the set of keys.
     let show_page_2 = *state.show_page_2.read(rebuilder);
-    const PAGE_2: &str = "/page_2";
     if show_page_2 {
         keys.add_static_page(PAGE_2, NavPage::new("Page 2", Text::new("This is page 2.")));
     }

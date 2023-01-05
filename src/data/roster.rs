@@ -14,7 +14,7 @@ impl<'x, V, T: 'static + Send + Sync> Deref for RosterWriteGuard<'x, V, T> {
     type Target = V;
 
     fn deref(&self) -> &Self::Target {
-        &*self.0.as_ref().unwrap()
+        self.0.as_ref().unwrap()
     }
 }
 impl<'x, V, T: 'static + Send + Sync> DerefMut for RosterWriteGuard<'x, V, T> {

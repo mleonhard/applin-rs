@@ -103,7 +103,7 @@ impl FormTextfield {
             println!("WARN FormTextfield::with_max_chars called with 0");
             self.max_chars = u32::MAX;
         } else {
-            self.max_chars = max_chars
+            self.max_chars = max_chars;
         }
         self
     }
@@ -116,7 +116,7 @@ impl FormTextfield {
             println!("WARN FormTextfield::with_max_lines called with 0");
             self.max_lines = u32::MAX;
         } else {
-            self.max_lines = max_lines
+            self.max_lines = max_lines;
         }
         self
     }

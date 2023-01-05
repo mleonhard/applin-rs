@@ -49,6 +49,7 @@ pub enum ImageDisposition {
     Stretch,
 }
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
 #[must_use]
 fn is_u32_max(n: &u32) -> bool {
     *n == u32::MAX
@@ -177,7 +178,7 @@ impl Widget {
     #[must_use]
     #[allow(clippy::missing_panics_doc)]
     pub fn to_value(&self) -> Value {
-        serde_json::to_value(&self).unwrap()
+        serde_json::to_value(self).unwrap()
     }
 }
 impl From<Widget> for Value {

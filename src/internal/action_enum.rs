@@ -16,7 +16,7 @@ impl Action {
     #[must_use]
     #[allow(clippy::missing_panics_doc)]
     pub fn to_value(&self) -> Value {
-        serde_json::to_value(&self).unwrap()
+        serde_json::to_value(self).unwrap()
     }
 }
 impl From<Action> for Value {

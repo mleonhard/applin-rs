@@ -84,6 +84,7 @@ impl<T> PageMap<T> {
         self.0.contains_key(key)
     }
 
+    #[allow(clippy::borrowed_box)]
     #[must_use]
     pub fn get(&self, key: &str) -> Option<&Box<PageFn<T>>> {
         self.0.get(key)

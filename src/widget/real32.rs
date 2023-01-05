@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::num::FpCategory;
 
-/// A 32-bit floating point number that cannot container NaN, infinity, or negative zero.
+/// A 32-bit floating point number that cannot be NaN, infinity, or negative zero.
 #[derive(Clone, Debug, Serialize)]
 pub struct Real32(f32);
 impl Real32 {
@@ -11,10 +11,12 @@ impl Real32 {
     ///
     /// # Panics
     /// Panics when `v` is NaN or infinity.
+    #[must_use]
     pub fn new(v: f32) -> Self {
         Self::try_from(v).unwrap()
     }
 
+    #[must_use]
     pub fn get(self) -> f32 {
         self.0
     }
@@ -56,7 +58,7 @@ impl Hash for Real32 {
             FpCategory::Nan => "NaN".hash(state),
             FpCategory::Infinite => "inf".hash(state),
             FpCategory::Zero | FpCategory::Subnormal | FpCategory::Normal => {
-                self.0.to_bits().hash(state)
+                self.0.to_bits().hash(state);
             }
         }
     }
@@ -67,6 +69,6 @@ impl<'de> Deserialize<'de> for Real32 {
         D: Deserializer<'de>,
     {
         let raw: f32 = f32::deserialize(deserializer)?;
-        Real32::try_from(raw).map_err(|e| serde::de::Error::custom(e))
+        Real32::try_from(raw).map_err(serde::de::Error::custom)
     }
 }

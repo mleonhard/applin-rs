@@ -46,7 +46,7 @@ fn page_nav_serialize() {
             poll_seconds: 0,
             start: None,
             stream: false,
-            title: "".to_string(),
+            title: String::new(),
             widget: Widget::EmptyVariant,
         })
         .unwrap(),
@@ -86,7 +86,7 @@ fn page_nav_deserialize() {
             poll_seconds: 0,
             start: None,
             stream: false,
-            title: "".to_string(),
+            title: String::new(),
             widget: Widget::EmptyVariant,
         }
     );
@@ -117,7 +117,7 @@ fn page_plain_serialize() {
         serde_json::to_string(&Page::Plain {
             poll_seconds: 0,
             stream: false,
-            title: "".to_string(),
+            title: String::new(),
             widget: Widget::EmptyVariant,
         })
         .unwrap(),
@@ -149,7 +149,7 @@ fn page_plain_deserialize() {
         Page::Plain {
             poll_seconds: 0,
             stream: false,
-            title: "".to_string(),
+            title: String::new(),
             widget: Widget::EmptyVariant,
         }
     );

@@ -68,7 +68,7 @@ fn widget_back_button_deserialize() {
 fn widget_button_serialize() {
     assert_eq!(
         serde_json::to_string(&Widget::ButtonVariant {
-            text: "".to_string(),
+            text: String::new(),
             actions: Vec::new(),
         })
         .unwrap(),
@@ -89,7 +89,7 @@ fn widget_button_deserialize() {
     assert_eq!(
         serde_json::from_str::<Widget>(r#"{"typ":"button","text":""}"#).unwrap(),
         Widget::ButtonVariant {
-            text: "".to_string(),
+            text: String::new(),
             actions: Vec::new(),
         }
     );
@@ -183,7 +183,7 @@ fn widget_nav_button_serialize() {
             actions: Vec::new(),
             photo_url: None,
             sub_text: None,
-            text: "".to_string(),
+            text: String::new(),
         })
         .unwrap(),
         r#"{"typ":"nav-button","text":""}"#
@@ -210,7 +210,7 @@ fn widget_nav_button_deserialize() {
             actions: Vec::new(),
             photo_url: None,
             sub_text: None,
-            text: "".to_string(),
+            text: String::new(),
         }
     );
     assert_eq!(
@@ -282,7 +282,7 @@ fn widget_form_section_deserialize() {
 fn widget_modal_button_serialize() {
     assert_eq!(
         serde_json::to_string(&Widget::ModalButtonVariant {
-            text: "".to_string(),
+            text: String::new(),
             actions: Vec::new(),
             is_cancel: false,
             is_default: false,
@@ -309,7 +309,7 @@ fn widget_modal_button_deserialize() {
     assert_eq!(
         serde_json::from_str::<Widget>(r#"{"typ":"modal-button","text":""}"#).unwrap(),
         Widget::ModalButtonVariant {
-            text: "".to_string(),
+            text: String::new(),
             actions: Vec::new(),
             is_cancel: false,
             is_default: false,
@@ -335,7 +335,7 @@ fn widget_modal_button_deserialize() {
 fn widget_text_serialize() {
     assert_eq!(
         serde_json::to_string(&Widget::TextVariant {
-            text: "".to_string()
+            text: String::new()
         })
         .unwrap(),
         r#"{"typ":"text","text":""}"#
@@ -355,7 +355,7 @@ fn widget_text_deserialize() {
     assert_eq!(
         serde_json::from_str::<Widget>(r#"{"typ":"text","text":""}"#).unwrap(),
         Widget::TextVariant {
-            text: "".to_string()
+            text: String::new()
         }
     );
     assert_eq!(
