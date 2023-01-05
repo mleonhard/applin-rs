@@ -1,5 +1,5 @@
 use crate::{ServerState, SessionState, CHECK_VARS_RPC_PATH};
-use applin::session::{KeySet, PageKey};
+use applin::session::{PageKey, PageMap};
 use applin::widget::{Checkbox, Form, NavPage};
 use serde::{Deserialize, Serialize};
 use servlin::{Request, Response};
@@ -23,7 +23,7 @@ pub fn check_vars_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Respons
     session.rpc_response_with_vars(output)
 }
 
-pub fn add_check_vars_page(keys: &mut KeySet<SessionState>) -> PageKey {
+pub fn add_check_vars_page(keys: &mut PageMap<SessionState>) -> PageKey {
     keys.add_static_page(
         "/check-vars",
         NavPage::new(

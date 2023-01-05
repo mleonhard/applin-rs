@@ -1,11 +1,11 @@
 use crate::{SessionState, TEXTFIELD_CHECK_RPC_PATH};
 use applin::action::{nothing, push};
-use applin::session::{KeySet, PageKey};
+use applin::session::{PageKey, PageMap};
 use applin::widget::{
     AlertModal, Form, FormButton, FormSection, FormTextfield, NavPage, Scroll, Text,
 };
 
-pub fn add_form_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
+pub fn add_form_button_page(keys: &mut PageMap<SessionState>) -> PageKey {
     let pressed = keys.add_static_page(
         "/form-button-pressed",
         AlertModal::new("Form Button Pressed").with_ok(),
@@ -32,7 +32,7 @@ pub fn add_form_button_page(keys: &mut KeySet<SessionState>) -> PageKey {
     )
 }
 
-pub fn add_form_section_page(keys: &mut KeySet<SessionState>) -> PageKey {
+pub fn add_form_section_page(keys: &mut PageMap<SessionState>) -> PageKey {
     keys.add_static_page(
         "/form-section",
         NavPage::new(
@@ -58,7 +58,7 @@ pub fn add_form_section_page(keys: &mut KeySet<SessionState>) -> PageKey {
     )
 }
 
-pub fn add_form_text_field_page(keys: &mut KeySet<SessionState>) -> PageKey {
+pub fn add_form_text_field_page(keys: &mut PageMap<SessionState>) -> PageKey {
     keys.add_static_page(
         "/form-text-field",
         NavPage::new(

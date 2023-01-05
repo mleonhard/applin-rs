@@ -35,7 +35,7 @@ impl<T: 'static + Send + Sync> Rebuilder<T> {
         match self {
             Rebuilder::Keys(weak_session) => {
                 if let Some(session) = weak_session.upgrade() {
-                    session.rebuild_key_set(rebuilder);
+                    session.rebuild_page_map(rebuilder);
                 }
             }
             Rebuilder::Value(weak_session, key) => {

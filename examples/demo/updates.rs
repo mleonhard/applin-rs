@@ -1,6 +1,6 @@
 use crate::{ServerState, SessionState};
 use applin::data::Context;
-use applin::session::{KeySet, PageKey};
+use applin::session::{PageKey, PageMap};
 use applin::widget::{Column, NavPage, Text};
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
@@ -19,7 +19,7 @@ pub fn start_updater_thread(state: Arc<ServerState>) {
     });
 }
 
-pub fn add_inert_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) -> PageKey {
+pub fn add_inert_page(state: &Arc<ServerState>, keys: &mut PageMap<SessionState>) -> PageKey {
     let state_clone = state.clone();
     keys.add_page_fn("/updates/inert", move |rebuilder| {
         Ok(NavPage::new(
@@ -35,7 +35,7 @@ pub fn add_inert_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>)
     })
 }
 
-pub fn add_poll_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) -> PageKey {
+pub fn add_poll_page(state: &Arc<ServerState>, keys: &mut PageMap<SessionState>) -> PageKey {
     let state_clone = state.clone();
     keys.add_page_fn("/updates/poll", move |rebuilder| {
         Ok(NavPage::new(
@@ -53,7 +53,7 @@ pub fn add_poll_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) 
     })
 }
 
-pub fn add_stream_page(state: &Arc<ServerState>, keys: &mut KeySet<SessionState>) -> PageKey {
+pub fn add_stream_page(state: &Arc<ServerState>, keys: &mut PageMap<SessionState>) -> PageKey {
     let state_clone = state.clone();
     keys.add_page_fn("/updates/stream", move |rebuilder| {
         Ok(NavPage::new(

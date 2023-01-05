@@ -46,7 +46,7 @@
 
 use applin::action::rpc;
 use applin::data::Roster;
-use applin::session::{KeySet, Session, SessionSet};
+use applin::session::{PageMap, Session, SessionSet};
 use applin::widget::{Column, FormButton, NavPage, Text};
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
@@ -68,8 +68,8 @@ impl ServerState {
     }
 }
 
-fn key_set(state: &Arc<ServerState>) -> KeySet<SessionState> {
-    let mut keys = KeySet::new();
+fn page_map(state: &Arc<ServerState>) -> PageMap<SessionState> {
+    let mut keys = PageMap::new();
     let state_clone = state.clone();
     keys.add_page_fn("/", move |rebuilder| {
         Ok(NavPage::new(
@@ -97,7 +97,7 @@ fn get_or_new_session(
     let state_clone = state.clone();
     state.sessions.get_or_new(
         req,
-        move |_rebuilder| Ok(key_set(&state_clone)),
+        move |_rebuilder| Ok(page_map(&state_clone)),
         || SessionState {},
     )
 }

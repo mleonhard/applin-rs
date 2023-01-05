@@ -1,7 +1,7 @@
 mod util;
 
 use applin::data::{Context, Roster};
-use applin::session::{KeySet, SessionSet};
+use applin::session::{PageMap, SessionSet};
 use applin::testing::{start_for_test, TestClient};
 use applin::widget::{Empty, NavPage, Text};
 use serde_json::json;
@@ -13,7 +13,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 #[test]
-pub fn key_set_updates() {
+pub fn page_map_updates() {
     struct ServerState {
         show_page2: Roster<bool, ()>,
         sessions: SessionSet<()>,
@@ -30,23 +30,23 @@ pub fn key_set_updates() {
     let executor = Executor::new(1, 1).unwrap();
     let server_state = Arc::new(ServerState::new(&executor));
     let server_state2 = Arc::clone(&server_state);
-    let key_set_fn = move |rebuilder| {
-        let mut key_set = KeySet::new();
-        key_set.add_static_page("/", NavPage::new("Home", Empty::new()));
+    let page_map_fn = move |rebuilder| {
+        let mut page_map = PageMap::new();
+        page_map.add_static_page("/", NavPage::new("Home", Empty::new()));
         if *server_state2.show_page2.read(rebuilder) {
-            key_set.add_static_page("/page2", NavPage::new("Page 2", Empty::new()));
+            page_map.add_static_page("/page2", NavPage::new("Page 2", Empty::new()));
         }
-        Ok(key_set)
+        Ok(page_map)
     };
     let server_state3 = Arc::clone(&server_state);
     let req_handler = move |req: Request| match (req.method.as_str(), req.url.path()) {
         ("GET", "/") => server_state3
             .sessions
-            .get_or_new(&req, key_set_fn, || ())?
+            .get_or_new(&req, page_map_fn, || ())?
             .poll(),
         ("GET", "/stream") => server_state3
             .sessions
-            .get_or_new(&req, key_set_fn, || ())?
+            .get_or_new(&req, page_map_fn, || ())?
             .stream(),
         ("POST", "/toggle") => {
             let session = server_state3.sessions.get(&req)?;
@@ -111,9 +111,9 @@ pub fn page_updates() {
     let executor = Executor::new(1, 1).unwrap();
     let server_state = Arc::new(ServerState::new(&executor));
     let server_state2 = Arc::clone(&server_state);
-    let key_set_fn = move |_| {
+    let page_map_fn = move |_| {
         let server_state3 = Arc::clone(&server_state2);
-        Ok(KeySet::new().with_page_fn("/", move |rebuilder| {
+        Ok(PageMap::new().with_page_fn("/", move |rebuilder| {
             Ok(NavPage::new(
                 "t1",
                 Text::new(format!("count: {}", server_state3.counter.read(rebuilder))),
@@ -124,11 +124,11 @@ pub fn page_updates() {
     let req_handler = move |req: Request| match (req.method.as_str(), req.url.path()) {
         ("GET", "/") => server_state4
             .sessions
-            .get_or_new(&req, key_set_fn, || ())?
+            .get_or_new(&req, page_map_fn, || ())?
             .poll(),
         ("GET", "/stream") => server_state4
             .sessions
-            .get_or_new(&req, key_set_fn, || ())?
+            .get_or_new(&req, page_map_fn, || ())?
             .stream(),
         ("POST", "/increment") => {
             let session = server_state4.sessions.get(&req)?;

@@ -1,7 +1,7 @@
 mod util;
 
 use applin::data::Rebuilder;
-use applin::session::{KeySet, SessionSet};
+use applin::session::{PageMap, SessionSet};
 use applin::testing::{start_for_test, TestClient};
 use applin::widget::{NavPage, Text};
 use serde_json::json;
@@ -14,10 +14,10 @@ use std::sync::Arc;
 pub fn static_page() {
     let executor = Executor::new(1, 1).unwrap();
     let sessions = Arc::new(SessionSet::new(&executor));
-    let key_set_fn =
-        |_| Ok(KeySet::new().with_static_page("/", NavPage::new("t1", Text::new("hello1"))));
+    let page_map_fn =
+        |_| Ok(PageMap::new().with_static_page("/", NavPage::new("t1", Text::new("hello1"))));
     let req_handler = move |req: Request| match (req.method.as_str(), req.url.path()) {
-        ("GET", "/") => sessions.get_or_new(&req, key_set_fn, || ())?.poll(),
+        ("GET", "/") => sessions.get_or_new(&req, page_map_fn, || ())?.poll(),
         _ => Ok(Response::not_found_404()),
     };
     let (url, _receiver) = start_for_test(&executor, req_handler);
@@ -58,13 +58,13 @@ pub fn user_specific_static_page() {
     let sessions: Arc<SessionSet<UserState>> = Arc::new(SessionSet::new(&executor));
     let req_handler = move |req: Request| match (req.method.as_str(), req.url.path()) {
         ("GET", "/") => {
-            let key_set_fn = |rebuilder: Rebuilder<UserState>| {
+            let page_map_fn = |rebuilder: Rebuilder<UserState>| {
                 let id = rebuilder.session()?.state().id;
-                Ok(KeySet::new()
+                Ok(PageMap::new()
                     .with_static_page("/", NavPage::new("t1", Text::new(format!("hello {}", id)))))
             };
             sessions
-                .get_or_new(&req, key_set_fn, UserState::new)?
+                .get_or_new(&req, page_map_fn, UserState::new)?
                 .poll()
         }
         _ => Ok(Response::not_found_404()),
@@ -84,7 +84,7 @@ pub fn user_specific_static_page() {
 }
 
 #[test]
-pub fn user_specific_key_set() {
+pub fn user_specific_page_map() {
     static ID_COUNTER: AtomicU32 = AtomicU32::new(3);
     struct UserState {
         id: u32,
@@ -100,15 +100,15 @@ pub fn user_specific_key_set() {
     let sessions: Arc<SessionSet<UserState>> = Arc::new(SessionSet::new(&executor));
     let req_handler = move |req: Request| match (req.method.as_str(), req.url.path()) {
         ("GET", "/") => {
-            let key_set_fn = |rebuilder: Rebuilder<UserState>| {
+            let page_map_fn = |rebuilder: Rebuilder<UserState>| {
                 let id = rebuilder.session()?.state().id;
-                Ok(KeySet::new().with_static_page(
+                Ok(PageMap::new().with_static_page(
                     format!("/user{}", id),
                     NavPage::new("t1", Text::new(format!("hello {}", id))),
                 ))
             };
             sessions
-                .get_or_new(&req, key_set_fn, UserState::new)?
+                .get_or_new(&req, page_map_fn, UserState::new)?
                 .poll()
         }
         _ => Ok(Response::not_found_404()),

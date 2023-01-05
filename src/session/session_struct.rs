@@ -1,6 +1,6 @@
 use crate::data::{Context, Rebuilder};
 use crate::error::server_error;
-use crate::session::{KeySet, SessionCookie, SessionId};
+use crate::session::{PageMap, SessionCookie, SessionId};
 use core::fmt::{Debug, Formatter};
 use serde_json::{json, Value};
 use servlin::reexport::safina_executor::Executor;
@@ -42,7 +42,7 @@ impl<'x, T> DerefMut for SessionStateGuard<'x, T> {
 
 #[allow(clippy::module_name_repetitions)]
 pub struct InnerSession<T> {
-    pub key_set: KeySet<T>,
+    pub page_map: PageMap<T>,
     pub rpc_updates: HashSet<PendingUpdate>,
     pub sender: EventSender,
 }
@@ -51,11 +51,11 @@ pub struct Session<T> {
     pub executor: Weak<Executor>,
     pub cookie: SessionCookie,
     #[allow(clippy::type_complexity)]
-    pub key_set_fn: Box<
+    pub page_map_fn: Box<
         dyn 'static
             + Send
             + Sync
-            + Fn(Rebuilder<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
+            + Fn(Rebuilder<T>) -> Result<PageMap<T>, Box<dyn std::error::Error>>,
     >,
     pub last_contact_epoch_seconds: AtomicU64,
     pub scheduled_updates: Mutex<HashSet<PendingUpdate>>,
@@ -63,22 +63,22 @@ pub struct Session<T> {
     pub inner: Mutex<InnerSession<T>>,
 }
 impl<T: 'static + Send + Sync> Session<T> {
-    pub fn new<F>(executor: Weak<Executor>, key_set_fn: F, state: T) -> Arc<Self>
+    pub fn new<F>(executor: Weak<Executor>, page_map_fn: F, state: T) -> Arc<Self>
     where
         F: 'static
             + Send
             + Sync
-            + Fn(Rebuilder<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
+            + Fn(Rebuilder<T>) -> Result<PageMap<T>, Box<dyn std::error::Error>>,
     {
         Arc::new(Self {
             executor,
             cookie: SessionCookie::new_random(),
-            key_set_fn: Box::new(key_set_fn),
+            page_map_fn: Box::new(page_map_fn),
             last_contact_epoch_seconds: AtomicU64::new(epoch_seconds()),
             scheduled_updates: Mutex::new(HashSet::new()),
             state: Mutex::new(state),
             inner: Mutex::new(InnerSession {
-                key_set: KeySet::new(),
+                page_map: PageMap::new(),
                 rpc_updates: HashSet::new(),
                 sender: EventSender::unconnected(),
             }),
@@ -121,12 +121,12 @@ impl<T: 'static + Send + Sync> Session<T> {
         let (sender, response) = Response::event_stream();
         {
             let mut inner_guard = self.lock_inner();
-            inner_guard.key_set = KeySet::new();
+            inner_guard.page_map = PageMap::new();
             inner_guard.sender = sender;
         }
         // TODO: Send the client an opaque version ID
         //       and skip rebuilding all if it matches.
-        self.rebuild_key_set(&Context::Empty);
+        self.rebuild_page_map(&Context::Empty);
         Ok(response
             .with_set_cookie(self.cookie.to_cookie())
             .with_no_store())
@@ -134,37 +134,37 @@ impl<T: 'static + Send + Sync> Session<T> {
 
     /// # Errors
     /// Returns an error when we fail to build the new key set or fail to build the value for a key.
-    pub fn build_key_set(
+    pub fn build_page_map(
         self: &Arc<Self>,
     ) -> Result<serde_json::Map<String, Value>, Box<dyn std::error::Error>> {
         let rebuilder = Rebuilder::Keys(Arc::downgrade(self));
         let mut inner_guard = self.lock_inner();
-        let result = (*self.key_set_fn)(rebuilder);
-        let mut new_key_set = result?;
+        let result = (*self.page_map_fn)(rebuilder);
+        let mut new_page_map = result?;
         let mut diff = serde_json::Map::new();
         // Removed keys.
-        for key in inner_guard.key_set.key_to_value_fn.keys() {
-            if !new_key_set.key_to_value_fn.contains_key(key) {
+        for key in inner_guard.page_map.keys() {
+            if !new_page_map.contains_key(key) {
                 diff.insert(key.to_string(), Value::Null);
             }
         }
         // Added keys.
-        for (key, value_fn) in &new_key_set.key_to_value_fn {
-            if !inner_guard.key_set.key_to_value_fn.contains_key(key) {
+        for (key, value_fn) in new_page_map.iter() {
+            if !inner_guard.page_map.contains_key(key) {
                 let rebuilder = Rebuilder::Value(Arc::downgrade(self), key.to_string());
                 let value = (*value_fn)(rebuilder)?;
                 diff.insert(key.to_string(), value);
             }
         }
-        std::mem::swap(&mut inner_guard.key_set, &mut new_key_set);
+        std::mem::swap(&mut inner_guard.page_map, &mut new_page_map);
         Ok(diff)
     }
 
     /// # Errors
     /// Returns an error when we fail to build the new key set or fail to build the value for a key.
     #[allow(clippy::missing_panics_doc)]
-    pub fn build_key_set_and_send(self: &Arc<Self>) -> Result<(), Box<dyn std::error::Error>> {
-        let diff = self.build_key_set()?;
+    pub fn build_page_map_and_send(self: &Arc<Self>) -> Result<(), Box<dyn std::error::Error>> {
+        let diff = self.build_page_map()?;
         let update = json!({ "pages": diff });
         let json_string = serde_json::to_string(&update).unwrap();
         //dbg!(&json_string);
@@ -178,8 +178,7 @@ impl<T: 'static + Send + Sync> Session<T> {
         let rebuilder = Rebuilder::Value(Arc::downgrade(self), key.to_string());
         let inner_guard = self.lock_inner();
         let value_fn = inner_guard
-            .key_set
-            .key_to_value_fn
+            .page_map
             .get(key)
             .ok_or_else(|| format!("key {:?} not found", key))?;
         (*value_fn)(rebuilder)
@@ -208,14 +207,14 @@ impl<T: 'static + Send + Sync> Session<T> {
     }
 
     #[allow(clippy::missing_panics_doc)]
-    pub fn rebuild_key_set(self: &Arc<Self>, ctx: &Context) {
+    pub fn rebuild_page_map(self: &Arc<Self>, ctx: &Context) {
         if &Context::Rpc(self.id()) == ctx || !self.lock_inner().sender.is_connected() {
             self.lock_inner().rpc_updates.insert(PendingUpdate::KeySet);
         } else {
             let self_clone = self.clone();
             if let Some(executor) = self.executor.upgrade() {
                 executor.schedule_blocking(move || {
-                    self_clone.build_key_set_and_send().unwrap();
+                    self_clone.build_page_map_and_send().unwrap();
                 });
             }
         }
@@ -260,7 +259,7 @@ impl<T: 'static + Send + Sync> Session<T> {
         }
         //dbg!(&pending_updates);
         let mut diff = if pending_updates.remove(&PendingUpdate::KeySet) {
-            self.build_key_set()
+            self.build_page_map()
                 .map_err(|e| server_error(format!("error building keys: {}", e)))?
         } else {
             serde_json::Map::new()
@@ -298,7 +297,7 @@ impl<T: 'static + Send + Sync> Session<T> {
     pub fn poll(self: &Arc<Self>) -> Result<Response, Response> {
         // TODO: Send the client an opaque version ID
         //       and skip rebuilding all if it matches.
-        self.rebuild_key_set(&Context::Rpc(self.id()));
+        self.rebuild_page_map(&Context::Rpc(self.id()));
         let response = self.rpc_response()?;
         Ok(response.with_set_cookie(self.cookie.to_cookie()))
     }
@@ -317,13 +316,7 @@ impl<T: 'static + Send + Sync> Debug for Session<T> {
         let mut scheduled_updates: Vec<PendingUpdate> =
             self.lock_scheduled_updates().iter().cloned().collect();
         scheduled_updates.sort();
-        let mut keys: Vec<String> = self
-            .lock_inner()
-            .key_set
-            .key_to_value_fn
-            .keys()
-            .cloned()
-            .collect();
+        let mut keys: Vec<String> = self.lock_inner().page_map.keys().cloned().collect();
         keys.sort();
         write!(
             f,

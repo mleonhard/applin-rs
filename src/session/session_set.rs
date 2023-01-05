@@ -1,5 +1,5 @@
 use crate::data::Rebuilder;
-use crate::session::{KeySet, Session, SessionCookie, SessionId};
+use crate::session::{PageMap, Session, SessionCookie, SessionId};
 use servlin::reexport::safina_executor::Executor;
 use servlin::{Request, Response};
 use std::collections::HashMap;
@@ -63,14 +63,14 @@ impl<T: 'static + Send + Sync> SessionSet<T> {
         }
     }
 
-    pub fn new_session<F>(&self, key_set_fn: F, value: T) -> Arc<Session<T>>
+    pub fn new_session<F>(&self, page_map_fn: F, value: T) -> Arc<Session<T>>
     where
         F: 'static
             + Send
             + Sync
-            + Fn(Rebuilder<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
+            + Fn(Rebuilder<T>) -> Result<PageMap<T>, Box<dyn std::error::Error>>,
     {
-        let session = Session::new(self.executor.clone(), key_set_fn, value);
+        let session = Session::new(self.executor.clone(), page_map_fn, value);
         self.write_lock()
             .insert(session.cookie.id(), session.clone());
         session
@@ -81,20 +81,20 @@ impl<T: 'static + Send + Sync> SessionSet<T> {
     pub fn get_or_new<F>(
         &self,
         req: &Request,
-        key_set_fn: F,
+        page_map_fn: F,
         session_state_fn: impl FnOnce() -> T,
     ) -> Result<Arc<Session<T>>, Response>
     where
         F: 'static
             + Send
             + Sync
-            + Fn(Rebuilder<T>) -> Result<KeySet<T>, Box<dyn std::error::Error>>,
+            + Fn(Rebuilder<T>) -> Result<PageMap<T>, Box<dyn std::error::Error>>,
     {
         if let Some(session) = self.get_opt(req)? {
             Ok(session)
         } else {
             let session_state = session_state_fn();
-            Ok(self.new_session(key_set_fn, session_state))
+            Ok(self.new_session(page_map_fn, session_state))
         }
     }
 }

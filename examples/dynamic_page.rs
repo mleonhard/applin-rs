@@ -28,7 +28,7 @@
 
 use applin::action::push;
 use applin::data::{Context, Rebuilder, Roster};
-use applin::session::{KeySet, PageKey, Session, SessionSet};
+use applin::session::{PageKey, PageMap, Session, SessionSet};
 use applin::widget::{Column, Empty, FormButton, NavPage, Text};
 use servlin::reexport::permit::Permit;
 use servlin::reexport::{safina_executor, safina_timer};
@@ -54,11 +54,11 @@ impl ServerState {
 }
 
 #[allow(clippy::unnecessary_wraps)]
-fn key_set(
+fn page_map(
     state: &Arc<ServerState>,
     rebuilder: Rebuilder<SessionState>,
-) -> Result<KeySet<SessionState>, Box<dyn Error>> {
-    let mut keys = KeySet::new();
+) -> Result<PageMap<SessionState>, Box<dyn Error>> {
+    let mut keys = PageMap::new();
     // Read the `show_page_2` value and subscribe to changes.
     // Whenever the value changes, Applin calls this function
     // to rebuild the set of keys.
@@ -95,7 +95,7 @@ fn get_or_new_session(
     let state_clone = state.clone();
     state.sessions.get_or_new(
         req,
-        move |rebuilder| key_set(&state_clone, rebuilder),
+        move |rebuilder| page_map(&state_clone, rebuilder),
         || SessionState {},
     )
 }
