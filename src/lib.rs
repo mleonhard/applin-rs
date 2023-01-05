@@ -198,9 +198,6 @@ pub mod internal;
 pub mod session;
 pub mod widget;
 
-#[cfg(feature = "testing")]
-pub mod testing;
-
 pub mod reexports {
     pub use serde_json;
 }

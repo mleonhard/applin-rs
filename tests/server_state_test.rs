@@ -3,7 +3,6 @@ mod util;
 
 use applin::data::{Context, Roster};
 use applin::session::{PageMap, SessionSet};
-use applin::testing::{start_for_test, TestClient};
 use applin::widget::{Empty, NavPage, Text};
 use serde_json::json;
 use servlin::reexport::safina_executor::Executor;
@@ -12,6 +11,7 @@ use servlin::{Request, Response};
 use std::ops::{AddAssign, BitXorAssign};
 use std::sync::Arc;
 use std::time::Duration;
+use util::{start_for_test, TestClient};
 
 #[test]
 pub fn page_map_updates() {

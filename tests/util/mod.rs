@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use serde::Serialize;
 use servlin::reexport::safina_executor::Executor;
 use servlin::reexport::safina_sync::Receiver;

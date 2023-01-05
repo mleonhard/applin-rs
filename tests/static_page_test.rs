@@ -3,13 +3,13 @@ mod util;
 
 use applin::data::Rebuilder;
 use applin::session::{PageMap, SessionSet};
-use applin::testing::{start_for_test, TestClient};
 use applin::widget::{NavPage, Text};
 use serde_json::json;
 use servlin::reexport::safina_executor::Executor;
 use servlin::{Request, Response};
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::Arc;
+use util::{start_for_test, TestClient};
 
 #[test]
 pub fn static_page() {
