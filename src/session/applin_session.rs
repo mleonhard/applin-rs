@@ -47,7 +47,7 @@ pub struct InnerSession<T> {
     pub sender: EventSender,
 }
 
-pub struct Session<T> {
+pub struct ApplinSession<T> {
     pub executor: Weak<Executor>,
     pub cookie: SessionCookie,
     #[allow(clippy::type_complexity)]
@@ -62,7 +62,7 @@ pub struct Session<T> {
     pub state: Mutex<T>,
     pub inner: Mutex<InnerSession<T>>,
 }
-impl<T: 'static + Send + Sync> Session<T> {
+impl<T: 'static + Send + Sync> ApplinSession<T> {
     pub fn new<F>(executor: Weak<Executor>, page_map_fn: F, state: T) -> Arc<Self>
     where
         F: 'static
@@ -302,13 +302,13 @@ impl<T: 'static + Send + Sync> Session<T> {
         Ok(response.with_set_cookie(self.cookie.to_cookie()))
     }
 }
-impl<T> PartialEq for Session<T> {
+impl<T> PartialEq for ApplinSession<T> {
     fn eq(&self, other: &Self) -> bool {
         self.cookie == other.cookie
     }
 }
-impl<T> Eq for Session<T> {}
-impl<T: 'static + Send + Sync> Debug for Session<T> {
+impl<T> Eq for ApplinSession<T> {}
+impl<T: 'static + Send + Sync> Debug for ApplinSession<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
         let mut rpc_updates: Vec<PendingUpdate> =
             self.lock_inner().rpc_updates.iter().cloned().collect();

@@ -1,5 +1,5 @@
 use crate::data::Rebuilder;
-use crate::session::{PageMap, Session, SessionCookie, SessionId};
+use crate::session::{ApplinSession, PageMap, SessionCookie, SessionId};
 use servlin::reexport::safina_executor::Executor;
 use servlin::{Request, Response};
 use std::collections::HashMap;
@@ -12,7 +12,7 @@ pub fn session_not_found() -> Response {
 
 pub struct SessionSet<T> {
     pub executor: Weak<Executor>,
-    pub set: Arc<RwLock<HashMap<SessionId, Arc<Session<T>>>>>,
+    pub set: Arc<RwLock<HashMap<SessionId, Arc<ApplinSession<T>>>>>,
 }
 impl<T: 'static + Send + Sync> SessionSet<T> {
     #[must_use]
@@ -23,17 +23,17 @@ impl<T: 'static + Send + Sync> SessionSet<T> {
         }
     }
 
-    fn read_lock(&self) -> RwLockReadGuard<HashMap<SessionId, Arc<Session<T>>>> {
+    fn read_lock(&self) -> RwLockReadGuard<HashMap<SessionId, Arc<ApplinSession<T>>>> {
         self.set.read().unwrap_or_else(PoisonError::into_inner)
     }
 
-    fn write_lock(&self) -> RwLockWriteGuard<HashMap<SessionId, Arc<Session<T>>>> {
+    fn write_lock(&self) -> RwLockWriteGuard<HashMap<SessionId, Arc<ApplinSession<T>>>> {
         self.set.write().unwrap_or_else(PoisonError::into_inner)
     }
 
     /// # Errors
     /// Returns an error when the request has the session cookie but we fail to parse it.
-    pub fn get_opt(&self, req: &Request) -> Result<Option<Arc<Session<T>>>, Response> {
+    pub fn get_opt(&self, req: &Request) -> Result<Option<Arc<ApplinSession<T>>>, Response> {
         if let Some(cookie) = SessionCookie::from_req_option(req)? {
             if let Some(session) = self.read_lock().get(&cookie.id()).cloned() {
                 if cookie == session.cookie {
@@ -49,7 +49,7 @@ impl<T: 'static + Send + Sync> SessionSet<T> {
     /// - the request has no session cookie
     /// - we fail to parse the session cookie
     /// - the session is not found
-    pub fn get(&self, req: &Request) -> Result<Arc<Session<T>>, Response> {
+    pub fn get(&self, req: &Request) -> Result<Arc<ApplinSession<T>>, Response> {
         self.get_opt(req)?.ok_or_else(session_not_found)
     }
 
@@ -63,14 +63,14 @@ impl<T: 'static + Send + Sync> SessionSet<T> {
         }
     }
 
-    pub fn new_session<F>(&self, page_map_fn: F, value: T) -> Arc<Session<T>>
+    pub fn new_session<F>(&self, page_map_fn: F, value: T) -> Arc<ApplinSession<T>>
     where
         F: 'static
             + Send
             + Sync
             + Fn(Rebuilder<T>) -> Result<PageMap<T>, Box<dyn std::error::Error>>,
     {
-        let session = Session::new(self.executor.clone(), page_map_fn, value);
+        let session = ApplinSession::new(self.executor.clone(), page_map_fn, value);
         self.write_lock()
             .insert(session.cookie.id(), session.clone());
         session
@@ -83,7 +83,7 @@ impl<T: 'static + Send + Sync> SessionSet<T> {
         req: &Request,
         page_map_fn: F,
         session_state_fn: impl FnOnce() -> T,
-    ) -> Result<Arc<Session<T>>, Response>
+    ) -> Result<Arc<ApplinSession<T>>, Response>
     where
         F: 'static
             + Send

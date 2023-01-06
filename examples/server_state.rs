@@ -46,7 +46,7 @@
 
 use applin::action::rpc;
 use applin::data::Roster;
-use applin::session::{PageMap, Session, SessionSet};
+use applin::session::{ApplinSession, PageMap, SessionSet};
 use applin::widget::{Column, FormButton, NavPage, Text};
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{print_log_response, socket_addr_127_0_0_1, HttpServerBuilder, Request, Response};
@@ -93,7 +93,7 @@ fn page_map(state: &Arc<ServerState>) -> PageMap<SessionState> {
 fn get_or_new_session(
     state: &Arc<ServerState>,
     req: &Request,
-) -> Result<Arc<Session<SessionState>>, Response> {
+) -> Result<Arc<ApplinSession<SessionState>>, Response> {
     let state_clone = state.clone();
     state.sessions.get_or_new(
         req,

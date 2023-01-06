@@ -1,16 +1,17 @@
 use crate::data::Context;
-use crate::session::Session;
+use crate::session::ApplinSession;
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Weak};
 
 pub enum Rebuilder<T> {
-    Keys(Weak<Session<T>>),
-    Value(Weak<Session<T>>, String),
+    Keys(Weak<ApplinSession<T>>),
+    // TODO: Rename to Page.
+    Value(Weak<ApplinSession<T>>, String),
 }
 impl<T> Rebuilder<T> {
     #[must_use]
-    pub fn weak_session(&self) -> &Weak<Session<T>> {
+    pub fn weak_session(&self) -> &Weak<ApplinSession<T>> {
         match self {
             Rebuilder::Keys(weak_session) | Rebuilder::Value(weak_session, ..) => weak_session,
         }
@@ -19,7 +20,7 @@ impl<T> Rebuilder<T> {
     /// # Errors
     /// Returns an error when the session is not found.
     /// This happens when the connection is closed and the session was cleaned up.
-    pub fn session(&self) -> Result<Arc<Session<T>>, &'static str> {
+    pub fn session(&self) -> Result<Arc<ApplinSession<T>>, &'static str> {
         self.weak_session().upgrade().ok_or("session not found")
     }
 
