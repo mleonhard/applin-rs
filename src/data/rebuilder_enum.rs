@@ -5,15 +5,15 @@ use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Weak};
 
 pub enum Rebuilder<T> {
-    Keys(Weak<ApplinSession<T>>),
+    PageMap(Weak<ApplinSession<T>>),
     // TODO: Rename to Page.
-    Value(Weak<ApplinSession<T>>, String),
+    Page(Weak<ApplinSession<T>>, String),
 }
 impl<T> Rebuilder<T> {
     #[must_use]
     pub fn weak_session(&self) -> &Weak<ApplinSession<T>> {
         match self {
-            Rebuilder::Keys(weak_session) | Rebuilder::Value(weak_session, ..) => weak_session,
+            Rebuilder::PageMap(weak_session) | Rebuilder::Page(weak_session, ..) => weak_session,
         }
     }
 
@@ -26,20 +26,20 @@ impl<T> Rebuilder<T> {
 
     fn order_num(&self) -> u8 {
         match self {
-            Rebuilder::Keys(..) => 0,
-            Rebuilder::Value(..) => 1,
+            Rebuilder::PageMap(..) => 0,
+            Rebuilder::Page(..) => 1,
         }
     }
 }
 impl<T: 'static + Send + Sync> Rebuilder<T> {
     pub fn rebuild(&self, rebuilder: &Context) {
         match self {
-            Rebuilder::Keys(weak_session) => {
+            Rebuilder::PageMap(weak_session) => {
                 if let Some(session) = weak_session.upgrade() {
                     session.rebuild_page_map(rebuilder);
                 }
             }
-            Rebuilder::Value(weak_session, key) => {
+            Rebuilder::Page(weak_session, key) => {
                 if let Some(session) = weak_session.upgrade() {
                     session.rebuild_value(key, rebuilder);
                 }
@@ -61,9 +61,9 @@ impl<T: 'static + Send + Sync> Rebuilder<T> {
 impl<T> Clone for Rebuilder<T> {
     fn clone(&self) -> Self {
         match self {
-            Rebuilder::Keys(weak_session) => Rebuilder::Keys(weak_session.clone()),
-            Rebuilder::Value(weak_session, key) => {
-                Rebuilder::Value(weak_session.clone(), key.clone())
+            Rebuilder::PageMap(weak_session) => Rebuilder::PageMap(weak_session.clone()),
+            Rebuilder::Page(weak_session, key) => {
+                Rebuilder::Page(weak_session.clone(), key.clone())
             }
         }
     }
@@ -71,8 +71,10 @@ impl<T> Clone for Rebuilder<T> {
 impl<T> PartialEq for Rebuilder<T> {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Rebuilder::Keys(weak), Rebuilder::Keys(other_weak)) => Weak::ptr_eq(weak, other_weak),
-            (Rebuilder::Value(weak, key), Rebuilder::Value(other_weak, other_key)) => {
+            (Rebuilder::PageMap(weak), Rebuilder::PageMap(other_weak)) => {
+                Weak::ptr_eq(weak, other_weak)
+            }
+            (Rebuilder::Page(weak, key), Rebuilder::Page(other_weak, other_key)) => {
                 Weak::ptr_eq(weak, other_weak) && key == other_key
             }
             _ => false,
@@ -83,10 +85,10 @@ impl<T> Eq for Rebuilder<T> {}
 impl<T> Ord for Rebuilder<T> {
     fn cmp(&self, other: &Self) -> Ordering {
         match (self, other) {
-            (Rebuilder::Keys(weak), Rebuilder::Keys(other_weak)) => {
+            (Rebuilder::PageMap(weak), Rebuilder::PageMap(other_weak)) => {
                 Weak::as_ptr(weak).cmp(&Weak::as_ptr(other_weak))
             }
-            (Rebuilder::Value(weak, key), Rebuilder::Value(other_weak, other_key)) => {
+            (Rebuilder::Page(weak, key), Rebuilder::Page(other_weak, other_key)) => {
                 match Weak::as_ptr(weak).cmp(&Weak::as_ptr(other_weak)) {
                     Ordering::Equal => key.cmp(other_key),
                     other => other,
@@ -104,8 +106,8 @@ impl<T> PartialOrd for Rebuilder<T> {
 impl<T> Hash for Rebuilder<T> {
     fn hash<H: Hasher>(&self, hasher: &mut H) {
         match self {
-            Rebuilder::Keys(weak) => Weak::as_ptr(weak).hash(hasher),
-            Rebuilder::Value(weak, key) => {
+            Rebuilder::PageMap(weak) => Weak::as_ptr(weak).hash(hasher),
+            Rebuilder::Page(weak, key) => {
                 Weak::as_ptr(weak).hash(hasher);
                 key.hash(hasher);
             }

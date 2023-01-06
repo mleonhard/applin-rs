@@ -137,7 +137,7 @@ impl<T: 'static + Send + Sync> ApplinSession<T> {
     pub fn build_page_map(
         self: &Arc<Self>,
     ) -> Result<serde_json::Map<String, Value>, Box<dyn std::error::Error>> {
-        let rebuilder = Rebuilder::Keys(Arc::downgrade(self));
+        let rebuilder = Rebuilder::PageMap(Arc::downgrade(self));
         let mut inner_guard = self.lock_inner();
         let result = (*self.page_map_fn)(rebuilder);
         let mut new_page_map = result?;
@@ -151,7 +151,7 @@ impl<T: 'static + Send + Sync> ApplinSession<T> {
         // Added keys.
         for (key, value_fn) in new_page_map.iter() {
             if !inner_guard.page_map.contains_key(key) {
-                let rebuilder = Rebuilder::Value(Arc::downgrade(self), key.to_string());
+                let rebuilder = Rebuilder::Page(Arc::downgrade(self), key.to_string());
                 let value = (*value_fn)(rebuilder)?;
                 diff.insert(key.to_string(), value);
             }
@@ -175,7 +175,7 @@ impl<T: 'static + Send + Sync> ApplinSession<T> {
     /// # Errors
     /// Returns an error when we build the value for the key.
     pub fn build_value(self: &Arc<Self>, key: &str) -> Result<Value, Box<dyn std::error::Error>> {
-        let rebuilder = Rebuilder::Value(Arc::downgrade(self), key.to_string());
+        let rebuilder = Rebuilder::Page(Arc::downgrade(self), key.to_string());
         let inner_guard = self.lock_inner();
         let value_fn = inner_guard
             .page_map
