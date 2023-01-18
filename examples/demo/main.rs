@@ -16,7 +16,7 @@ use applin::action::push;
 use applin::data::Roster;
 use applin::error::user_error;
 use applin::session::{ApplinSession, PageMap, SessionSet};
-use applin::widget::{Form, FormSection, NavButton, NavPage, Scroll};
+use applin::widget::{Column, Form, FormSection, NavButton, NavPage, Scroll};
 use core::fmt::Debug;
 use serde::Deserialize;
 use servlin::reexport::{safina_executor, safina_timer};
@@ -76,7 +76,7 @@ fn page_map(state: &Arc<ServerState>) -> PageMap<SessionState> {
         "/",
         NavPage::new(
             "Applin Demo",
-            Scroll::new(Form::new((
+            Scroll::new(Column::new((
                 FormSection::new().with_title("Pages").with_widgets((
                     NavButton::new("Alert Modal").with_action(push(&alert_modal)),
                     NavButton::new("Drawer Modal").with_action(push(&drawer_modal)),
