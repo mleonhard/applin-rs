@@ -1,11 +1,11 @@
-use crate::{SessionState, ERROR_RPC_PATH, OK_RPC_PATH};
+use crate::{Session, ERROR_RPC_PATH, OK_RPC_PATH};
 use applin::action::{pop, push, rpc};
 use applin::session::{PageKey, PageMap};
 use applin::widget::{
     AlertModal, DrawerModal, Form, FormButton, ModalButton, NavPage, PlainPage, Text,
 };
 
-pub fn add_alert_page(drawer: &PageKey, keys: &mut PageMap<SessionState>) -> PageKey {
+pub fn add_alert_page(drawer: &PageKey, keys: &mut PageMap<Session>) -> PageKey {
     const KEY: &str = "/pages/alert";
     let button_pressed_modal = keys.add_static_page(
         "/pages/alert-button-pressed",
@@ -33,7 +33,7 @@ pub fn add_alert_page(drawer: &PageKey, keys: &mut PageMap<SessionState>) -> Pag
     )
 }
 
-pub fn add_drawer_modal_page(keys: &mut PageMap<SessionState>) -> PageKey {
+pub fn add_drawer_modal_page(keys: &mut PageMap<Session>) -> PageKey {
     let button_pressed_modal = keys.add_static_page(
         "/pages/drawer-button-pressed",
         AlertModal::new("Button Pressed").with_ok(),
@@ -54,7 +54,7 @@ pub fn add_drawer_modal_page(keys: &mut PageMap<SessionState>) -> PageKey {
     )
 }
 
-pub fn add_nav_page(keys: &mut PageMap<SessionState>) -> PageKey {
+pub fn add_nav_page(keys: &mut PageMap<Session>) -> PageKey {
     keys.add_static_page(
         "/pages/nav-page",
         NavPage::new(
@@ -67,7 +67,7 @@ pub fn add_nav_page(keys: &mut PageMap<SessionState>) -> PageKey {
     )
 }
 
-pub fn add_plain_page(keys: &mut PageMap<SessionState>) -> PageKey {
+pub fn add_plain_page(keys: &mut PageMap<Session>) -> PageKey {
     keys.add_static_page(
         "/pages/plain-page",
         PlainPage::new(

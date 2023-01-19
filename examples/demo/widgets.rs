@@ -1,4 +1,4 @@
-use crate::{SessionState, ERROR_RPC_PATH, OK_RPC_PATH};
+use crate::{Session, ERROR_RPC_PATH, OK_RPC_PATH};
 use applin::action::{nothing, pop, push, rpc};
 use applin::internal::ImageDisposition;
 use applin::session::{PageKey, PageMap};
@@ -7,7 +7,7 @@ use applin::widget::{
     NavButton, NavPage, Scroll, Text,
 };
 
-pub fn add_back_button_pages(keys: &mut PageMap<SessionState>) -> PageKey {
+pub fn add_back_button_pages(keys: &mut PageMap<Session>) -> PageKey {
     let default = keys.add_static_page(
         "/back-button-default",
         NavPage::new("Default", Empty::new()),
@@ -67,7 +67,7 @@ pub fn add_back_button_pages(keys: &mut PageMap<SessionState>) -> PageKey {
     )
 }
 
-pub fn add_button_page(keys: &mut PageMap<SessionState>) -> PageKey {
+pub fn add_button_page(keys: &mut PageMap<Session>) -> PageKey {
     let pressed = keys.add_static_page(
         "/button-pressed",
         AlertModal::new("Button Pressed").with_ok(),
@@ -94,7 +94,7 @@ pub fn add_button_page(keys: &mut PageMap<SessionState>) -> PageKey {
     )
 }
 
-pub fn add_checkbox_page(keys: &mut PageMap<SessionState>) -> PageKey {
+pub fn add_checkbox_page(keys: &mut PageMap<Session>) -> PageKey {
     keys.add_static_page(
         "/checkbox",
         NavPage::new(
@@ -120,7 +120,7 @@ pub fn add_checkbox_page(keys: &mut PageMap<SessionState>) -> PageKey {
     )
 }
 
-pub fn add_error_text_page(keys: &mut PageMap<SessionState>) -> PageKey {
+pub fn add_error_text_page(keys: &mut PageMap<Session>) -> PageKey {
     keys.add_static_page(
         "/error-text",
         NavPage::new(
@@ -139,7 +139,7 @@ pub fn add_error_text_page(keys: &mut PageMap<SessionState>) -> PageKey {
     )
 }
 
-pub fn add_image_page(keys: &mut PageMap<SessionState>) -> PageKey {
+pub fn add_image_page(keys: &mut PageMap<Session>) -> PageKey {
     keys.add_static_page(
         "/image",
         NavPage::new(
@@ -161,7 +161,7 @@ pub fn add_image_page(keys: &mut PageMap<SessionState>) -> PageKey {
 }
 
 #[allow(clippy::too_many_lines)]
-pub fn add_nav_button_page(keys: &mut PageMap<SessionState>) -> PageKey {
+pub fn add_nav_button_page(keys: &mut PageMap<Session>) -> PageKey {
     let pressed = keys.add_static_page(
         "/nav-button-pressed",
         NavPage::new("Nav Button Pressed", Empty::new()),
@@ -301,7 +301,7 @@ pub fn add_nav_button_page(keys: &mut PageMap<SessionState>) -> PageKey {
     )
 }
 
-pub fn add_text_page(keys: &mut PageMap<SessionState>) -> PageKey {
+pub fn add_text_page(keys: &mut PageMap<Session>) -> PageKey {
     keys.add_static_page(
         "/text",
         NavPage::new(

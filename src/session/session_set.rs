@@ -82,7 +82,7 @@ impl<T: 'static + Send + Sync> SessionSet<T> {
         &self,
         req: &Request,
         page_map_fn: F,
-        session_state_fn: impl FnOnce() -> T,
+        new_value_fn: impl FnOnce() -> T,
     ) -> Result<Arc<ApplinSession<T>>, Response>
     where
         F: 'static
@@ -93,8 +93,8 @@ impl<T: 'static + Send + Sync> SessionSet<T> {
         if let Some(session) = self.get_opt(req)? {
             Ok(session)
         } else {
-            let session_state = session_state_fn();
-            Ok(self.new_session(page_map_fn, session_state))
+            let value = new_value_fn();
+            Ok(self.new_session(page_map_fn, value))
         }
     }
 }

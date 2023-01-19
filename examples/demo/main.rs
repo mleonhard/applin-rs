@@ -16,7 +16,7 @@ use applin::action::push;
 use applin::data::Roster;
 use applin::error::user_error;
 use applin::session::{ApplinSession, PageMap, SessionSet};
-use applin::widget::{Column, Form, FormSection, NavButton, NavPage, Scroll};
+use applin::widget::{Column, FormSection, NavButton, NavPage, Scroll};
 use core::fmt::Debug;
 use serde::Deserialize;
 use servlin::reexport::{safina_executor, safina_timer};
@@ -32,11 +32,11 @@ pub const OK_RPC_PATH: &str = "/ok";
 pub const TEXTFIELD_CHECK_RPC_PATH: &str = "/widgets/form-textfield-check";
 
 #[derive(Debug)]
-pub struct SessionState {}
+pub struct Session {}
 
 pub struct ServerState {
-    clock_epoch_seconds: Roster<u64, SessionState>,
-    sessions: SessionSet<SessionState>,
+    clock_epoch_seconds: Roster<u64, Session>,
+    sessions: SessionSet<Session>,
 }
 impl ServerState {
     #[must_use]
@@ -48,7 +48,7 @@ impl ServerState {
     }
 }
 
-fn page_map(state: &Arc<ServerState>) -> PageMap<SessionState> {
+fn page_map(state: &Arc<ServerState>) -> PageMap<Session> {
     let mut keys = PageMap::new();
     // Pages
     let drawer_modal = pages::add_drawer_modal_page(&mut keys);
@@ -113,12 +113,12 @@ fn page_map(state: &Arc<ServerState>) -> PageMap<SessionState> {
 fn get_or_new_session(
     state: &Arc<ServerState>,
     req: &Request,
-) -> Result<Arc<ApplinSession<SessionState>>, Response> {
+) -> Result<Arc<ApplinSession<Session>>, Response> {
     let state_clone = state.clone();
     state.sessions.get_or_new(
         req,
         move |_rebuilder| Ok(page_map(&state_clone)),
-        || SessionState {},
+        || Session {},
     )
 }
 
