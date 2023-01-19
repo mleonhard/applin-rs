@@ -82,7 +82,7 @@ fn page_map(_state: &Arc<ServerState>) -> PageMap<SessionState> {
     let mut keys = PageMap::new();
     keys.add_page_fn("/", move |rebuilder: Rebuilder<SessionState>| {
         let session = rebuilder.session()?;
-        let session_state = session.state();
+        let session_state = session.value();
         Ok(NavPage::new(
             "Session State Example",
             Column::new((
@@ -116,7 +116,7 @@ fn get_or_new_session(
 fn increment(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     let session = state.sessions.get(req)?;
     session
-        .state()
+        .value()
         .count
         .write(&session.rpc_context())
         .add_assign(1);

@@ -60,7 +60,7 @@ pub fn user_specific_static_page() {
     let req_handler = move |req: Request| match (req.method.as_str(), req.url.path()) {
         ("GET", "/") => {
             let page_map_fn = |rebuilder: Rebuilder<UserState>| {
-                let id = rebuilder.session()?.state().id;
+                let id = rebuilder.session()?.value().id;
                 Ok(PageMap::new()
                     .with_static_page("/", NavPage::new("t1", Text::new(format!("hello {}", id)))))
             };
@@ -102,7 +102,7 @@ pub fn user_specific_page_map() {
     let req_handler = move |req: Request| match (req.method.as_str(), req.url.path()) {
         ("GET", "/") => {
             let page_map_fn = |rebuilder: Rebuilder<UserState>| {
-                let id = rebuilder.session()?.state().id;
+                let id = rebuilder.session()?.value().id;
                 Ok(PageMap::new().with_static_page(
                     format!("/user{}", id),
                     NavPage::new("t1", Text::new(format!("hello {}", id))),

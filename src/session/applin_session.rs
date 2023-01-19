@@ -59,11 +59,11 @@ pub struct ApplinSession<T> {
     >,
     pub last_contact_epoch_seconds: AtomicU64,
     pub scheduled_updates: Mutex<HashSet<PendingUpdate>>,
-    pub state: Mutex<T>,
+    pub value: Mutex<T>,
     pub inner: Mutex<InnerSession<T>>,
 }
 impl<T: 'static + Send + Sync> ApplinSession<T> {
-    pub fn new<F>(executor: Weak<Executor>, page_map_fn: F, state: T) -> Arc<Self>
+    pub fn new<F>(executor: Weak<Executor>, page_map_fn: F, value: T) -> Arc<Self>
     where
         F: 'static
             + Send
@@ -76,7 +76,7 @@ impl<T: 'static + Send + Sync> ApplinSession<T> {
             page_map_fn: Box::new(page_map_fn),
             last_contact_epoch_seconds: AtomicU64::new(epoch_seconds()),
             scheduled_updates: Mutex::new(HashSet::new()),
-            state: Mutex::new(state),
+            value: Mutex::new(value),
             inner: Mutex::new(InnerSession {
                 page_map: PageMap::new(),
                 rpc_updates: HashSet::new(),
@@ -108,8 +108,8 @@ impl<T: 'static + Send + Sync> ApplinSession<T> {
     }
 
     #[must_use]
-    pub fn state(&self) -> SessionStateGuard<'_, T> {
-        SessionStateGuard(self.state.lock().unwrap_or_else(PoisonError::into_inner))
+    pub fn value(&self) -> SessionStateGuard<'_, T> {
+        SessionStateGuard(self.value.lock().unwrap_or_else(PoisonError::into_inner))
     }
 
     /// # Errors
