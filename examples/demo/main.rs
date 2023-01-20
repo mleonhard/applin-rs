@@ -146,6 +146,7 @@ pub fn textfield_check_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Re
 fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     match (req.method(), req.url().path()) {
         ("GET", "/health") => Ok(Response::text(200, "ok")),
+        ("POST", "/") => get_or_new_session(state, req)?.rpc_response(),
         ("GET", "/") => get_or_new_session(state, req)?.poll(),
         ("GET", "/stream") => get_or_new_session(state, req)?.stream(),
         ("POST", ERROR_RPC_PATH) => Err(Response::text(500, "error1")),

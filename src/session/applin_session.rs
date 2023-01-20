@@ -79,7 +79,7 @@ impl<T: 'static + Send + Sync> ApplinSession<T> {
             value: Mutex::new(value),
             inner: Mutex::new(InnerSession {
                 page_map: PageMap::new(),
-                rpc_updates: HashSet::new(),
+                rpc_updates: HashSet::from([PendingUpdate::KeySet]),
                 sender: EventSender::unconnected(),
             }),
         })
