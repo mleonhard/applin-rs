@@ -153,9 +153,6 @@ pub enum Widget {
         #[serde(rename = "auto-capitalize")]
         #[serde(default, skip_serializing_if = "is_default")]
         auto_capitalize: TextfieldAutoCapitalize,
-        #[serde(rename = "check-rpc")]
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        check_rpc: Option<String>,
         #[serde(rename = "initial-string")]
         #[serde(default, skip_serializing_if = "String::is_empty")]
         initial_string: String,
@@ -169,6 +166,8 @@ pub enum Widget {
         #[serde(rename = "min-chars")]
         #[serde(default, skip_serializing_if = "is_default")]
         min_chars: u32,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        rpc: Option<String>,
         var: String,
     },
     #[serde(rename = "text")]

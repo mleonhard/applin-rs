@@ -4,12 +4,12 @@ use crate::internal::{TextfieldAllow, TextfieldAutoCapitalize, Widget};
 pub struct Textfield {
     allow: TextfieldAllow,
     auto_capitalize: TextfieldAutoCapitalize,
-    check_rpc: Option<String>,
     initial: String,
     label: String,
     max_chars: u32,
     max_lines: u32,
     min_chars: u32,
+    rpc: Option<String>,
     var: String,
 }
 impl Textfield {
@@ -30,26 +30,14 @@ impl Textfield {
         Self {
             allow: TextfieldAllow::All,
             auto_capitalize: TextfieldAutoCapitalize::Sentences,
-            check_rpc: None,
             initial: String::new(),
             label: label.into(),
             max_chars: u32::MAX,
             max_lines: u32::MAX,
             min_chars: 0,
+            rpc: None,
             var,
         }
-    }
-
-    #[must_use]
-    pub fn with_check_rpc(mut self, check_rpc: impl Into<String>) -> Self {
-        self.check_rpc = Some(check_rpc.into());
-        self
-    }
-
-    #[must_use]
-    pub fn with_initial(mut self, initial: impl Into<String>) -> Self {
-        self.initial = initial.into();
-        self
     }
 
     #[must_use]
@@ -95,6 +83,12 @@ impl Textfield {
         self
     }
 
+    #[must_use]
+    pub fn with_initial(mut self, initial: impl Into<String>) -> Self {
+        self.initial = initial.into();
+        self
+    }
+
     /// Ask the client to prevent the user from entering to many characters.
     /// Use `u32::MAX` for no limit.
     #[must_use]
@@ -130,16 +124,22 @@ impl Textfield {
     }
 
     #[must_use]
+    pub fn with_rpc(mut self, rpc: impl Into<String>) -> Self {
+        self.rpc = Some(rpc.into());
+        self
+    }
+
+    #[must_use]
     pub fn to_widget(self) -> Widget {
         Widget::TextfieldVariant {
             allow: self.allow,
             auto_capitalize: self.auto_capitalize,
-            check_rpc: self.check_rpc,
             initial_string: self.initial,
             label: self.label,
             max_chars: self.max_chars,
             max_lines: self.max_lines,
             min_chars: self.min_chars,
+            rpc: self.rpc,
             var: self.var,
         }
     }
