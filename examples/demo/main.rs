@@ -14,11 +14,9 @@ mod widgets;
 
 use applin::action::push;
 use applin::data::Roster;
-use applin::error::user_error;
 use applin::session::{ApplinSession, PageMap, SessionSet};
 use applin::widget::{Column, FormSection, NavButton, NavPage, Scroll};
 use core::fmt::Debug;
-use serde::Deserialize;
 use servlin::reexport::{safina_executor, safina_timer};
 use servlin::{
     print_log_response, socket_addr_all_interfaces, ContentType, HttpServerBuilder, Request,
@@ -29,7 +27,6 @@ use std::sync::Arc;
 pub const CHECK_VARS_RPC_PATH: &str = "/check-vars-rpc";
 pub const ERROR_RPC_PATH: &str = "/error";
 pub const OK_RPC_PATH: &str = "/ok";
-pub const TEXTFIELD_CHECK_RPC_PATH: &str = "/widgets/form-textfield-check";
 
 #[derive(Debug)]
 pub struct Session {}
@@ -63,7 +60,7 @@ fn page_map(state: &Arc<ServerState>) -> PageMap<Session> {
     let nav_button_page = widgets::add_nav_button_page(&mut keys);
     let form_button_page = form_widgets::add_form_button_page(&mut keys);
     let form_section_page = form_widgets::add_form_section_page(&mut keys);
-    let form_textfield_page = form_widgets::add_form_text_field_page(&mut keys);
+    let textfield_page = widgets::add_textfield_page(&mut keys);
     let image_page = widgets::add_image_page(&mut keys);
     let text_page = widgets::add_text_page(&mut keys);
     // Update Modes
@@ -91,8 +88,8 @@ fn page_map(state: &Arc<ServerState>) -> PageMap<Session> {
                     NavButton::new("Nav Button").with_action(push(&nav_button_page)),
                     NavButton::new("Form Button").with_action(push(&form_button_page)),
                     NavButton::new("Form Section").with_action(push(&form_section_page)),
-                    NavButton::new("Form Textfield").with_action(push(&form_textfield_page)),
                     NavButton::new("Image").with_action(push(&image_page)),
+                    NavButton::new("Textfield").with_action(push(&textfield_page)),
                     NavButton::new("Text").with_action(push(&text_page)),
                 )),
                 FormSection::new().with_title("Update Modes").with_widgets((
@@ -128,21 +125,6 @@ pub fn ok_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Response, Respo
     session.rpc_response()
 }
 
-#[allow(clippy::missing_errors_doc)]
-pub fn textfield_check_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
-    #[derive(Deserialize)]
-    struct Vars {
-        rpc_checked1: String,
-    }
-    let _session = state.sessions.get(req)?;
-    let vars: Vars = req.json()?;
-    if vars.rpc_checked1.contains("bad") {
-        Err(user_error("Please remove 'bad' from the box."))
-    } else {
-        Ok(Response::new(200))
-    }
-}
-
 fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     match (req.method(), req.url().path()) {
         ("GET", "/health") => Ok(Response::text(200, "ok")),
@@ -151,7 +133,6 @@ fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Respo
         ("GET", "/stream") => get_or_new_session(state, req)?.stream(),
         ("POST", ERROR_RPC_PATH) => Err(Response::text(500, "error1")),
         ("POST", OK_RPC_PATH) => ok_rpc(state, req),
-        ("POST", TEXTFIELD_CHECK_RPC_PATH) => textfield_check_rpc(state, req),
         ("POST", CHECK_VARS_RPC_PATH) => vars::check_vars_rpc(state, req),
         ("GET", "/placeholder-200x200.png") => Ok(Response::new(200)
             .with_type(ContentType::Png)

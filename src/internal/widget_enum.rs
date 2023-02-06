@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Serialize, Ord, PartialEq, PartialOrd)]
-pub enum FormTextfieldAllow {
+pub enum TextfieldAllow {
     #[serde(rename = "all")]
     All,
     #[serde(rename = "ascii")]
@@ -17,20 +17,20 @@ pub enum FormTextfieldAllow {
     #[serde(rename = "tel")]
     Tel,
 }
-impl Default for FormTextfieldAllow {
+impl Default for TextfieldAllow {
     fn default() -> Self {
         Self::All
     }
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Serialize, Ord, PartialEq, PartialOrd)]
-pub enum FormTextfieldAutoCapitalize {
+pub enum TextfieldAutoCapitalize {
     #[serde(rename = "names")]
     Names,
     #[serde(rename = "sentences")]
     Sentences,
 }
-impl Default for FormTextfieldAutoCapitalize {
+impl Default for TextfieldAutoCapitalize {
     fn default() -> Self {
         Self::Sentences
     }
@@ -112,31 +112,6 @@ pub enum Widget {
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         widgets: Vec<Widget>,
     },
-    #[serde(rename = "form-textfield")]
-    FormTextfieldVariant {
-        #[serde(default, skip_serializing_if = "is_default")]
-        allow: FormTextfieldAllow,
-        #[serde(rename = "auto-capitalize")]
-        #[serde(default, skip_serializing_if = "is_default")]
-        auto_capitalize: FormTextfieldAutoCapitalize,
-        #[serde(rename = "check-rpc")]
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        check_rpc: Option<String>,
-        #[serde(rename = "initial-string")]
-        #[serde(default, skip_serializing_if = "String::is_empty")]
-        initial_string: String,
-        label: String,
-        #[serde(rename = "max-chars")]
-        #[serde(default, skip_serializing_if = "is_u32_max")]
-        max_chars: u32,
-        #[serde(rename = "max-lines")]
-        #[serde(default, skip_serializing_if = "is_u32_max")]
-        max_lines: u32,
-        #[serde(rename = "min-chars")]
-        #[serde(default, skip_serializing_if = "is_default")]
-        min_chars: u32,
-        var: String,
-    },
     #[serde(rename = "image")]
     ImageVariant {
         #[serde(rename = "aspect-ratio")]
@@ -171,6 +146,31 @@ pub enum Widget {
     },
     #[serde(rename = "scroll")]
     ScrollVariant { widget: Box<Widget> },
+    #[serde(rename = "textfield")]
+    TextfieldVariant {
+        #[serde(default, skip_serializing_if = "is_default")]
+        allow: TextfieldAllow,
+        #[serde(rename = "auto-capitalize")]
+        #[serde(default, skip_serializing_if = "is_default")]
+        auto_capitalize: TextfieldAutoCapitalize,
+        #[serde(rename = "check-rpc")]
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        check_rpc: Option<String>,
+        #[serde(rename = "initial-string")]
+        #[serde(default, skip_serializing_if = "String::is_empty")]
+        initial_string: String,
+        label: String,
+        #[serde(rename = "max-chars")]
+        #[serde(default, skip_serializing_if = "is_u32_max")]
+        max_chars: u32,
+        #[serde(rename = "max-lines")]
+        #[serde(default, skip_serializing_if = "is_u32_max")]
+        max_lines: u32,
+        #[serde(rename = "min-chars")]
+        #[serde(default, skip_serializing_if = "is_default")]
+        min_chars: u32,
+        var: String,
+    },
     #[serde(rename = "text")]
     TextVariant { text: String },
 }

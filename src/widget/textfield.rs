@@ -1,9 +1,9 @@
-use crate::internal::{FormTextfieldAllow, FormTextfieldAutoCapitalize, Widget};
+use crate::internal::{TextfieldAllow, TextfieldAutoCapitalize, Widget};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct FormTextfield {
-    allow: FormTextfieldAllow,
-    auto_capitalize: FormTextfieldAutoCapitalize,
+pub struct Textfield {
+    allow: TextfieldAllow,
+    auto_capitalize: TextfieldAutoCapitalize,
     check_rpc: Option<String>,
     initial: String,
     label: String,
@@ -12,7 +12,7 @@ pub struct FormTextfield {
     min_chars: u32,
     var: String,
 }
-impl FormTextfield {
+impl Textfield {
     /// Creates a text field.
     ///
     /// Clients use these defaults:
@@ -28,8 +28,8 @@ impl FormTextfield {
         let var = var.into();
         assert!(!var.is_empty());
         Self {
-            allow: FormTextfieldAllow::All,
-            auto_capitalize: FormTextfieldAutoCapitalize::Sentences,
+            allow: TextfieldAllow::All,
+            auto_capitalize: TextfieldAutoCapitalize::Sentences,
             check_rpc: None,
             initial: String::new(),
             label: label.into(),
@@ -54,44 +54,44 @@ impl FormTextfield {
 
     #[must_use]
     pub fn with_allow_all(mut self) -> Self {
-        self.allow = FormTextfieldAllow::All;
+        self.allow = TextfieldAllow::All;
         self
     }
 
     #[must_use]
     pub fn with_allow_ascii(mut self) -> Self {
-        self.allow = FormTextfieldAllow::Ascii;
+        self.allow = TextfieldAllow::Ascii;
         self
     }
 
     #[must_use]
     pub fn with_allow_email(mut self) -> Self {
-        self.allow = FormTextfieldAllow::Email;
+        self.allow = TextfieldAllow::Email;
         self
     }
 
     #[must_use]
     pub fn with_allow_numbers(mut self) -> Self {
-        self.allow = FormTextfieldAllow::Numbers;
+        self.allow = TextfieldAllow::Numbers;
         self
     }
 
     #[must_use]
     pub fn with_allow_tel(mut self) -> Self {
-        self.allow = FormTextfieldAllow::Tel;
+        self.allow = TextfieldAllow::Tel;
         self
     }
 
     #[must_use]
     pub fn with_autocap_names(mut self) -> Self {
-        self.auto_capitalize = FormTextfieldAutoCapitalize::Names;
+        self.auto_capitalize = TextfieldAutoCapitalize::Names;
         self
     }
 
     /// This is the default.
     #[must_use]
     pub fn with_autocap_sentences(mut self) -> Self {
-        self.auto_capitalize = FormTextfieldAutoCapitalize::Sentences;
+        self.auto_capitalize = TextfieldAutoCapitalize::Sentences;
         self
     }
 
@@ -100,7 +100,7 @@ impl FormTextfield {
     #[must_use]
     pub fn with_max_chars(mut self, max_chars: u32) -> Self {
         if max_chars == 0 {
-            println!("WARN FormTextfield::with_max_chars called with 0");
+            println!("WARN Textfield::with_max_chars called with 0");
             self.max_chars = u32::MAX;
         } else {
             self.max_chars = max_chars;
@@ -113,7 +113,7 @@ impl FormTextfield {
     #[must_use]
     pub fn with_max_lines(mut self, max_lines: u32) -> Self {
         if max_lines == 0 {
-            println!("WARN FormTextfield::with_max_lines called with 0");
+            println!("WARN Textfield::with_max_lines called with 0");
             self.max_lines = u32::MAX;
         } else {
             self.max_lines = max_lines;
@@ -131,7 +131,7 @@ impl FormTextfield {
 
     #[must_use]
     pub fn to_widget(self) -> Widget {
-        Widget::FormTextfieldVariant {
+        Widget::TextfieldVariant {
             allow: self.allow,
             auto_capitalize: self.auto_capitalize,
             check_rpc: self.check_rpc,
@@ -144,8 +144,8 @@ impl FormTextfield {
         }
     }
 }
-impl From<FormTextfield> for Widget {
-    fn from(src: FormTextfield) -> Self {
+impl From<Textfield> for Widget {
+    fn from(src: Textfield) -> Self {
         src.to_widget()
     }
 }

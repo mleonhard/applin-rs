@@ -4,7 +4,7 @@ use applin::internal::ImageDisposition;
 use applin::session::{PageKey, PageMap};
 use applin::widget::{
     AlertModal, BackButton, Button, Checkbox, Column, Empty, ErrorText, Form, FormSection, Image,
-    NavButton, NavPage, Scroll, Text,
+    NavButton, NavPage, Scroll, Text, Textfield,
 };
 
 pub fn add_back_button_pages(keys: &mut PageMap<Session>) -> PageKey {
@@ -296,6 +296,37 @@ pub fn add_nav_button_page(keys: &mut PageMap<Session>) -> PageKey {
                         .with_photo_url("/placeholder-200x200.png")
                         .with_action(push(&pressed)),
                 )),
+            ))),
+        ),
+    )
+}
+
+pub fn add_textfield_page(keys: &mut PageMap<Session>) -> PageKey {
+    keys.add_static_page(
+        "/text-field",
+        NavPage::new(
+            "Text Field",
+            Scroll::new(Form::new((
+                Textfield::new("text1", "Enter some text"),
+                Textfield::new("prefilled1", "Pre-filled").with_initial("initial content"),
+                // TODO: Demo TextField with `rpc` set.
+                Textfield::new("nums1", "Numbers only").with_allow_numbers(),
+                Textfield::new("ascii1", "ASCII only").with_allow_ascii(),
+                Textfield::new("tel1", "Tel").with_allow_tel(),
+                Textfield::new("email1", "Email").with_allow_email(),
+                Textfield::new("names1", "Auto-capitalize for names").with_autocap_names(),
+                Textfield::new("sentences1", "Auto-capitalize for sentences")
+                    .with_autocap_sentences(),
+                Textfield::new("minchars1", "3 chars required").with_min_chars(3),
+                Textfield::new("maxchars1", "5 chars max").with_max_chars(5),
+                Textfield::new("maxlines1", "Single-line").with_max_lines(1),
+                Textfield::new("maxlines2", "Three lines max").with_max_lines(3),
+                Textfield::new("mmms", "Pre-filled with many words").with_initial(
+                    "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                ),
+                Textfield::new("mmmmm", "Pre-filled with a long word").with_initial(
+                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                ),
             ))),
         ),
     )
