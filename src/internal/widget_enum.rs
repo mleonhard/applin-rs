@@ -153,6 +153,8 @@ pub enum Widget {
         #[serde(rename = "auto-capitalize")]
         #[serde(default, skip_serializing_if = "is_default")]
         auto_capitalize: TextfieldAutoCapitalize,
+        #[serde(default, skip_serializing_if = "String::is_empty")]
+        error: String,
         #[serde(rename = "initial-string")]
         #[serde(default, skip_serializing_if = "String::is_empty")]
         initial_string: String,

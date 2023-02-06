@@ -4,6 +4,7 @@ use crate::internal::{TextfieldAllow, TextfieldAutoCapitalize, Widget};
 pub struct Textfield {
     allow: TextfieldAllow,
     auto_capitalize: TextfieldAutoCapitalize,
+    error: String,
     initial: String,
     label: String,
     max_chars: u32,
@@ -30,6 +31,7 @@ impl Textfield {
         Self {
             allow: TextfieldAllow::All,
             auto_capitalize: TextfieldAutoCapitalize::Sentences,
+            error: String::new(),
             initial: String::new(),
             label: String::new(),
             max_chars: u32::MAX,
@@ -84,8 +86,32 @@ impl Textfield {
     }
 
     #[must_use]
+    pub fn with_error(mut self, error: impl Into<String>) -> Self {
+        self.error = error.into();
+        self
+    }
+
+    #[must_use]
+    pub fn with_opt_error(mut self, opt_error: Option<impl Into<String>>) -> Self {
+        match opt_error {
+            None => self.error = String::new(),
+            Some(error) => self.error = error.into(),
+        }
+        self
+    }
+
+    #[must_use]
     pub fn with_initial(mut self, initial: impl Into<String>) -> Self {
         self.initial = initial.into();
+        self
+    }
+
+    #[must_use]
+    pub fn with_opt_initial(mut self, opt_initial: Option<impl Into<String>>) -> Self {
+        match opt_initial {
+            None => self.initial = String::new(),
+            Some(initial) => self.initial = initial.into(),
+        }
         self
     }
 
@@ -140,6 +166,7 @@ impl Textfield {
         Widget::TextfieldVariant {
             allow: self.allow,
             auto_capitalize: self.auto_capitalize,
+            error: self.error,
             initial_string: self.initial,
             label: self.label,
             max_chars: self.max_chars,

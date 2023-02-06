@@ -307,7 +307,12 @@ pub fn add_textfield_page(keys: &mut PageMap<Session>) -> PageKey {
         NavPage::new(
             "Text Field",
             Scroll::new(Form::new((
-                Textfield::new("text1").with_label("Enter some text"),
+                Text::new("Without a label"),
+                Textfield::new("text1"),
+                Textfield::new("label1").with_label("With a label"),
+                Textfield::new("error1")
+                    .with_label("With an error")
+                    .with_error("An error message."),
                 Textfield::new("prefilled1")
                     .with_label("Pre-filled")
                     .with_initial("initial content"),
