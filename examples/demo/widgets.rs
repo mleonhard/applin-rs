@@ -307,26 +307,49 @@ pub fn add_textfield_page(keys: &mut PageMap<Session>) -> PageKey {
         NavPage::new(
             "Text Field",
             Scroll::new(Form::new((
-                Textfield::new("text1", "Enter some text"),
-                Textfield::new("prefilled1", "Pre-filled").with_initial("initial content"),
+                Textfield::new("text1").with_label("Enter some text"),
+                Textfield::new("prefilled1")
+                    .with_label("Pre-filled")
+                    .with_initial("initial content"),
                 // TODO: Demo TextField with `rpc` set.
-                Textfield::new("nums1", "Numbers only").with_allow_numbers(),
-                Textfield::new("ascii1", "ASCII only").with_allow_ascii(),
-                Textfield::new("tel1", "Tel").with_allow_tel(),
-                Textfield::new("email1", "Email").with_allow_email(),
-                Textfield::new("names1", "Auto-capitalize for names").with_autocap_names(),
-                Textfield::new("sentences1", "Auto-capitalize for sentences")
+                Textfield::new("nums1")
+                    .with_label("Numbers only")
+                    .with_allow_numbers(),
+                Textfield::new("ascii1")
+                    .with_label("ASCII only")
+                    .with_allow_ascii(),
+                Textfield::new("tel1").with_label("Tel").with_allow_tel(),
+                Textfield::new("email1")
+                    .with_label("Email")
+                    .with_allow_email(),
+                Textfield::new("names1")
+                    .with_label("Auto-capitalize for names")
+                    .with_autocap_names(),
+                Textfield::new("sentences1")
+                    .with_label("Auto-capitalize for sentences")
                     .with_autocap_sentences(),
-                Textfield::new("minchars1", "3 chars required").with_min_chars(3),
-                Textfield::new("maxchars1", "5 chars max").with_max_chars(5),
-                Textfield::new("maxlines1", "Single-line").with_max_lines(1),
-                Textfield::new("maxlines2", "Three lines max").with_max_lines(3),
-                Textfield::new("mmms", "Pre-filled with many words").with_initial(
-                    "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
-                ),
-                Textfield::new("mmmmm", "Pre-filled with a long word").with_initial(
-                    "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
-                ),
+                Textfield::new("minchars1")
+                    .with_label("3 chars required")
+                    .with_min_chars(3),
+                Textfield::new("maxchars1")
+                    .with_label("5 chars max")
+                    .with_max_chars(5),
+                Textfield::new("maxlines1")
+                    .with_label("Single-line")
+                    .with_max_lines(1),
+                Textfield::new("maxlines2")
+                    .with_label("Three lines max")
+                    .with_max_lines(3),
+                Textfield::new("mmms")
+                    .with_label("Pre-filled with many words")
+                    .with_initial(
+                        "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                    ),
+                Textfield::new("mmmmm")
+                    .with_label("Pre-filled with a long word")
+                    .with_initial(
+                        "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                    ),
             ))),
         ),
     )

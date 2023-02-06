@@ -24,14 +24,14 @@ impl Textfield {
     /// # Panics
     /// Panics when `id` is empty.
     #[must_use]
-    pub fn new(var: impl Into<String>, label: impl Into<String>) -> Self {
+    pub fn new(var: impl Into<String>) -> Self {
         let var = var.into();
         assert!(!var.is_empty());
         Self {
             allow: TextfieldAllow::All,
             auto_capitalize: TextfieldAutoCapitalize::Sentences,
             initial: String::new(),
-            label: label.into(),
+            label: String::new(),
             max_chars: u32::MAX,
             max_lines: u32::MAX,
             min_chars: 0,
@@ -86,6 +86,12 @@ impl Textfield {
     #[must_use]
     pub fn with_initial(mut self, initial: impl Into<String>) -> Self {
         self.initial = initial.into();
+        self
+    }
+
+    #[must_use]
+    pub fn with_label(mut self, label: impl Into<String>) -> Self {
+        self.label = label.into();
         self
     }
 

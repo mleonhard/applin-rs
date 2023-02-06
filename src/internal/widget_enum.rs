@@ -156,6 +156,7 @@ pub enum Widget {
         #[serde(rename = "initial-string")]
         #[serde(default, skip_serializing_if = "String::is_empty")]
         initial_string: String,
+        #[serde(default, skip_serializing_if = "String::is_empty")]
         label: String,
         #[serde(rename = "max-chars")]
         #[serde(default, skip_serializing_if = "is_u32_max")]
