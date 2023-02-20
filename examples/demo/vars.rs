@@ -6,7 +6,7 @@ use servlin::{Request, Response};
 use std::sync::Arc;
 
 pub fn check_vars_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
-    #[derive(Default, Deserialize, Serialize)]
+    #[derive(Debug, Default, Deserialize, Serialize)]
     struct Vars {
         // TODO: Find a way to catch typos in variable names.
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -17,6 +17,7 @@ pub fn check_vars_rpc(state: &Arc<ServerState>, req: &Request) -> Result<Respons
     let session = state.sessions.get(req)?;
     let input: Vars = req.json()?;
     let mut output = Vars::default();
+    println!("/check-vars {:?}", input);
     if !input.option_a.unwrap_or(false) {
         output.option_b = Some(false);
     }
