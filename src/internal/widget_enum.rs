@@ -143,6 +143,12 @@ pub enum Widget {
         photo_url: Option<String>,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         actions: Vec<Action>,
+        #[serde(
+            rename = "badge-text",
+            default,
+            skip_serializing_if = "Option::is_none"
+        )]
+        badge_text: Option<String>,
     },
     #[serde(rename = "scroll")]
     ScrollVariant { widget: Box<Widget> },

@@ -3,6 +3,7 @@ use crate::internal::{Action, Widget};
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct NavButton {
     actions: Vec<Action>,
+    badge_text: Option<String>,
     photo_url: Option<String>,
     sub_text: Option<String>,
     text: String,
@@ -12,6 +13,7 @@ impl NavButton {
     pub fn new(text: impl Into<String>) -> Self {
         Self {
             actions: vec![],
+            badge_text: None,
             photo_url: None,
             sub_text: None,
             text: text.into(),
@@ -33,6 +35,12 @@ impl NavButton {
     }
 
     #[must_use]
+    pub fn with_badge_text(mut self, badge: impl Into<String>) -> Self {
+        self.badge_text = Some(badge.into());
+        self
+    }
+
+    #[must_use]
     pub fn with_photo_url(mut self, url: impl Into<String>) -> Self {
         self.photo_url = Some(url.into());
         self
@@ -48,6 +56,7 @@ impl NavButton {
     pub fn to_widget(self) -> Widget {
         Widget::NavButtonVariant {
             actions: self.actions,
+            badge_text: self.badge_text,
             photo_url: self.photo_url,
             sub_text: self.sub_text,
             text: self.text,

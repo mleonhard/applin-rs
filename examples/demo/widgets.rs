@@ -185,6 +185,18 @@ pub fn add_nav_button_page(keys: &mut PageMap<Session>) -> PageKey {
                     NavButton::new("").with_action(push(&pressed)),
                     NavButton::new("Disabled"),
                     NavButton::new("Does Nothing").with_action(nothing()),
+                    NavButton::new("With Badge")
+                        .with_action(push(&pressed))
+                        .with_badge_text("2"),
+                    NavButton::new("With Long Badge")
+                        .with_action(push(&pressed))
+                        .with_badge_text("123456789"),
+                    NavButton::new("With Very Long Badge")
+                        .with_action(push(&pressed))
+                        .with_badge_text("123456789012345678901234567890"),
+                    NavButton::new("With Empty Badge")
+                        .with_action(push(&pressed))
+                        .with_badge_text(""),
                 )),
                 FormSection::new()
                     .with_title("Text + Sub-text")
@@ -222,6 +234,14 @@ pub fn add_nav_button_page(keys: &mut PageMap<Session>) -> PageKey {
                     NavButton::new("")
                         .with_sub_text("Text is empty")
                         .with_action(push(&pressed)),
+                    NavButton::new("With Badge")
+                        .with_sub_text("Sub-text")
+                        .with_action(push(&pressed))
+                        .with_badge_text("2"),
+                    NavButton::new("With Long Badge")
+                        .with_sub_text("Sub-text")
+                        .with_action(push(&pressed))
+                        .with_badge_text("123456789"),
                 )),
                 FormSection::new().with_title("Image + Text").with_widgets((
                     NavButton::new("Text")
@@ -248,6 +268,14 @@ pub fn add_nav_button_page(keys: &mut PageMap<Session>) -> PageKey {
                         .with_photo_url("/health")
                         .with_action(push(&pressed)),
                     // TODO: Use a URL that never returns a result.
+                    NavButton::new("With Badge")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed))
+                        .with_badge_text("2"),
+                    NavButton::new("With Long Badge")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed))
+                        .with_badge_text("123456789"),
                 )),
                 FormSection::new()
                     .with_title("Image + Text + Sub-text")
@@ -295,6 +323,16 @@ pub fn add_nav_button_page(keys: &mut PageMap<Session>) -> PageKey {
                         .with_sub_text("Text is empty")
                         .with_photo_url("/placeholder-200x200.png")
                         .with_action(push(&pressed)),
+                    NavButton::new("With Badge")
+                        .with_sub_text("Sub-text")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed))
+                        .with_badge_text("2"),
+                    NavButton::new("With Long Badge")
+                        .with_sub_text("Sub-text")
+                        .with_photo_url("/placeholder-200x200.png")
+                        .with_action(push(&pressed))
+                        .with_badge_text("123456789"),
                 )),
             ))),
         ),
