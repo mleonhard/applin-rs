@@ -43,3 +43,8 @@ impl From<Image> for Widget {
         src.to_widget()
     }
 }
+impl From<Image> for Option<Widget> {
+    fn from(src: Image) -> Self {
+        Some(src.to_widget())
+    }
+}

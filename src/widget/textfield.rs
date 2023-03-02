@@ -182,3 +182,8 @@ impl From<Textfield> for Widget {
         src.to_widget()
     }
 }
+impl From<Textfield> for Option<Widget> {
+    fn from(src: Textfield) -> Self {
+        Some(src.to_widget())
+    }
+}

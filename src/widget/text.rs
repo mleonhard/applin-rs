@@ -20,3 +20,8 @@ impl From<Text> for Widget {
         src.to_widget()
     }
 }
+impl From<Text> for Option<Widget> {
+    fn from(src: Text) -> Self {
+        Some(src.to_widget())
+    }
+}

@@ -49,3 +49,8 @@ impl From<Checkbox> for Widget {
         src.to_widget()
     }
 }
+impl From<Checkbox> for Option<Widget> {
+    fn from(src: Checkbox) -> Self {
+        Some(src.to_widget())
+    }
+}

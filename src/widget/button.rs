@@ -41,3 +41,8 @@ impl From<Button> for Widget {
         src.to_widget()
     }
 }
+impl From<Button> for Option<Widget> {
+    fn from(src: Button) -> Self {
+        Some(src.to_widget())
+    }
+}

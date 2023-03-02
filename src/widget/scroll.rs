@@ -25,3 +25,8 @@ impl From<Scroll> for Widget {
         src.to_widget()
     }
 }
+impl From<Scroll> for Option<Widget> {
+    fn from(src: Scroll) -> Self {
+        Some(src.to_widget())
+    }
+}

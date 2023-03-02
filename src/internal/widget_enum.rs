@@ -112,6 +112,13 @@ pub enum Widget {
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         widgets: Vec<Widget>,
     },
+    #[serde(rename = "grouped-row-table")]
+    GroupedRowTableVariant {
+        #[serde(rename = "row-groups", default, skip_serializing_if = "Vec::is_empty")]
+        row_groups: Vec<Vec<Vec<Option<Widget>>>>,
+        #[serde(default, skip_serializing_if = "is_default")]
+        spacing: u16,
+    },
     #[serde(rename = "image")]
     ImageVariant {
         #[serde(rename = "aspect-ratio")]

@@ -68,3 +68,8 @@ impl From<NavButton> for Widget {
         src.to_widget()
     }
 }
+impl From<NavButton> for Option<Widget> {
+    fn from(src: NavButton) -> Self {
+        Some(src.to_widget())
+    }
+}

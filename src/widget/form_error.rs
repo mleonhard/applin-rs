@@ -20,3 +20,8 @@ impl From<ErrorText> for Widget {
         src.to_widget()
     }
 }
+impl From<ErrorText> for Option<Widget> {
+    fn from(src: ErrorText) -> Self {
+        Some(src.to_widget())
+    }
+}

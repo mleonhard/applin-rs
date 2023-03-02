@@ -20,3 +20,8 @@ impl From<Empty> for Widget {
         src.to_widget()
     }
 }
+impl From<Empty> for Option<Widget> {
+    fn from(_src: Empty) -> Self {
+        None
+    }
+}

@@ -59,3 +59,8 @@ impl From<Column> for Widget {
         src.to_widget()
     }
 }
+impl From<Column> for Option<Widget> {
+    fn from(src: Column) -> Self {
+        Some(src.to_widget())
+    }
+}

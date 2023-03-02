@@ -50,3 +50,8 @@ impl From<FormSection> for Widget {
         src.to_widget()
     }
 }
+impl From<FormSection> for Option<Widget> {
+    fn from(src: FormSection) -> Self {
+        Some(src.to_widget())
+    }
+}

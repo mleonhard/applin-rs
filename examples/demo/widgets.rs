@@ -3,8 +3,8 @@ use applin::action::{nothing, pop, push, rpc};
 use applin::internal::ImageDisposition;
 use applin::session::{PageKey, PageMap};
 use applin::widget::{
-    AlertModal, BackButton, Button, Checkbox, Column, Empty, ErrorText, Form, FormSection, Image,
-    NavButton, NavPage, Scroll, Text, Textfield,
+    AlertModal, BackButton, Button, Checkbox, Column, Empty, ErrorText, Form, FormSection,
+    GroupedRowTable, Image, NavButton, NavPage, Scroll, Text, Textfield,
 };
 
 pub fn add_back_button_pages(keys: &mut PageMap<Session>) -> PageKey {
@@ -134,6 +134,73 @@ pub fn add_error_text_page(keys: &mut PageMap<Session>) -> PageKey {
                 ErrorText::new(
                     "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
                 ),
+            ))),
+        ),
+    )
+}
+
+pub fn add_grouped_row_table_page(keys: &mut PageMap<Session>) -> PageKey {
+    keys.add_static_page(
+        "/grouped-row-table",
+        NavPage::new(
+            "Grouped Row Table",
+            Scroll::new(Form::new((
+                FormSection::new().with_title("Single Group").with_widget(
+                    GroupedRowTable::new().with_spacing(8).with_row_group((
+                        (Text::new("A1"), Text::new("B1"), Text::new("C1")),
+                        (Text::new("A2"), Text::new("B2"), Text::new("C2")),
+                    )),
+                ),
+                FormSection::new()
+                    .with_title("Multiple Groups")
+                    .with_widget(
+                        GroupedRowTable::new()
+                            .with_spacing(8)
+                            .with_row_group((
+                                (Text::new("A1"), Text::new("B1"), Text::new("C1")),
+                                (Text::new("A2"), Text::new("B2"), None),
+                            ))
+                            .with_row_group((
+                                (Text::new("A3"), Text::new("B3"), Text::new("C3")),
+                                (Text::new("A4"), Text::new("B4")),
+                            )),
+                    ),
+                FormSection::new()
+                    .with_title("With an empty column")
+                    .with_widget(GroupedRowTable::new().with_spacing(8).with_row_group((
+                        (Text::new("A1"), None, Text::new("C1")),
+                        (Text::new("A2"), None, Text::new("C2")),
+                    ))),
+                FormSection::new()
+                    .with_title("With an empty row")
+                    .with_widget(GroupedRowTable::new().with_spacing(8).with_row_group((
+                        (Text::new("A"), Text::new("B")),
+                        (None, None),
+                        (Text::new("AAA"), Text::new("BBB")),
+                    ))),
+                FormSection::new()
+                    .with_title("With a empty groups")
+                    .with_widget(
+                        GroupedRowTable::new()
+                            .with_spacing(8)
+                            .with_row_group(())
+                            .with_row_group(((Text::new("A1"), Text::new("B1")),))
+                            .with_row_group(())
+                            .with_row_group(((Text::new("A2"), Text::new("B2")),)),
+                    ),
+                // FormSection::new()
+                //     .with_title("With an empty cell")
+                //     .with_widget(
+                //         GroupedRowTable::new()
+                //             .with_spacing(8)
+                //             .with_row_group((<Option<Widget>>::None,)),
+                //     ),
+                FormSection::new()
+                    .with_title("With no cells")
+                    .with_widget(GroupedRowTable::new().with_spacing(8).with_row_group(())),
+                FormSection::new()
+                    .with_title("With no groups")
+                    .with_widget(GroupedRowTable::new().with_spacing(8)),
             ))),
         ),
     )
