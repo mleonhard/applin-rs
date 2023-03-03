@@ -201,6 +201,46 @@ pub fn add_grouped_row_table_page(keys: &mut PageMap<Session>) -> PageKey {
                 FormSection::new()
                     .with_title("With no groups")
                     .with_widget(GroupedRowTable::new().with_spacing(8)),
+                FormSection::new()
+                    .with_title("Row with a lot of words")
+                    .with_widget(GroupedRowTable::new().with_spacing(8).with_row_group((
+                    (
+                        Text::new("A1"),
+                        Text::new(
+                            "MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM MMMM",
+                        ),
+                    ),
+                    (Text::new("A2"), Text::new("B2")),
+                ))),
+                FormSection::new()
+                    .with_title("Row with a long word")
+                    .with_widget(GroupedRowTable::new().with_spacing(8).with_row_group((
+                    (
+                        Text::new("A1"),
+                        Text::new(
+                            "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                        ),
+                    ),
+                    (Text::new("A2"), Text::new("B2")),
+                ))),
+                FormSection::new()
+                    .with_title("Row with a long word")
+                    .with_widget(GroupedRowTable::new().with_spacing(8).with_row_group((
+                    (
+                        Text::new(
+                            "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                        ),
+                        Text::new(
+                            "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                        ),
+                    ),
+                    (
+                        Text::new("A2"),
+                        Text::new(
+                            "MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM",
+                        ),
+                    ),
+                ))),
             ))),
         ),
     )
