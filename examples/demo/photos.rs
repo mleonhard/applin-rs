@@ -25,7 +25,8 @@ pub fn upload_photo_handler(state: &Arc<ServerState>, req: &Request) -> Result<R
             .lock()
             .unwrap_or_else(PoisonError::into_inner);
         let mut photo_guard = session_guard.photo.write(applin_session.rpc_context());
-        *photo_guard = Some(body_bytes);
+        let num = photo_guard.as_ref().map_or_else(|| 0, |t| t.1 + 1);
+        *photo_guard = Some((body_bytes, num));
     }
     applin_session.rpc_response()
 }
@@ -42,7 +43,9 @@ pub fn get_photo_handler(state: &Arc<ServerState>, req: &Request) -> Result<Resp
     let photo_guard = session_guard.photo.write(applin_session.rpc_context());
     match &*photo_guard {
         None => Err(Response::not_found_404()),
-        Some(bytes) => Ok(Response::new(200).with_body(bytes.clone())),
+        Some((bytes, _num)) => Ok(Response::new(200)
+            .with_body(bytes.clone())
+            .with_max_age_seconds(7 * 24 * 60 * 60)),
     }
 }
 
@@ -56,11 +59,13 @@ pub fn add_view_photo_page(keys: &mut PageMap<Session>) -> PageKey {
         let photo_guard = session_guard.photo.read(rebuilder);
         Ok(NavPage::new(
             "Photo",
-            match *photo_guard {
+            match &*photo_guard {
                 None => Text::new("No photo found.").to_widget(),
-                Some(..) => Image::new(1.0, GET_PHOTO_PATH).to_widget(),
+                Some((_bytes, num)) => {
+                    let photo_path = format!("{}?{}", GET_PHOTO_PATH, num);
+                    Image::new(1.0, photo_path).to_widget()
+                }
             },
-        )
-        .with_stream())
+        ))
     })
 }

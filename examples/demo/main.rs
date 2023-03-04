@@ -34,7 +34,7 @@ pub const UPLOAD_PHOTO_PATH: &str = "/upload-photo";
 
 #[derive(Debug)]
 pub struct Session {
-    photo: Roster<Option<Vec<u8>>, Session>,
+    photo: Roster<Option<(Vec<u8>, u32)>, Session>,
 }
 
 pub struct ServerState {
