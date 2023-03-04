@@ -24,6 +24,7 @@ use servlin::{
     Response, ResponseBody,
 };
 use std::sync::Arc;
+use temp_dir::TempDir;
 
 pub const CHECK_VARS_RPC_PATH: &str = "/check-vars-rpc";
 pub const ERROR_RPC_PATH: &str = "/error";
@@ -170,6 +171,7 @@ pub fn main() {
     println!("Access the app with an Applin client at http://127.0.0.1:8000/");
     safina_timer::start_timer_thread();
     let executor = safina_executor::Executor::default();
+    let cache_dir = TempDir::new().unwrap();
     let state = Arc::new(ServerState::new(&executor));
     updates::start_updater_thread(state.clone());
     let request_handler = move |req: Request| print_log_response(&req, handle_req(&state, &req));
@@ -178,6 +180,7 @@ pub fn main() {
             HttpServerBuilder::new()
                 .listen_addr(socket_addr_all_interfaces(8000))
                 .max_conns(100)
+                .receive_large_bodies(cache_dir.path())
                 .spawn_and_join(request_handler),
         )
         .unwrap();
