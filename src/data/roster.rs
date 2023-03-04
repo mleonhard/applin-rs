@@ -8,7 +8,7 @@ use std::sync::{Arc, PoisonError, RwLock, RwLockReadGuard, RwLockWriteGuard};
 pub struct RosterWriteGuard<'x, V, T: 'static + Send + Sync>(
     Option<RwLockWriteGuard<'x, V>>,
     &'x RebuilderSet<T>,
-    &'x Context,
+    Context,
 );
 impl<'x, V, T: 'static + Send + Sync> Deref for RosterWriteGuard<'x, V, T> {
     type Target = V;
@@ -82,7 +82,7 @@ impl<V, T: 'static + Send + Sync> Roster<V, T> {
 
     /// Get a write lock on the value.
     /// When the returned guard drops, it rebuilds all subscribed contexts.
-    pub fn write<'x>(&'x self, ctx: &'x Context) -> RosterWriteGuard<'x, V, T> {
+    pub fn write<'x>(&'x self, ctx: Context) -> RosterWriteGuard<'x, V, T> {
         RosterWriteGuard(Some(self.value_write_lock()), &self.context_set, ctx)
     }
 

@@ -32,7 +32,7 @@ impl<T> Rebuilder<T> {
     }
 }
 impl<T: 'static + Send + Sync> Rebuilder<T> {
-    pub fn rebuild(&self, rebuilder: &Context) {
+    pub fn rebuild(&self, rebuilder: Context) {
         match self {
             Rebuilder::PageMap(weak_session) => {
                 if let Some(session) = weak_session.upgrade() {

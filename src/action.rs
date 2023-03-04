@@ -2,6 +2,11 @@ use crate::internal::Action;
 use crate::session::PageKey;
 
 #[must_use]
+pub fn choose_photo(upload_url: impl Into<String>) -> Action {
+    Action::ChoosePhoto(upload_url.into())
+}
+
+#[must_use]
 pub fn copy_to_clipboard(s: impl Into<String>) -> Action {
     Action::CopyToClipboard(s.into())
 }
@@ -34,4 +39,9 @@ pub fn pop() -> Action {
 #[must_use]
 pub fn rpc(url: impl Into<String>) -> Action {
     Action::Rpc(url.into())
+}
+
+#[must_use]
+pub fn take_photo(upload_url: impl Into<String>) -> Action {
+    Action::TakePhoto(upload_url.into())
 }

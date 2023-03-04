@@ -8,11 +8,12 @@
 
 mod form_widgets;
 mod pages;
+mod photos;
 mod updates;
 mod vars;
 mod widgets;
 
-use applin::action::push;
+use applin::action::{choose_photo, push};
 use applin::data::Roster;
 use applin::session::{ApplinSession, PageMap, SessionSet};
 use applin::widget::{Column, FormSection, NavButton, NavPage, Scroll};
@@ -26,10 +27,14 @@ use std::sync::Arc;
 
 pub const CHECK_VARS_RPC_PATH: &str = "/check-vars-rpc";
 pub const ERROR_RPC_PATH: &str = "/error";
+pub const GET_PHOTO_PATH: &str = "/get-photo";
 pub const OK_RPC_PATH: &str = "/ok";
+pub const UPLOAD_PHOTO_PATH: &str = "/upload-photo";
 
 #[derive(Debug)]
-pub struct Session {}
+pub struct Session {
+    photo: Roster<Option<Vec<u8>>, Session>,
+}
 
 pub struct ServerState {
     clock_epoch_seconds: Roster<u64, Session>,
@@ -64,6 +69,8 @@ fn page_map(state: &Arc<ServerState>) -> PageMap<Session> {
     let image_page = widgets::add_image_page(&mut keys);
     let text_page = widgets::add_text_page(&mut keys);
     let textfield_page = widgets::add_textfield_page(&mut keys);
+    // Photos
+    let view_photo_page = photos::add_view_photo_page(&mut keys);
     // Update Modes
     let inert_page = updates::add_inert_page(state, &mut keys);
     let poll_page = updates::add_poll_page(state, &mut keys);
@@ -94,6 +101,15 @@ fn page_map(state: &Arc<ServerState>) -> PageMap<Session> {
                     NavButton::new("Text").with_action(push(&text_page)),
                     NavButton::new("Textfield").with_action(push(&textfield_page)),
                 )),
+                FormSection::new().with_title("Photos").with_widgets((
+                    NavButton::new("Choose Photo")
+                        .with_action(choose_photo("/upload-photo"))
+                        .with_action(push(&view_photo_page)),
+                    NavButton::new("Take Photo")
+                        .with_action(choose_photo("/upload-photo"))
+                        .with_action(push(&view_photo_page)),
+                    NavButton::new("View Photo").with_action(push(&view_photo_page)),
+                )),
                 FormSection::new().with_title("Update Modes").with_widgets((
                     NavButton::new("Inert").with_action(push(&inert_page)),
                     NavButton::new("Poll").with_action(push(&poll_page)),
@@ -117,7 +133,9 @@ fn get_or_new_session(
     state.sessions.get_or_new(
         req,
         move |_rebuilder| Ok(page_map(&state_clone)),
-        || Session {},
+        || Session {
+            photo: Roster::new(None),
+        },
     )
 }
 
@@ -136,6 +154,8 @@ fn handle_req(state: &Arc<ServerState>, req: &Request) -> Result<Response, Respo
         ("POST", ERROR_RPC_PATH) => Err(Response::text(500, "error1")),
         ("POST", OK_RPC_PATH) => ok_rpc(state, req),
         ("POST", CHECK_VARS_RPC_PATH) => vars::check_vars_rpc(state, req),
+        (_, GET_PHOTO_PATH) => photos::get_photo_handler(state, req),
+        (_, UPLOAD_PHOTO_PATH) => photos::upload_photo_handler(state, req),
         ("GET", "/placeholder-200x200.png") => Ok(Response::new(200)
             .with_type(ContentType::Png)
             .with_max_age_seconds(365 * 24 * 60 * 60)

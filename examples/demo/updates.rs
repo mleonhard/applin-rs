@@ -14,7 +14,7 @@ fn epoch_seconds() -> u64 {
 
 pub fn start_updater_thread(state: Arc<ServerState>) {
     std::thread::spawn(move || loop {
-        *state.clock_epoch_seconds.write(&Context::Empty) = epoch_seconds();
+        *state.clock_epoch_seconds.write(Context::Empty) = epoch_seconds();
         std::thread::sleep(Duration::from_secs(1));
     });
 }

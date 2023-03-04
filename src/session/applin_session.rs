@@ -126,7 +126,7 @@ impl<T: 'static + Send + Sync> ApplinSession<T> {
         }
         // TODO: Send the client an opaque version ID
         //       and skip rebuilding all if it matches.
-        self.rebuild_page_map(&Context::Empty);
+        self.rebuild_page_map(Context::Empty);
         Ok(response
             .with_set_cookie(self.cookie.to_cookie())
             .with_no_store())
@@ -207,8 +207,8 @@ impl<T: 'static + Send + Sync> ApplinSession<T> {
     }
 
     #[allow(clippy::missing_panics_doc)]
-    pub fn rebuild_page_map(self: &Arc<Self>, ctx: &Context) {
-        if &Context::Rpc(self.id()) == ctx || !self.lock_inner().sender.is_connected() {
+    pub fn rebuild_page_map(self: &Arc<Self>, ctx: Context) {
+        if self.rpc_context() == ctx || !self.lock_inner().sender.is_connected() {
             self.lock_inner().rpc_updates.insert(PendingUpdate::KeySet);
         } else {
             let self_clone = self.clone();
@@ -221,9 +221,9 @@ impl<T: 'static + Send + Sync> ApplinSession<T> {
     }
 
     #[allow(clippy::missing_panics_doc)]
-    pub fn rebuild_value(self: &Arc<Self>, key: impl AsRef<str>, ctx: &Context) {
+    pub fn rebuild_value(self: &Arc<Self>, key: impl AsRef<str>, ctx: Context) {
         let key = key.as_ref().to_string();
-        if &Context::Rpc(self.id()) == ctx {
+        if self.rpc_context() == ctx {
             self.lock_inner()
                 .rpc_updates
                 .insert(PendingUpdate::Key(key));
@@ -297,7 +297,7 @@ impl<T: 'static + Send + Sync> ApplinSession<T> {
     pub fn poll(self: &Arc<Self>) -> Result<Response, Response> {
         // TODO: Send the client an opaque version ID
         //       and skip rebuilding all if it matches.
-        self.rebuild_page_map(&Context::Rpc(self.id()));
+        self.rebuild_page_map(self.rpc_context());
         let response = self.rpc_response()?;
         Ok(response.with_set_cookie(self.cookie.to_cookie()))
     }

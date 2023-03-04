@@ -77,7 +77,7 @@ impl<T: 'static + Send + Sync> RebuilderSet<T> {
         self.write().remove(rebuilder)
     }
 
-    pub fn rebuild_all(&self, ctx: &Context) {
+    pub fn rebuild_all(&self, ctx: Context) {
         //dbg!(&session_id);
         self.clean_if_cleanup_task_not_started();
         for rebuilder in self.read().iter() {
