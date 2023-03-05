@@ -3,7 +3,7 @@ use crate::internal::{TextfieldAllow, TextfieldAutoCapitalize, Widget};
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Textfield {
     allow: TextfieldAllow,
-    auto_capitalize: TextfieldAutoCapitalize,
+    auto_capitalize: Option<TextfieldAutoCapitalize>,
     error: String,
     initial: String,
     label: String,
@@ -30,7 +30,7 @@ impl Textfield {
         assert!(!var.is_empty());
         Self {
             allow: TextfieldAllow::All,
-            auto_capitalize: TextfieldAutoCapitalize::Sentences,
+            auto_capitalize: None,
             error: String::new(),
             initial: String::new(),
             label: String::new(),
@@ -74,14 +74,14 @@ impl Textfield {
 
     #[must_use]
     pub fn with_autocap_names(mut self) -> Self {
-        self.auto_capitalize = TextfieldAutoCapitalize::Names;
+        self.auto_capitalize = Some(TextfieldAutoCapitalize::Names);
         self
     }
 
     /// This is the default.
     #[must_use]
     pub fn with_autocap_sentences(mut self) -> Self {
-        self.auto_capitalize = TextfieldAutoCapitalize::Sentences;
+        self.auto_capitalize = Some(TextfieldAutoCapitalize::Sentences);
         self
     }
 
