@@ -289,6 +289,7 @@ impl<T: 'static + Send + Sync> ApplinSession<T> {
         }
         Ok(Response::json(200, Value::Object(obj))
             .unwrap()
+            .with_set_cookie(self.cookie.to_cookie())
             .with_no_store())
     }
 
