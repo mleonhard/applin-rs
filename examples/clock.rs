@@ -95,7 +95,7 @@ pub fn main() {
     std::thread::spawn(move || loop {
         let elapsed = start.elapsed();
         let new_string = format!("elapsed: {}", elapsed.as_secs());
-        *state_clone.displayed_string.write(&Context::Empty) = new_string;
+        *state_clone.displayed_string.write(Context::Empty) = new_string;
         let nanos_to_sleep = 5_000_000_000 - elapsed.as_nanos() % 1_000_000_000;
         std::thread::sleep(Duration::from_nanos(u64::try_from(nanos_to_sleep).unwrap()));
     });

@@ -1,4 +1,4 @@
-use crate::data::random_u64;
+use crate::data::random_positive_nonzero_i64;
 use crate::error::client_error;
 use crate::session::SessionId;
 use core::fmt::{Debug, Formatter};
@@ -9,12 +9,12 @@ use std::str::FromStr;
 
 const SESSION_COOKIE_NAME: &str = "session";
 
-// TODONT: Do not implement `Ord` or `PartialOrd`.  They would let
+// TODONT: Do not derive `Ord` or `PartialOrd`.  They would let
 //         data structure operations leak `secret` via timing.
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub struct SessionCookie {
-    id: u64,
-    secret: u64,
+    id: i64,
+    secret: i64,
 }
 impl SessionCookie {
     /// Returns `None` when the request doesn't have the cookie.
@@ -45,14 +45,19 @@ impl SessionCookie {
     #[must_use]
     pub fn new_random() -> Self {
         Self {
-            id: random_u64(),
-            secret: random_u64(),
+            id: random_positive_nonzero_i64(),
+            secret: random_positive_nonzero_i64(),
         }
     }
 
     #[must_use]
     pub fn id(&self) -> SessionId {
         SessionId::new(self.id)
+    }
+
+    #[must_use]
+    pub fn secret(&self) -> i64 {
+        self.secret
     }
 
     #[must_use]
@@ -79,8 +84,14 @@ impl TryFrom<&str> for SessionCookie {
         if parts.len() != 2 {
             return Err(err());
         }
-        let id: u64 = parts[0].parse().map_err(|_| err())?;
-        let secret: u64 = parts[1].parse().map_err(|_| err())?;
+        let id: i64 = parts[0].parse().map_err(|_| err())?;
+        if id < 0 {
+            return Err(err());
+        }
+        let secret: i64 = parts[1].parse().map_err(|_| err())?;
+        if secret < 0 {
+            return Err(err());
+        }
         Ok(Self { id, secret })
     }
 }

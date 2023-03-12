@@ -123,7 +123,7 @@ pub fn main() {
             std::thread::sleep(Duration::from_secs(5));
             state_clone
                 .show_page_2
-                .write(&Context::Empty)
+                .write(Context::Empty)
                 .bitxor_assign(true);
         }
     });

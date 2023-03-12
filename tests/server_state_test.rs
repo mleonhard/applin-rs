@@ -53,7 +53,7 @@ pub fn page_map_updates() {
             let session = server_state3.sessions.get(&req)?;
             server_state3
                 .show_page2
-                .write(&session.rpc_context())
+                .write(session.rpc_context())
                 .bitxor_assign(true);
             session.rpc_response()
         }
@@ -73,7 +73,7 @@ pub fn page_map_updates() {
     assert_eq!(only_home, poller1.poll().unwrap());
     assert_eq!(empty_update, poller1.poll().unwrap());
     // Background thread updates state.
-    *server_state.show_page2.write(&Context::Empty) = true;
+    *server_state.show_page2.write(Context::Empty) = true;
     assert_eq!(home_and_page2, TestClient::new(&url).poll().unwrap());
     assert_eq!(add_page2, poller1.poll().unwrap());
     assert_eq!(empty_update, poller1.poll().unwrap());
@@ -135,7 +135,7 @@ pub fn page_updates() {
             let session = server_state4.sessions.get(&req)?;
             server_state4
                 .counter
-                .write(&session.rpc_context())
+                .write(session.rpc_context())
                 .add_assign(1);
             session.rpc_response()
         }
@@ -148,7 +148,7 @@ pub fn page_updates() {
     let empty_update = json!({});
     assert_eq!(empty_update, poller1.poll().unwrap());
     // Background thread updates state.
-    *server_state.counter.write(&Context::Empty) = 5;
+    *server_state.counter.write(Context::Empty) = 5;
     let update5 = json!({"pages": {"/": {"typ": "nav-page", "title": "t1", "widget": {"typ":"text", "text": "count: 5"}}}});
     assert_eq!(update5, TestClient::new(&url).poll().unwrap());
     assert_eq!(update5, poller1.poll().unwrap());

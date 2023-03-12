@@ -29,7 +29,7 @@
 #![forbid(unsafe_code)]
 
 use applin::action::rpc;
-use applin::data::{random_u64, Rebuilder, Roster};
+use applin::data::{random_positive_nonzero_i64, Rebuilder, Roster};
 use applin::session::{ApplinSession, PageMap, SessionSet};
 use applin::widget::{Button, Column, NavPage, Text};
 use servlin::reexport::{safina_executor, safina_timer};
@@ -39,10 +39,10 @@ use std::ops::AddAssign;
 use std::sync::Arc;
 
 #[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
-struct UserId(pub u64);
+struct UserId(pub i64);
 impl UserId {
     pub fn new_random() -> Self {
-        Self(random_u64())
+        Self(random_positive_nonzero_i64())
     }
 }
 impl Debug for UserId {
@@ -55,7 +55,7 @@ impl Debug for UserId {
 struct SessionState {
     #[allow(dead_code)]
     pub user_id: UserId,
-    pub count: Roster<u64, Self>,
+    pub count: Roster<i64, Self>,
 }
 impl SessionState {
     #[must_use]
@@ -118,7 +118,7 @@ fn increment(state: &Arc<ServerState>, req: &Request) -> Result<Response, Respon
     session
         .value()
         .count
-        .write(&session.rpc_context())
+        .write(session.rpc_context())
         .add_assign(1);
     session.rpc_response()
 }

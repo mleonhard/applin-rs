@@ -105,7 +105,7 @@ fn get_or_new_session(
 fn increment(state: &Arc<ServerState>, req: &Request) -> Result<Response, Response> {
     //dbg!(req);
     let session = state.sessions.get(req)?;
-    state.counter.write(&session.rpc_context()).add_assign(1);
+    state.counter.write(session.rpc_context()).add_assign(1);
     session.rpc_response()
 }
 

@@ -184,6 +184,7 @@ fn widget_nav_button_serialize() {
             photo_url: None,
             sub_text: None,
             text: String::new(),
+            badge_text: None,
         })
         .unwrap(),
         r#"{"typ":"nav-button","text":""}"#
@@ -194,6 +195,7 @@ fn widget_nav_button_serialize() {
             photo_url: Some("/p1".to_string()),
             sub_text: Some("s1".to_string()),
             text: "t1".to_string(),
+            badge_text: None,
         })
         .unwrap(),
         r#"{"typ":"nav-button","text":"t1","sub-text":"s1","photo-url":"/p1","actions":["pop","logout"]}"#
@@ -211,6 +213,7 @@ fn widget_nav_button_deserialize() {
             photo_url: None,
             sub_text: None,
             text: String::new(),
+            badge_text: None,
         }
     );
     assert_eq!(
@@ -223,6 +226,7 @@ fn widget_nav_button_deserialize() {
             photo_url: Some("/p1".to_string()),
             sub_text: Some("s1".to_string()),
             text: "t1".to_string(),
+            badge_text: None,
         }
     );
 }
