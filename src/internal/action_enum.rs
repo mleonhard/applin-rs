@@ -32,17 +32,17 @@ impl Serialize for Action {
         S: Serializer,
     {
         match self {
-            Action::ChoosePhoto(s) => serializer.serialize_str(&format!("choose-photo:{}", s)),
+            Action::ChoosePhoto(s) => serializer.serialize_str(&format!("choose-photo:{s}")),
             Action::CopyToClipboard(s) => {
-                serializer.serialize_str(&format!("copy-to-clipboard:{}", s))
+                serializer.serialize_str(&format!("copy-to-clipboard:{s}"))
             }
-            Action::LaunchUrl(s) => serializer.serialize_str(&format!("launch-url:{}", s)),
+            Action::LaunchUrl(s) => serializer.serialize_str(&format!("launch-url:{s}")),
             Action::Logout => serializer.serialize_str("logout"),
             Action::Nothing => serializer.serialize_str("nothing"),
             Action::Pop => serializer.serialize_str("pop"),
-            Action::Push(s) => serializer.serialize_str(&format!("push:{}", s)),
-            Action::Rpc(s) => serializer.serialize_str(&format!("rpc:{}", s)),
-            Action::TakePhoto(s) => serializer.serialize_str(&format!("take-photo:{}", s)),
+            Action::Push(s) => serializer.serialize_str(&format!("push:{s}")),
+            Action::Rpc(s) => serializer.serialize_str(&format!("rpc:{s}")),
+            Action::TakePhoto(s) => serializer.serialize_str(&format!("take-photo:{s}")),
         }
     }
 }
@@ -82,7 +82,7 @@ impl<'de> Deserialize<'de> for Action {
                     (Some("take-photo"), Some(s)) if !s.is_empty() => {
                         Ok(Action::TakePhoto(s.to_string()))
                     }
-                    _ => Err(E::custom(format!("invalid action: {:?}", value))),
+                    _ => Err(E::custom(format!("invalid action: {value:?}"))),
                 }
             }
         }

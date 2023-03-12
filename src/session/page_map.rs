@@ -94,7 +94,7 @@ impl<T> Debug for PageMap<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), core::fmt::Error> {
         let mut keys: Vec<&String> = self.0.keys().collect();
         keys.sort();
-        write!(f, "Keys({:?})", keys)
+        write!(f, "Keys({keys:?})")
     }
 }
 impl<T> Default for PageMap<T> {

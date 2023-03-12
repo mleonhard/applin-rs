@@ -32,7 +32,7 @@ impl TryFrom<f32> for Real32 {
                 Ok(Self(value))
             }
         } else {
-            Err(format!("cannot make Real32 from {:?}", value))
+            Err(format!("cannot make Real32 from {value:?}"))
         }
     }
 }

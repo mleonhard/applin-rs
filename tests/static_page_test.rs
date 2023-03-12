@@ -62,7 +62,7 @@ pub fn user_specific_static_page() {
             let page_map_fn = |rebuilder: Rebuilder<UserState>| {
                 let id = rebuilder.session()?.value().id;
                 Ok(PageMap::new()
-                    .with_static_page("/", NavPage::new("t1", Text::new(format!("hello {}", id)))))
+                    .with_static_page("/", NavPage::new("t1", Text::new(format!("hello {id}")))))
             };
             sessions
                 .get_or_new(&req, page_map_fn, UserState::new)?
@@ -104,8 +104,8 @@ pub fn user_specific_page_map() {
             let page_map_fn = |rebuilder: Rebuilder<UserState>| {
                 let id = rebuilder.session()?.value().id;
                 Ok(PageMap::new().with_static_page(
-                    format!("/user{}", id),
-                    NavPage::new("t1", Text::new(format!("hello {}", id))),
+                    format!("/user{id}"),
+                    NavPage::new("t1", Text::new(format!("hello {id}"))),
                 ))
             };
             sessions

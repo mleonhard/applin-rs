@@ -180,7 +180,7 @@ impl<T: 'static + Send + Sync> ApplinSession<T> {
         let value_fn = inner_guard
             .page_map
             .get(key)
-            .ok_or_else(|| format!("key {:?} not found", key))?;
+            .ok_or_else(|| format!("key {key:?} not found"))?;
         (*value_fn)(rebuilder)
         // TODO: Warn if page has multiple widgets using the same var name.
     }
@@ -260,7 +260,7 @@ impl<T: 'static + Send + Sync> ApplinSession<T> {
         //dbg!(&pending_updates);
         let mut diff = if pending_updates.remove(&PendingUpdate::KeySet) {
             self.build_page_map()
-                .map_err(|e| server_error(format!("error building keys: {}", e)))?
+                .map_err(|e| server_error(format!("error building keys: {e}")))?
         } else {
             serde_json::Map::new()
         };
@@ -275,7 +275,7 @@ impl<T: 'static + Send + Sync> ApplinSession<T> {
             }
             let value = self
                 .build_value(&key)
-                .map_err(|e| server_error(format!("error building key {:?}: {}", key, e)))?;
+                .map_err(|e| server_error(format!("error building key {key:?}: {e}")))?;
             diff.insert(key, value);
         }
         //dbg!(&diff);
@@ -319,10 +319,6 @@ impl<T: 'static + Send + Sync> Debug for ApplinSession<T> {
         scheduled_updates.sort();
         let mut keys: Vec<String> = self.lock_inner().page_map.keys().cloned().collect();
         keys.sort();
-        write!(
-            f,
-            "Session{{rpc_updates={:?}, scheduled_updates={:?}, keys={:?}}}",
-            rpc_updates, scheduled_updates, keys
-        )
+        write!(f, "Session{{rpc_updates={rpc_updates:?}, scheduled_updates={scheduled_updates:?}, keys={keys:?}}}")
     }
 }

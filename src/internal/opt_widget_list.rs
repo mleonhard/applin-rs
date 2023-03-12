@@ -7,7 +7,7 @@ pub struct OptWidgetList(pub Vec<Option<Widget>>);
 
 impl From<Vec<Widget>> for OptWidgetList {
     fn from(v: Vec<Widget>) -> Self {
-        Self(v.into_iter().map(|w| Some(w)).collect())
+        Self(v.into_iter().map(Some).collect())
     }
 }
 

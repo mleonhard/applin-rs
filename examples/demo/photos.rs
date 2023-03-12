@@ -62,7 +62,7 @@ pub fn add_view_photo_page(keys: &mut PageMap<Session>) -> PageKey {
             match &*photo_guard {
                 None => Text::new("No photo found.").to_widget(),
                 Some((_bytes, num)) => {
-                    let photo_path = format!("{}?{}", GET_PHOTO_PATH, num);
+                    let photo_path = format!("{GET_PHOTO_PATH}?{num}");
                     Image::new(1.0, photo_path).to_widget()
                 }
             },

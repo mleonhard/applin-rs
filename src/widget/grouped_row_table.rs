@@ -1,3 +1,4 @@
+#![allow(clippy::many_single_char_names)]
 use crate::internal::{OptWidgetList, Widget};
 
 /// This struct converts tuples of tuples of widget builders (`Into<WidgetList>`) to a `Vec<Vec<Widget>>`.

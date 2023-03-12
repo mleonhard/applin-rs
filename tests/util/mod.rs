@@ -55,7 +55,7 @@ impl TestClient {
                 code,
                 response
                     .into_string()
-                    .unwrap_or_else(|e| format!("error decoding response body: {}", e)),
+                    .unwrap_or_else(|e| format!("error decoding response body: {e}")),
             ),
             ureq::Error::Transport(e) => (0, e.to_string()),
         }
@@ -152,6 +152,6 @@ where
                 .spawn(move |req| req_handler(req).unwrap_or_else(|r| r)),
         )
         .unwrap();
-    let url = format!("http://{}", addr);
+    let url = format!("http://{addr }");
     (url, receiver)
 }

@@ -24,10 +24,7 @@ impl SessionCookie {
     pub fn from_req_option(req: &Request) -> Result<Option<SessionCookie>, Response> {
         if let Some(string) = req.cookies.get(SESSION_COOKIE_NAME) {
             let cookie = Self::try_from(string.as_str()).map_err(|e| {
-                client_error(format!(
-                    "error parsing {:?} cookie: {}",
-                    SESSION_COOKIE_NAME, e
-                ))
+                client_error(format!("error parsing {SESSION_COOKIE_NAME:?} cookie: {e}"))
             })?;
             Ok(Some(cookie))
         } else {
@@ -39,7 +36,7 @@ impl SessionCookie {
     /// Returns an error when the request doesn't have the cookie or we fail to parse it.
     pub fn from_req(req: &Request) -> Result<SessionCookie, Response> {
         Self::from_req_option(req)?
-            .ok_or_else(|| client_error(format!("missing cookie {:?}", SESSION_COOKIE_NAME)))
+            .ok_or_else(|| client_error(format!("missing cookie {SESSION_COOKIE_NAME:?}")))
     }
 
     #[must_use]

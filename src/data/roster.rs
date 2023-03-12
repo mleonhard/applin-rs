@@ -82,7 +82,7 @@ impl<V, T: 'static + Send + Sync> Roster<V, T> {
 
     /// Get a write lock on the value.
     /// When the returned guard drops, it rebuilds all subscribed contexts.
-    pub fn write<'x>(&'x self, ctx: Context) -> RosterWriteGuard<'x, V, T> {
+    pub fn write(&'_ self, ctx: Context) -> RosterWriteGuard<'_, V, T> {
         RosterWriteGuard(Some(self.value_write_lock()), &self.context_set, ctx)
     }
 
