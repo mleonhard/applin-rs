@@ -9,7 +9,7 @@
 //!
 //! Use an Applin client to access the app:
 //! - [applin-ios](https://github.com/mleonhard/applin-ios)
-//! - [applin-android](https://github.com/mleonhard/applin-android)
+//! - applin-android (Coming soon!)
 //!
 //! # Features
 //! - `forbid(unsafe_code)`
@@ -154,11 +154,22 @@
 //! - [Adaptive Cards](https://adaptivecards.io)
 //!   - Libraries for rendering simple JSON UIs on iOS, Android, and Windows.
 //!   - From Microsoft
+//! - [Azilen SDUI](https://www.azilen.com/blog/server-driven-user-interface-sdui-framework-ios-applications)
+//!   - Proprietary server-driven UI framework offered by a consulting company, since 2016
+//! - [Unflow](https://www.unflow.com)
+//!   - A hosted service that lets you design and update app pages without changing code.
 //!
 //! Companies using server-driven UI for popular apps:
-//! - [A Deep Dive into Airbnb’s Server-Driven UI System](https://medium.com/airbnb-engineering/a-deep-dive-into-airbnbs-server-driven-ui-system-842244c5f5)
-//! - [How we built Facebook Lite for every Android phone and network](https://engineering.fb.com/2016/03/09/android/how-we-built-facebook-lite-for-every-android-phone-and-network/)
-//! - [Facebook Lite: Building for 2G Connections and Typical Devices (Video)](https://www.facebook.com/watch/?v=10153625275313553)
+//! - Airbnb: [A Deep Dive into Airbnb’s Server-Driven UI System](https://medium.com/airbnb-engineering/a-deep-dive-into-airbnbs-server-driven-ui-system-842244c5f5)
+//! - Facebook: [How we built Facebook Lite for every Android phone and network](https://engineering.fb.com/2016/03/09/android/how-we-built-facebook-lite-for-every-android-phone-and-network/)
+//! - Facebook: [Facebook Lite: Building for 2G Connections and Typical Devices (Video)](https://www.facebook.com/watch/?v=10153625275313553)
+//! - Doordash: [Improving Development Velocity with Generic, Server-Driven UI Components](https://doordash.engineering/2021/08/24/improving-development-velocity-with-generic-server-driven-ui-components/)
+//! - Spotify: [Hub Framework - Spotify’s component-driven UI framework for iOS](https://github.com/spotify/HubFramework)
+//! - Instacart: [Building Instacart’s view model API](https://tech.instacart.com/building-instacarts-view-model-api-part-1-why-view-model-4362f64ffd2a)
+//!
+//! [Introduction to Server Driven UI in iOS, Swift & SwiftUI - Udemy course](https://www.udemy.com/course/introduction-to-server-driven-ui-in-ios-swift-swiftui/)
+//!
+//! [Server driven UI and Apple review guidelines. - r/iOSProgramming - Reddit](https://old.reddit.com/r/iOSProgramming/comments/11m5aq1/server_driven_ui_and_apple_review_guidelines/)
 //!
 //! # Trademark
 //! "Applin™" is a trademark of Leonhard LLC.
@@ -189,6 +200,9 @@
 //! - Action to refresh an image
 //! - Server to push refresh an image
 //! - Fail build on key collision, for large projects.
+//! - Allow customizing widget style.  See https://github.com/Lona/Lona .
+//! - Start Android implementation
+//!    - https://github.com/flipkart-incubator/proteus
 #![forbid(unsafe_code)]
 
 pub mod action;
